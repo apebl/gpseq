@@ -1028,7 +1028,7 @@ namespace Gpseq {
 		 * @return the result of the reduction
 		 * @see Collector
 		 */
-		public R collect<A,R> (Collector<R,A,G> collector) {
+		public R collect<R,A> (Collector<R,A,G> collector) {
 			assert(_is_closed == false);
 			if (_is_parallel) {
 				if (CollectorFeatures.CONCURRENT in collector.features) {
@@ -1040,10 +1040,10 @@ namespace Gpseq {
 					close();
 					return collector.finish(accumulator);
 				} else {
-					return collect_ordered<A,R>(collector);
+					return collect_ordered<R,A>(collector);
 				}
 			} else {
-				return collect_ordered<A,R>(collector);
+				return collect_ordered<R,A>(collector);
 			}
 		}
 
@@ -1061,12 +1061,12 @@ namespace Gpseq {
 		 * @return the result of the reduction
 		 * @see Collector
 		 */
-		public R collect_ordered<A,R> (Collector<R,A,G> collector) {
+		public R collect_ordered<R,A> (Collector<R,A,G> collector) {
 			assert(_is_closed == false);
 			if (_is_parallel) {
 				if (CollectorFeatures.CONCURRENT in collector.features
 				&& CollectorFeatures.UNORDERED in collector.features) {
-					return collect<A,R>(collector);
+					return collect<R,A>(collector);
 				} else {
 					_container.start(this);
 					int64 len = _container.estimated_size;
