@@ -1,0 +1,45 @@
+image: debian:buster-slim
+
+stages:
+  - build
+  - test
+
+variables:
+  DEPENDENCIES: valac valadoc gtk-doc-tools meson lcov
+                libglib2.0-dev libgee-0.8-dev
+
+cache:
+  paths:
+    - .cache/apt
+
+before_script:
+  - mkdir -p .cache/apt
+  - apt-get -o dir::cache::archives=".cache/apt" update -qq
+  - apt-get -o dir::cache::archives=".cache/apt" install -qq -y $DEPENDENCIES
+
+build:
+  stage: build
+  artifacts:
+    paths:
+      - valadoc
+      - gtkdoc
+  script:
+    - meson _build && ninja -C _build
+    - meson --reconfigure _build -Dbuild_doc=valadoc,gtkdoc
+    - DESTDIR=$(mktemp -d) ninja install -C _build -v
+    - mv _build/valadoc _build/gtkdoc .
+
+test:
+  stage: test
+  artifacts:
+    paths:
+      - coverage
+  script:
+    - meson _build -Db_coverage=true
+    - meson test -C _build -t 20 --print-errorlogs --verbose
+    - cd _build/src
+    - lcov -d . -o lcov.info -c
+    - lcov -d . -o lcov.info -r lcov.info "*/_build/*"
+    - genhtml -t "gpseq" -o ../../coverage lcov.info
+    - lcov -l lcov.info
+  coverage: '/Total:\| *(\d+\.?\d+\%)/'
