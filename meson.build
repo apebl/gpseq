@@ -65,7 +65,6 @@ if get_option('build_doc').length() > 0
 		custom_target('valadoc', command: valadoc_cmd,
 			input: sources,
 			output: 'valadoc',
-			build_by_default: true,
 			install: true,
 			install_dir: get_option('datadir') / 'doc' / (meson.project_name() + '-' + api_version) )
 	endif
@@ -78,7 +77,6 @@ if get_option('build_doc').length() > 0
 		custom_target('gtkdoc', command: gtkdoc_cmd,
 			input: sources,
 			output: 'gtkdoc',
-			build_by_default: true,
 			install: true,
 			install_dir: get_option('datadir') / 'doc' / (meson.project_name() + '-' + api_version) )
 	endif
