@@ -9,6 +9,11 @@ option('build_doc',
 	value: [],
 	description: 'Documentations that will be built')
 
+option('build_typelib',
+	type: 'boolean',
+	value: false,
+	description: 'Whether to build typelib')
+
 option('have_atomic_int64_lock_free',
 	type: 'boolean',
 	value: true,

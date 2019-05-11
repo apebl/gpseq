@@ -5,6 +5,7 @@
 - valac
 - meson >= 0.49
 - ninja (or other meson backend to use)
+- g-ir-compiler and *.gir of the dependencies (optional; to build typelib)
 - valadoc (optional; to build documentation)
 - gtk-doc-tools (optional; to build gtkdoc)
 
