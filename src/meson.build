@@ -95,26 +95,26 @@ if get_option('have_atomic_int64_lock_free')
 	c_args += '-DGPSEQ_ATOMIC_INT64_LOCK_FREE'
 endif
 
-gpseq_lib = library(meson.project_name() + '-' + api_version, sources,
+gpseq_lib = library(libname, sources,
 	vala_header: meson.project_name() + '.h',
-	vala_gir: meson.project_name() + '-' + api_version + '.gir',
+	vala_gir: Libname + '.gir',
 	dependencies: dependencies,
 	install: true,
-	install_dir: [true, get_option('includedir') / (meson.project_name() + '-' + api_version), true, true],
+	install_dir: [true, get_option('includedir') / libname, true, true],
 	vala_args: vala_args,
 	c_args: c_args)
 
 gpseq_dep = declare_dependency(link_with: gpseq_lib,
 	include_directories: include_directories('.'))
 
-install_data('../' + meson.project_name() + '-@0@.deps'.format(api_version),
+install_data(meson.source_root() / (libname + '.deps'),
 	install_dir: get_option('datadir') / 'vala/vapi')
 
 pkg = import('pkgconfig')
 pkg.generate(libraries: gpseq_lib,
 	version: meson.project_version(),
 	name: meson.project_name(),
-	filebase: meson.project_name() + '-' + api_version,
+	filebase: libname,
 	requires: pkg_requires,
 	description: project_desc,
-	subdirs: meson.project_name() + '-' + api_version)
+	subdirs: libname)

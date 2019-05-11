@@ -8,6 +8,9 @@ project_desc = 'A GObject utility library providing parallel data processing'
 version_ary = meson.project_version().split('.')
 api_version = '@0@.@1@'.format(version_ary[0], version_ary[1])
 
+libname = 'gpseq-@0@'.format(api_version)
+Libname = 'Gpseq-@0@'.format(api_version)
+
 message('gpseq version: ' + meson.project_version())
 message('api version: ' + api_version)
 
@@ -49,7 +52,7 @@ endif
 if get_option('build_doc').length() > 0
 	valadoc = find_program('valadoc')
 	doc_cmd_base = [valadoc,
-		'--package-name=' + meson.project_name() + '-' + api_version,
+		'--package-name=' + libname,
 		'--package-version=' + meson.project_version(),
 		'--target-glib=' + glib_reqs,
 		'--force',
@@ -66,7 +69,7 @@ if get_option('build_doc').length() > 0
 			input: sources,
 			output: 'valadoc',
 			install: true,
-			install_dir: get_option('datadir') / 'doc' / (meson.project_name() + '-' + api_version) )
+			install_dir: get_option('datadir') / 'doc' / libname)
 	endif
 
 	if get_option('build_doc').contains('gtkdoc')
@@ -78,6 +81,6 @@ if get_option('build_doc').length() > 0
 			input: sources,
 			output: 'gtkdoc',
 			install: true,
-			install_dir: get_option('datadir') / 'doc' / (meson.project_name() + '-' + api_version) )
+			install_dir: get_option('datadir') / 'doc' / libname)
 	endif
 endif
