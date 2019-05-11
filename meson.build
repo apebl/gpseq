@@ -68,6 +68,7 @@ if get_option('build_doc').length() > 0
 		custom_target('valadoc', command: valadoc_cmd,
 			input: sources,
 			output: 'valadoc',
+			depends: gpseq_lib,
 			install: true,
 			install_dir: get_option('datadir') / 'doc' / libname)
 	endif
@@ -80,6 +81,7 @@ if get_option('build_doc').length() > 0
 		custom_target('gtkdoc', command: gtkdoc_cmd,
 			input: sources,
 			output: 'gtkdoc',
+			depends: gpseq_lib,
 			install: true,
 			install_dir: get_option('datadir') / 'doc' / libname)
 	endif

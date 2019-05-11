@@ -22,14 +22,7 @@ meson _build --buildtype=release
 ninja -C _build
 ```
 
-### Build documentations
-
-After build:
-
-```sh
-meson --reconfigure _build -Dbuild_doc=valadoc,gtkdoc
-ninja -C _build
-```
+In order to build documentations, add the `-Dbuild_doc` option.
 
 - Build valadoc: `-Dbuild_doc=valadoc`
 - Build gtkdoc: `-Dbuild_doc=gtkdoc`

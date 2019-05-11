@@ -24,8 +24,8 @@ build:
       - valadoc
       - gtkdoc
   script:
-    - meson _build && ninja -C _build
-    - meson --reconfigure _build -Dbuild_doc=valadoc,gtkdoc
+    - meson _build -Dbuild_doc=valadoc,gtkdoc
+    - ninja -C _build
     - DESTDIR=$(mktemp -d) ninja install -C _build -v
     - mv _build/valadoc _build/gtkdoc .
 
