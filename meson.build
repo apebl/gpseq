@@ -5,14 +5,10 @@ project('gpseq', 'vala', 'c',
 
 project_desc = 'A GObject utility library providing parallel data processing'
 
-version_ary = meson.project_version().split('.')
-api_version = '@0@.@1@'.format(version_ary[0], version_ary[1])
-
-libname = 'gpseq-@0@'.format(api_version)
-Libname = 'Gpseq-@0@'.format(api_version)
+libname = 'gpseq-1.0'
+Libname = 'Gpseq-1.0'
 
 message('gpseq version: ' + meson.project_version())
-message('api version: ' + api_version)
 
 cc = meson.get_compiler('c')
 
