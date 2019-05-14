@@ -28,6 +28,11 @@ public class IntSeqTests : SeqTests<int> {
 	public IntSeqTests () {
 		base("seq<int>");
 		_rand = new Rand();
+		register_tests();
+	}
+
+	private void register_tests () {
+		add_test("iterate", test_iterate);
 	}
 
 	protected override Seq<int> create_rand_seq () {
@@ -97,5 +102,18 @@ public class IntSeqTests : SeqTests<int> {
 
 	protected override int map_to_int (owned int g) {
 		return g;
+	}
+
+	private void test_iterate () {
+		int[] array = {};
+		Seq.iterate<int>(0, i => i < 10, i => ++i).foreach(i => array += i);
+		assert(array.length == 10);
+		for (int i = 0; i < 10; i++) {
+			assert(array[i] == i);
+		}
+
+		int n = 0;
+		Seq.iterate<int>(0, i => false, i => i).foreach(i => n++);
+		assert(n == 0);
 	}
 }

@@ -33,6 +33,7 @@ sources = files(
 	'ForkJoinThread.vala',
 	'GenericArraySpliterator.vala',
 	'Gpseq.vala',
+	'IterateIterator.vala',
 	'IteratorSpliterator.vala',
 	'ListSpliterator.vala',
 	'MappedContainer.vala',
