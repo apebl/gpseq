@@ -164,7 +164,7 @@ namespace Gpseq {
 		 */
 		public Optional<A> map<A> (MapFunc<Optional<A>,G> mapper) {
 			if (_is_present) {
-				Optional<A> result = mapper(_value);
+				Optional<A> result = mapper((owned) _value);
 				assert_nonnull(result);
 				return result;
 			} else {
