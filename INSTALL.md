@@ -43,6 +43,14 @@ Run `ninja install -C _build` after meson build.
 
 To uninstall: `ninja uninstall -C _build`
 
+You can specify the installation prefix by adding a `--prefix` option to meson
+build:
+
+```sh
+meson _build --buildtype=release --prefix=/usr
+ninja install -C _build
+```
+
 ### Build options
 
 See meson_options.txt.
