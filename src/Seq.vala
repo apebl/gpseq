@@ -131,15 +131,17 @@ namespace Gpseq {
 		 * is invoked. In case of the non-eager operations, the array must not
 		 * be modified while the iterator/spliterator is used.
 		 *
+		 * This method doesn't steal the ownership of the array. The array must
+		 * not be freed until the execution is completed.
+		 *
 		 * @param array a gpointer array
 		 * @param env a task environment. If not specified,
 		 * {@link TaskEnv.get_default_task_env} is used.
 		 * @return the result seq
 		 */
-		public static Seq<G> of_array<G> (owned G[] array, TaskEnv? env = null) {
-			// must take length first, before ownership transferred
-			int len = array.length;
-			Spliterator<G> spliter = new ArraySpliterator<G>((owned) array, 0, len);
+		public static Seq<G> of_array<G> (G[] array, TaskEnv? env = null) {
+			Spliterator<G> spliter = new SubArraySpliterator<G>(
+					new SubArray<G>(array), 0, array.length);
 			return new Seq<G>(spliter, env);
 		}
 
