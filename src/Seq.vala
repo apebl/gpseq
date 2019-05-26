@@ -146,6 +146,31 @@ namespace Gpseq {
 		}
 
 		/**
+		 * Creates a new sequential seq of the given array.
+		 *
+		 * The given array itself will not be modified by seq operations. and
+		 * the array must not be modified until the execution of the seq
+		 * pipeline is completed. Except for the non-eager operations iterator()
+		 * and spliterator(), execution is performed when the terminal operation
+		 * is invoked. In case of the non-eager operations, the array must not
+		 * be modified while the iterator/spliterator is used.
+		 *
+		 * This method steals the ownership of the array. The array wil be
+		 * freed after the execution is completed.
+		 *
+		 * @param array a gpointer array
+		 * @param env a task environment. If not specified,
+		 * {@link TaskEnv.get_default_task_env} is used.
+		 * @return the result seq
+		 */
+		public static Seq<G> of_owned_array<G> (owned G[] array, TaskEnv? env = null) {
+			// must take length first, before ownership transferred
+			int len = array.length;
+			Spliterator<G> spliter = new ArraySpliterator<G>((owned) array, 0, len);
+			return new Seq<G>(spliter, env);
+		}
+
+		/**
 		 * Creates a new sequential seq of the given generic array.
 		 *
 		 * The given generic array itself will not be modified by seq
