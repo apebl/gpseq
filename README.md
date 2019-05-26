@@ -8,8 +8,9 @@ Gpseq is a GObject utility library providing parallel data processing.
 ```vala
 using Gpseq;
 
+// main ()
 string[] array = {"dog", "cat", "pig", "boar", "bear"};
-Seq.of_array<string>((owned) array)
+Seq.of_array<string>(array)
 	.parallel()
 	.filter(g => g.length == 3)
 	.map<string>(g => g.up())
