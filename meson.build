@@ -27,12 +27,6 @@ dependencies = [
 	gee_dep
 ]
 
-pkg_requires = [
-	'glib-2.0 >= ' + glib_reqs,
-	'gobject-2.0 >= ' + gobject_reqs,
-	'gee-0.8 >= ' + gee_reqs
-]
-
 vala_args = [
 	'--target-glib=' + glib_reqs,
 	'--enable-experimental',

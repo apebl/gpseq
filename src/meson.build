@@ -116,7 +116,6 @@ pkg.generate(libraries: gpseq_lib,
 	version: meson.project_version(),
 	name: meson.project_name(),
 	filebase: libname,
-	requires: pkg_requires,
 	description: project_desc,
 	subdirs: libname)
 
