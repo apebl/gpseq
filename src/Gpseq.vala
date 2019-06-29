@@ -49,7 +49,7 @@ namespace Gpseq {
 	 * specified, the result of {@link Gee.Functions.get_compare_func_for} is
 	 * used
 	 */
-	public void parallel_sort<G> (G[] array, owned CompareDataFunc<G>? compare = null) {
+	public void parallel_sort<G> (G[] array, owned CompareFunc<G>? compare = null) {
 		int len = array.length;
 		if (len <= 1) return;
 		G[] temp_array = new G[len];

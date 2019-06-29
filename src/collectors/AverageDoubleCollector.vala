@@ -33,22 +33,22 @@ private class Gpseq.Collectors.AverageDoubleCollector<G> : Object, Collector<dou
 		}
 	}
 
-	public Accumulator create_accumulator () {
+	public Accumulator create_accumulator () throws Error {
 		return new Accumulator(0, 0);
 	}
 
-	public void accumulate (G g, Accumulator a) {
+	public void accumulate (G g, Accumulator a) throws Error {
 		a.val += _mapper(g);
 		a.count++;
 	}
 
-	public Accumulator combine (Accumulator a, Accumulator b) {
+	public Accumulator combine (Accumulator a, Accumulator b) throws Error {
 		a.val += b.val;
 		a.count += b.count;
 		return a;
 	}
 
-	public double? finish (Accumulator a) {
+	public double? finish (Accumulator a) throws Error {
 		return a.count == 0 ? 0 : a.val/a.count;
 	}
 

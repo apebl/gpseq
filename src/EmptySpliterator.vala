@@ -33,7 +33,7 @@ namespace Gpseq {
 			return null;
 		}
 
-		public bool try_advance (Func<G> consumer) {
+		public bool try_advance (Func<G> consumer) throws Error {
 			return false;
 		}
 

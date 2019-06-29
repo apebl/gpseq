@@ -29,7 +29,7 @@ namespace TestUtils {
 		}
 	}
 
-	public void assert_all_elements<G> (G[] array, Predicate<G> pred) {
+	public void assert_all_elements<G> (G[] array, Gee.Predicate<G> pred) {
 		for (int i = 0; i < array.length; i++) {
 			assert( pred(array[i]) );
 		}
@@ -240,9 +240,9 @@ namespace TestUtils {
 
 	public class MappedIterator<R,G> : Object, Traversable<R>, Iterator<R> {
 		private Iterator<G> _iter;
-		private MapFunc<R,G> _func;
+		private Gee.MapFunc<R,G> _func;
 
-		public MappedIterator (Iterator<G> iter, owned MapFunc<R,G> func) {
+		public MappedIterator (Iterator<G> iter, owned Gee.MapFunc<R,G> func) {
 			_iter = iter;
 			_func = (owned) func;
 		}

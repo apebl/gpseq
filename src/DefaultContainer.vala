@@ -93,7 +93,7 @@ namespace Gpseq {
 			return new DefaultContainer<G>(spliterator, _parent, _consumer);
 		}
 
-		public virtual bool try_advance (Func<G> consumer) {
+		public virtual bool try_advance (Func<G> consumer) throws Error {
 			Func<G> func = _consumer.function(g => consumer(g));
 			return _spliterator.try_advance(func);
 		}
@@ -110,12 +110,12 @@ namespace Gpseq {
 			}
 		}
 
-		public virtual void each (Func<G> f) {
+		public virtual void each (Func<G> f) throws Error {
 			Func<G> func = _consumer.function(g => f(g));
 			_spliterator.each(func);
 		}
 
-		public virtual bool each_chunk (EachChunkFunc<G> f) {
+		public virtual bool each_chunk (EachChunkFunc<G> f) throws Error {
 			if (_consumer.is_identity_function) {
 				return _spliterator.each_chunk(f);
 			} else {

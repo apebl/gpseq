@@ -109,10 +109,10 @@ namespace Gpseq {
 	 *
 	 * == Notes ==
 	 *
-	 * With nullable primitive types, operations using
-	 * {@link GLib.CompareDataFunc} function, such as order_by(), produce an
-	 * undesirable result if the compare function is not specified. You should
-	 * provide specified compare function to get a proper result.
+	 * With nullable primitive types, operations using {@link CompareFunc}
+	 * function, such as order_by(), produce an undesirable result if the
+	 * compare function is not specified. You should provide specified compare
+	 * function to get a proper result.
 	 *
 	 * Some operation might not work properly with unowned types. The best
 	 * approach is never to use unowned types for seq.
@@ -311,7 +311,7 @@ namespace Gpseq {
 		 * @return the result seq
 		 */
 		public static Seq<G> iterate<G> (owned G seed,
-				owned Predicate<G> pred, owned MapFunc<G,G> next,
+				owned Gee.Predicate<G> pred, owned Gee.MapFunc<G,G> next,
 				TaskEnv? env = null) {
 			var iter = new IterateIterator<G>((owned) seed, (owned) pred, (owned) next);
 			return Seq.of_iterator<G>(iter, -1, false, env);
@@ -1001,8 +1001,11 @@ namespace Gpseq {
 		 * @return an optional describing the maximum element, or an empty
 		 * optional if the seq is empty
 		 */
-		public Optional<G> max (owned CompareDataFunc<G>? compare = null) {
-			if (compare == null) compare = Functions.get_compare_func_for(element_type);
+		public Optional<G> max (owned CompareFunc<G>? compare = null) {
+			if (compare == null) {
+				CompareDataFunc func = Functions.get_compare_func_for(element_type);
+				compare = (a, b) => func(a, b);
+			}
 			return reduce((a, b) => {
 				return compare(a, b) >= 0 ? a : b;
 			});
@@ -1020,8 +1023,11 @@ namespace Gpseq {
 		 * @return an optional describing the minimum element, or an empty
 		 * optional if the seq is empty
 		 */
-		public Optional<G> min (owned CompareDataFunc<G>? compare = null) {
-			if (compare == null) compare = Functions.get_compare_func_for(element_type);
+		public Optional<G> min (owned CompareFunc<G>? compare = null) {
+			if (compare == null) {
+				CompareDataFunc func = Functions.get_compare_func_for(element_type);
+				compare = (a, b) => func(a, b);
+			}
 			return reduce((a, b) => {
 				return compare(a, b) <= 0 ? a : b;
 			});
@@ -1038,12 +1044,15 @@ namespace Gpseq {
 		 * is used to get a proper function
 		 * @return the new seq
 		 */
-		public Seq<G> order_by (owned CompareDataFunc<G>? compare = null) {
+		public Seq<G> order_by (owned CompareFunc<G>? compare = null) {
 			assert(_is_closed == false);
 			if (_container.is_size_known && _container.estimated_size <= 1) {
 				return copy_and_close<G>(_container);
 			} else {
-				if (compare == null) compare = Functions.get_compare_func_for(element_type);
+				if (compare == null) {
+					CompareDataFunc func = Functions.get_compare_func_for(element_type);
+					compare = (a, b) => func(a, b);
+				}
 				Container<G,G> container = new SortedContainer<G>(_container, _container, (owned) compare);
 				return copy_and_close<G>(container);
 			}

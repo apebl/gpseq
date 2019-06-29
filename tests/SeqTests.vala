@@ -374,10 +374,14 @@ public abstract class SeqTests<G> : Gpseq.TestSuite {
 		assert(result.is_size_known);
 		assert(result.estimated_size == __length);
 		G? item = null;
-		while (result.try_advance(g => item = g)) {
-			assert( iters[1].has_next() );
-			iters[1].next();
-			assert( equal(item, iters[1].get()) );
+		try {
+			while (result.try_advance(g => item = g)) {
+				assert( iters[1].has_next() );
+				iters[1].next();
+				assert( equal(item, iters[1].get()) );
+			}
+		} catch (Error err) {
+			error("%s", err.message);
 		}
 	}
 
@@ -391,7 +395,7 @@ public abstract class SeqTests<G> : Gpseq.TestSuite {
 		Iterator<G>[] iters = create_rand_iter(__length).tee(2);
 		Seq<G> seq = Seq.of_iterator<G>(iters[0], __length, true);
 		if (parallel) seq = seq.parallel();
-		int64 result = seq.filter(filter).count();
+		int64 result = seq.filter((g) => filter(g)).count();
 		int64 validation = 0;
 		while (iters[1].next()) {
 			if ( filter(iters[1].get()) ) {
@@ -685,7 +689,7 @@ public abstract class SeqTests<G> : Gpseq.TestSuite {
 	private void test_filter () {
 		Iterator<G>[] iters = create_rand_iter(__length).tee(2);
 		Iterator<G> result = Seq.of_iterator<G>(iters[0], __length, true)
-				.filter(filter)
+				.filter((g) => filter(g))
 				.iterator();
 
 		while (iters[1].next()) {
@@ -702,7 +706,10 @@ public abstract class SeqTests<G> : Gpseq.TestSuite {
 		Iterator<G>[] iters = create_rand_iter(__length).tee(2);
 		Seq<G> seq = Seq.of_iterator<G>(iters[0], __length, true);
 		if (parallel) seq = seq.parallel();
-		G result = seq.fold<G>(combine, combine, identity());
+		G result = seq.fold<G>(
+				(a, b) => { return combine(a, b); },
+				(a, b) => { return combine(a, b); },
+				identity() );
 
 		G validation = identity();
 		while (iters[1].next()) {
@@ -715,7 +722,7 @@ public abstract class SeqTests<G> : Gpseq.TestSuite {
 		Iterator<G>[] iters = create_rand_iter(__length).tee(2);
 		Seq<G> seq = Seq.of_iterator<G>(iters[0], __length, true);
 		if (parallel) seq = seq.parallel();
-		G result = seq.reduce(combine).value;
+		G result = seq.reduce((a, b) => { return combine(a, b); }).value;
 
 		G? validation = null;
 		bool found = false;
@@ -736,32 +743,36 @@ public abstract class SeqTests<G> : Gpseq.TestSuite {
 		Iterator<string>[] validations = new MappedIterator<string,G>(iters[0], map_to_str).tee(3);
 
 		Iterator<string> result = Seq.of_iterator<G>(iters[1], __length, true)
-				.map<string>(map_to_str)
+				.map<string>((g) => map_to_str(g))
 				.iterator();
 		assert_iter_equals<string>(validations[0], result, (a, b) => str_equal(a, b));
 
-		Iterator<string> v = validations[1];
-		Seq.of_iterator<G>(iters[2], __length, true)
-				.map<string>(map_to_str)
-				.spliterator()
-				.each(g => {
-					assert( v.next() );
-					assert( str_equal(v.get(), g) );
-				});
-		assert( !v.has_next() );
-
-		v = validations[2];
-		Seq.of_iterator<G>(iters[3], __length, true)
-				.map<string>(map_to_str)
-				.spliterator()
-				.each_chunk(chunk => {
-					for (int i = 0; i < chunk.length; i++) {
+		try {
+			Iterator<string> v = validations[1];
+			Seq.of_iterator<G>(iters[2], __length, true)
+					.map<string>((g) => map_to_str(g))
+					.spliterator()
+					.each(g => {
 						assert( v.next() );
-						assert( str_equal(v.get(), chunk[i]) );
-					}
-					return true;
-				});
-		assert( !v.has_next() );
+						assert( str_equal(v.get(), g) );
+					});
+			assert( !v.has_next() );
+
+			v = validations[2];
+			Seq.of_iterator<G>(iters[3], __length, true)
+					.map<string>((g) => map_to_str(g))
+					.spliterator()
+					.each_chunk(chunk => {
+						for (int i = 0; i < chunk.length; i++) {
+							assert( v.next() );
+							assert( str_equal(v.get(), chunk[i]) );
+						}
+						return true;
+					});
+			assert( !v.has_next() );
+		} catch (Error err) {
+			error("%s", err.message);
+		}
 	}
 
 	private void test_flat_map () {
@@ -778,36 +789,40 @@ public abstract class SeqTests<G> : Gpseq.TestSuite {
 		}
 
 		Iterator<G> result = Seq.of_iterator<G>(iters[1], len, true)
-				.flat_map<G>(flat_map)
+				.flat_map<G>((g) => flat_map(g))
 				.iterator();
 		GenericArray<G> result_array = iter_to_generic_array<G>(result);
 		assert_array_equals<G>(validation.data, result_array.data, equal);
 
-		result_array = new GenericArray<G>(len);
-		Seq.of_iterator<G>(iters[2], len, true)
-				.flat_map<G>(flat_map)
-				.spliterator()
-				.each(g => result_array.add(g));
-		assert_array_equals<G>(validation.data, result_array.data, equal);
+		try {
+			result_array = new GenericArray<G>(len);
+			Seq.of_iterator<G>(iters[2], len, true)
+					.flat_map<G>((g) => flat_map(g))
+					.spliterator()
+					.each(g => result_array.add(g));
+			assert_array_equals<G>(validation.data, result_array.data, equal);
 
-		result_array = new GenericArray<G>(len);
-		Seq.of_iterator<G>(iters[3], len, true)
-				.flat_map<G>(flat_map)
-				.spliterator()
-				.each_chunk(chunk => {
-					for (int i = 0; i < chunk.length; i++) {
-						result_array.add(chunk[i]);
-					}
-					return true;
-				});
-		assert_array_equals<G>(validation.data, result_array.data, equal);
+			result_array = new GenericArray<G>(len);
+			Seq.of_iterator<G>(iters[3], len, true)
+					.flat_map<G>((g) => flat_map(g))
+					.spliterator()
+					.each_chunk(chunk => {
+						for (int i = 0; i < chunk.length; i++) {
+							result_array.add(chunk[i]);
+						}
+						return true;
+					});
+			assert_array_equals<G>(validation.data, result_array.data, equal);
+		} catch (Error err) {
+			error("%s", err.message);
+		}
 	}
 
 	private void test_max (bool parallel) {
 		Iterator<G>[] iters = create_rand_iter(__length).tee(2);
 		Seq<G> seq = Seq.of_iterator<G>(iters[0], __length, true);
 		if (parallel) seq = seq.parallel();
-		Optional<G> result = seq.max(compare);
+		Optional<G> result = seq.max((a, b) => compare(a, b));
 
 		G? validation = null;
 		bool found = false;
@@ -829,7 +844,7 @@ public abstract class SeqTests<G> : Gpseq.TestSuite {
 		Iterator<G>[] iters = create_rand_iter(__length).tee(2);
 		Seq<G> seq = Seq.of_iterator<G>(iters[0], __length, true);
 		if (parallel) seq = seq.parallel();
-		Optional<G> result = seq.min(compare);
+		Optional<G> result = seq.min((a, b) => compare(a, b));
 
 		G? validation = null;
 		bool found = false;
@@ -853,7 +868,8 @@ public abstract class SeqTests<G> : Gpseq.TestSuite {
 		GenericArray<G> array = iter_to_generic_array<G>(create_rand_iter(len), len);
 		Seq<G> seq = Seq.of_generic_array<G>(array);
 		if (parallel) seq = seq.parallel();
-		GenericArray<G> result = iter_to_generic_array<G>(seq.order_by(compare).iterator(), len);
+		GenericArray<G> result = iter_to_generic_array<G>(
+			seq.order_by((a, b) => compare(a, b)).iterator(), len);
 
 		assert_sorted<G>(result.data, compare);
 		array.sort_with_data(compare);
@@ -908,11 +924,11 @@ public abstract class SeqTests<G> : Gpseq.TestSuite {
 		Seq<G> seq = Seq.of_generic_array<G>(array);
 		if (parallel) seq = seq.parallel();
 		int result = seq
-			.filter(filter)
+			.filter((g) => filter(g))
 			.distinct(hash, equal)
-			.order_by(compare)
+			.order_by((a, b) => compare(a, b))
 			.chop_ordered(__skip, __limit)
-			.map<int>(map_to_int)
+			.map<int>((g) => map_to_int(g))
 			.fold<int>((g, a) => g + a, (a, b) => a + b, 0);
 		int validation = get_complex_fold_validation(array);
 		assert(result == validation);
@@ -1083,7 +1099,7 @@ public abstract class SeqTests<G> : Gpseq.TestSuite {
 		Iterator<G>[] iters = create_rand_iter(__length).tee(2);
 		Seq<G> seq = Seq.of_iterator<G>(iters[0], __length, true);
 		if (parallel) seq = seq.parallel();
-		int result = seq.collect( Collectors.sum_int<G>(map_to_int) );
+		int result = seq.collect( Collectors.sum_int<G>((g) => map_to_int(g)) );
 		int validation = 0;
 		while (iters[1].next()) {
 			validation += map_to_int(iters[1].get());
@@ -1238,7 +1254,7 @@ public abstract class SeqTests<G> : Gpseq.TestSuite {
 		Seq<G> seq = Seq.of_iterator<G>(iters[0], __length, true);
 		if (parallel) seq = seq.parallel();
 
-		var collector = Collectors.max<G>(compare);
+		var collector = Collectors.max<G>((a, b) => compare(a, b));
 		Optional<G> result;
 		if (ordered) {
 			result = seq.collect_ordered(collector);
@@ -1267,7 +1283,7 @@ public abstract class SeqTests<G> : Gpseq.TestSuite {
 		Seq<G> seq = Seq.of_iterator<G>(iters[0], __length, true);
 		if (parallel) seq = seq.parallel();
 
-		var collector = Collectors.min<G>(compare);
+		var collector = Collectors.min<G>((a, b) => compare(a, b));
 		Optional<G> result;
 		if (ordered) {
 			result = seq.collect_ordered(collector);
@@ -1310,7 +1326,10 @@ public abstract class SeqTests<G> : Gpseq.TestSuite {
 		Seq<G> seq = Seq.of_iterator<G>(iters[0], __length, true);
 		if (parallel) seq = seq.parallel();
 
-		var collector = Collectors.fold<G,G>(combine, combine, identity());
+		var collector = Collectors.fold<G,G>(
+				(a, b) => { return combine(a, b); },
+				(a, b) => { return combine(a, b); },
+				identity() );
 		G result;
 		if (ordered) {
 			result = seq.collect_ordered(collector);
@@ -1330,7 +1349,7 @@ public abstract class SeqTests<G> : Gpseq.TestSuite {
 		Seq<G> seq = Seq.of_iterator<G>(iters[0], __length, true);
 		if (parallel) seq = seq.parallel();
 
-		var collector = Collectors.reduce<G>(combine);
+		var collector = Collectors.reduce<G>((a, b) => { return combine(a, b); });
 		G result;
 		if (ordered) {
 			result = seq.collect_ordered(collector).value;
@@ -1358,7 +1377,8 @@ public abstract class SeqTests<G> : Gpseq.TestSuite {
 		Seq<G> seq = Seq.of_iterator<G>(iters[0], len, true);
 		if (parallel) seq = seq.parallel();
 
-		var collector = Collectors.filter<Gee.List<G>,G>(filter, Collectors.to_list<G>());
+		var collector = Collectors.filter<Gee.List<G>,G>(
+				(g) => filter(g), Collectors.to_list<G>() );
 		Iterator<G> result;
 		if (ordered) {
 			result = seq.collect_ordered(collector).iterator();
@@ -1414,7 +1434,7 @@ public abstract class SeqTests<G> : Gpseq.TestSuite {
 		if (parallel) seq = seq.parallel();
 
 		var collector = Collectors.map<Gee.List<string>,string,G>(
-				map_to_str, Collectors.to_list<string>() );
+				(g) => map_to_str(g), Collectors.to_list<string>() );
 		Gee.List<string> result;
 		if (ordered) {
 			result = seq.collect_ordered(collector);

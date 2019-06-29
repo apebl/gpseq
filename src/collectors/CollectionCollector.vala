@@ -23,32 +23,32 @@ using Gee;
 private class Gpseq.Collectors.CollectionCollector<G> : Object, Collector<Collection<G>,Collection<G>,G> {
 	private Supplier<Collection<G>> _factory;
 	private CollectorFeatures _features;
-	
+
 	public CollectionCollector (Supplier<Collection<G>> factory, CollectorFeatures features) {
 		_factory = factory;
 		_features = features;
 	}
-	
+
 	public CollectorFeatures features {
 		get {
 			return _features;
 		}
 	}
 
-	public Collection<G> create_accumulator () {
+	public Collection<G> create_accumulator () throws Error {
 		return _factory.supply();
 	}
 
-	public void accumulate (G g, Collection<G> a) {
+	public void accumulate (G g, Collection<G> a) throws Error {
 		a.add(g);
 	}
 
-	public Collection<G> combine (Collection<G> a, Collection<G> b) {
+	public Collection<G> combine (Collection<G> a, Collection<G> b) throws Error {
 		a.add_all(b);
 		return a;
 	}
 
-	public Collection<G> finish (Collection<G> a) {
+	public Collection<G> finish (Collection<G> a) throws Error {
 		return a;
 	}
 }

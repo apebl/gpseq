@@ -24,7 +24,7 @@ namespace Gpseq {
 	 * compare function.
 	 */
 	internal class SortedContainer<G> : DefaultContainer<G> {
-		private CompareDataFunc<G>? _compare;
+		private CompareFunc<G>? _compare;
 
 		/**
 		 * Creates a new sorted container.
@@ -34,7 +34,7 @@ namespace Gpseq {
 		 * function
 		 */
 		public SortedContainer (Spliterator<G> spliterator, Container<G,void*> parent,
-				owned CompareDataFunc<G> compare) {
+				owned CompareFunc<G> compare) {
 			base(spliterator, parent, new Consumer<G>());
 			_compare = (owned) compare;
 		}
@@ -74,7 +74,7 @@ namespace Gpseq {
 			}
 		}
 
-		private G[] spliter_to_array () {
+		private G[] spliter_to_array () throws Error {
 			G[] array;
 			if (!spliterator.is_size_known || spliterator.estimated_size < 0) {
 				array = {}; // XXX use estimated_size

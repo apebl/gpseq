@@ -19,5 +19,5 @@
  */
 
 namespace Gpseq {
-	public delegate bool EachChunkFunc<G> (G[] chunk);
+	public delegate bool EachChunkFunc<G> (G[] chunk) throws Error;
 }

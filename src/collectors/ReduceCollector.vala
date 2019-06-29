@@ -33,20 +33,20 @@ private class Gpseq.Collectors.ReduceCollector<G> : Object, Collector<Optional<G
 		}
 	}
 
-	public Accumulator<G> create_accumulator () {
+	public Accumulator<G> create_accumulator () throws Error {
 		return new Accumulator<G>();
 	}
 
-	public void accumulate (G g, Accumulator<G> a) {
+	public void accumulate (G g, Accumulator<G> a) throws Error {
 		a.accumulate(g, _accumulator);
 	}
 
-	public Accumulator<G> combine (Accumulator<G> a, Accumulator<G> b) {
+	public Accumulator<G> combine (Accumulator<G> a, Accumulator<G> b) throws Error {
 		if (b.is_present) a.accumulate(b.val, _accumulator);
 		return a;
 	}
 
-	public Optional<G> finish (Accumulator<G> a) {
+	public Optional<G> finish (Accumulator<G> a) throws Error {
 		return a.is_present ? new Optional<G>.of(a.val) : new Optional<G>.empty();
 	}
 
@@ -66,7 +66,7 @@ private class Gpseq.Collectors.ReduceCollector<G> : Object, Collector<Optional<G
 			}
 		}
 
-		public void accumulate (G g, CombineFunc<G> func) {
+		public void accumulate (G g, CombineFunc<G> func) throws Error {
 			if (_is_present) {
 				_val = func(_val, g);
 			} else {

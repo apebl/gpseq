@@ -51,14 +51,14 @@ private class Gpseq.Collectors.MapCollector<K,V,G> : Object, Collector<Map<K,V>,
 		}
 	}
 
-	public Map<K,V> create_accumulator () {
+	public Map<K,V> create_accumulator () throws Error {
 		return new HashMap<K,V>(
 			(v) => _key_hash(v),
 			(a, b) => _key_equal(a, b),
 			(a, b) => _value_equal(a, b) );
 	}
 
-	public void accumulate (G g, Map<K,V> a) {
+	public void accumulate (G g, Map<K,V> a) throws Error {
 		K key = _key_mapper(g);
 		V val = _val_mapper(g);
 		if (a.has_key(key)) {
@@ -68,7 +68,7 @@ private class Gpseq.Collectors.MapCollector<K,V,G> : Object, Collector<Map<K,V>,
 		}
 	}
 
-	public Map<K,V> combine (Map<K,V> a, Map<K,V> b) {
+	public Map<K,V> combine (Map<K,V> a, Map<K,V> b) throws Error {
 		foreach (K key in b.keys) {
 			if (a.has_key(key)) {
 				a[key] = _merger(a[key], b[key]);
@@ -79,7 +79,7 @@ private class Gpseq.Collectors.MapCollector<K,V,G> : Object, Collector<Map<K,V>,
 		return a;
 	}
 
-	public Map<K,V> finish (Map<K,V> a) {
+	public Map<K,V> finish (Map<K,V> a) throws Error {
 		return a;
 	}
 }

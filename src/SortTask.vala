@@ -82,7 +82,7 @@ namespace Gpseq {
 			return task;
 		}
 
-		private void merge (SortTask<G> left, SortTask<G> right) {
+		private void merge (SortTask<G> left, SortTask<G> right) throws Error {
 			SubArray<G> ary0 = left._array;
 			SubArray<G> ary1 = right._array;
 
@@ -95,12 +95,7 @@ namespace Gpseq {
 			MergeTask<G> task = new MergeTask<G>(ary0, ary1, _temp,
 					_comparator, threshold, max_depth, executor);
 			task.depth = depth;
-			try {
-				task.invoke();
-			} catch (Error err) {
-				promise.set_exception(err);
-				return;
-			}
+			task.invoke();
 			_array.copy(0, _temp, 0, _array.size);
 		}
 
@@ -158,7 +153,7 @@ namespace Gpseq {
 				}
 			}
 
-			private void sequential_merge (SubArray<G> left, SubArray<G> right, SubArray<G> output) {
+			private void sequential_merge (SubArray<G> left, SubArray<G> right, SubArray<G> output) throws Error {
 				int l = 0; // left index
 				int r = 0; // right index
 				int o = 0; // output index
@@ -180,7 +175,7 @@ namespace Gpseq {
 				}
 			}
 
-			private int binary_search (G find, SubArray<G> array) {
+			private int binary_search (G find, SubArray<G> array) throws Error {
 				int lo = 0;
 				int hi = array.size;
 				while (lo < hi) {

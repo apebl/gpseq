@@ -36,19 +36,19 @@ private class Gpseq.Collectors.MappingCollector<R,A,G> : Object, Collector<R,Obj
 		}
 	}
 
-	public Object create_accumulator () {
+	public Object create_accumulator () throws Error {
 		return _downstream.create_accumulator();
 	}
 
-	public void accumulate (G g, Object a) {
+	public void accumulate (G g, Object a) throws Error {
 		_downstream.accumulate(_mapper(g), a);
 	}
 
-	public Object combine (Object a, Object b) {
+	public Object combine (Object a, Object b) throws Error {
 		return _downstream.combine(a, b);
 	}
 
-	public R finish (Object a) {
+	public R finish (Object a) throws Error {
 		return _downstream.finish(a);
 	}
 }

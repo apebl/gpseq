@@ -90,7 +90,7 @@ namespace Gpseq {
 		 * @param consumer a function that will be executed if a value is
 		 * present
 		 */
-		public void if_present (Func<G> consumer) {
+		public void if_present (GLib.Func<G> consumer) {
 			if (_is_present) {
 				consumer(_value);
 			}
@@ -143,7 +143,7 @@ namespace Gpseq {
 		 * @return an optional containing the value if a value is present,
 		 * otherwise an empty optional
 		 */
-		public Optional<G> filter (Predicate<G> pred) {
+		public Optional<G> filter (Gee.Predicate<G> pred) {
 			if (_is_present) {
 				return pred(_value) ? this : new Optional<G>.empty();
 			} else {
@@ -162,7 +162,7 @@ namespace Gpseq {
 		 * @return the result of the mapper function if a value is present,
 		 * otherwise an empty optional
 		 */
-		public Optional<A> map<A> (MapFunc<Optional<A>,G> mapper) {
+		public Optional<A> map<A> (Gee.MapFunc<Optional<A>,G> mapper) {
 			if (_is_present) {
 				Optional<A> result = mapper((owned) _value);
 				assert_nonnull(result);

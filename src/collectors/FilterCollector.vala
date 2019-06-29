@@ -35,21 +35,21 @@ private class Gpseq.Collectors.FilterCollector<A,G> : Object, Collector<A,Object
 		}
 	}
 
-	public Object create_accumulator () {
+	public Object create_accumulator () throws Error {
 		return _downstream.create_accumulator();
 	}
 
-	public void accumulate (G g, Object a) {
+	public void accumulate (G g, Object a) throws Error {
 		if (_pred(g)) {
 			_downstream.accumulate(g, a);
 		}
 	}
 
-	public Object combine (Object a, Object b) {
+	public Object combine (Object a, Object b) throws Error {
 		return _downstream.combine(a, b);
 	}
 
-	public A finish (Object a) {
+	public A finish (Object a) throws Error {
 		return _downstream.finish(a);
 	}
 }

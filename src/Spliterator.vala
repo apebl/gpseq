@@ -76,7 +76,7 @@ namespace Gpseq {
 		 *
 		 * @return false if no remaining elements existed, true otherwise.
 		 */
-		public abstract bool try_advance (Func<G> consumer); // XXX data-owned consumer?
+		public abstract bool try_advance (Func<G> consumer) throws Error; // XXX data-owned consumer?
 
 		/**
 		 * The estimated size of the remaining elements. it is negative if
@@ -108,7 +108,7 @@ namespace Gpseq {
 		 * This method would be more optimized than manual {@link try_advance}
 		 * calls.
 		 */
-		public virtual void each (Func<G> f) { // XXX data-owned consumer?
+		public virtual void each (Func<G> f) throws Error { // XXX data-owned consumer?
 			do {} while (try_advance(f));
 		}
 
@@ -127,7 +127,7 @@ namespace Gpseq {
 		 * @return false if the argument returned false at last invocation and
 		 * true otherwise.
 		 */
-		public virtual bool each_chunk (EachChunkFunc<G> f) {
+		public virtual bool each_chunk (EachChunkFunc<G> f) throws Error {
 			G[] array = new G[CHUNK_SIZE];
 			while (true) {
 				int i = 0;

@@ -88,14 +88,16 @@ public class SubArrayTests : Gpseq.TestSuite {
 		var array = create_rand_generic_array(LENGTH);
 		var sub = new SubArray<int>(array.data);
 		CompareDataFunc<int> cmp = (a, b) => a < b ? -1 : (a == b ? 0 : 1);
-		sub.sort((a, b) => cmp(a, b));
+		try { sub.sort((a, b) => cmp(a, b)); }
+		catch (Error err) { error("%s", err.message); }
 		assert_sorted<int>(sub.get_data(), (a, b) => cmp(a, b));
 	}
 
 	private void test_sort_default_func () {
 		var array = create_rand_generic_array(LENGTH);
 		var sub = new SubArray<int>(array.data);
-		sub.sort();
+		try { sub.sort(); }
+		catch (Error err) { error("%s", err.message); }
 		assert_sorted<int>(sub.get_data());
 	}
 

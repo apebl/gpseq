@@ -63,7 +63,7 @@ namespace Gpseq {
 			}
 		}
 
-		public bool try_advance (Func<R> consumer) {
+		public bool try_advance (Func<R> consumer) throws Error {
 			return _spliterator.try_advance(g => {
 				consumer(_mapper(g));
 			});
@@ -81,13 +81,13 @@ namespace Gpseq {
 			}
 		}
 
-		public void each (Func<R> f) {
+		public void each (Func<R> f) throws Error {
 			_spliterator.each(g => {
 				f(_mapper(g));
 			});
 		}
 
-		public bool each_chunk (EachChunkFunc<R> f) {
+		public bool each_chunk (EachChunkFunc<R> f) throws Error {
 			R[]? array = null;
 			return _spliterator.each_chunk(chunk => {
 				if (array == null) {

@@ -64,7 +64,11 @@ namespace Gpseq {
 			if (_has_next) {
 				return true;
 			} else {
-				_has_next = _spliterator.try_advance(g => { _next = g; });
+				try {
+					_has_next = _spliterator.try_advance(g => { _next = g; });
+				} catch (Error err) {
+					error("%s", err.message);
+				}
 				return _has_next;
 			}
 		}
@@ -77,7 +81,11 @@ namespace Gpseq {
 				_has_next = false;
 				return true;
 			} else {
-				_has_next = _spliterator.try_advance(g => { _next = g; });
+				try {
+					_has_next = _spliterator.try_advance(g => { _next = g; });
+				} catch (Error err) {
+					error("%s", err.message);
+				}
 				if (_has_next) {
 					return next();
 				} else {

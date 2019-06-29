@@ -33,20 +33,20 @@ private class Gpseq.Collectors.SumLongCollector<G> : Object, Collector<long,Accu
 		}
 	}
 
-	public Accumulator create_accumulator () {
+	public Accumulator create_accumulator () throws Error {
 		return new Accumulator(0);
 	}
 
-	public void accumulate (G g, Accumulator a) {
+	public void accumulate (G g, Accumulator a) throws Error {
 		a.val += _mapper(g);
 	}
 
-	public Accumulator combine (Accumulator a, Accumulator b) {
+	public Accumulator combine (Accumulator a, Accumulator b) throws Error {
 		a.val += b.val;
 		return a;
 	}
 
-	public long finish (Accumulator a) {
+	public long finish (Accumulator a) throws Error {
 		return a.val;
 	}
 

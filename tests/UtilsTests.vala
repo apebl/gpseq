@@ -67,7 +67,7 @@ public class UtilsTests : Gpseq.TestSuite {
 
 	private void test_parallel_sort_nullable_ints_few () {
 		int?[] array = {null, 1010, 99, 88, 77, 66, 55, 44, 33, 22, 11, 0, null};
-		parallel_sort<int?>(array, compare_nullable_int);
+		parallel_sort<int?>(array, (a, b) => compare_nullable_int(a, b));
 
 		assert( array[0] == null );
 		assert( array[1] == null );
@@ -99,7 +99,7 @@ public class UtilsTests : Gpseq.TestSuite {
 		for (int i = 0; i < MANY_SORT_LENGTH; i++) {
 			array[i] = Random.int_range(0, MANY_SORT_LENGTH);
 		}
-		parallel_sort<int?>(array, compare_nullable_int);
+		parallel_sort<int?>(array, (a, b) => compare_nullable_int(a, b));
 		assert_sorted<int?>(array, compare_nullable_int);
 		assert_all_elements<int?>(array, g => (0 <= g < MANY_SORT_LENGTH));
 	}

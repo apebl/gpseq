@@ -114,7 +114,7 @@ namespace Gpseq {
 			}
 		}
 
-		private ArrayBuffer<G> copy_elements () {
+		private ArrayBuffer<G> copy_elements () throws Error {
 			int64 estimated_remaining = int64.max(0, spliterator.estimated_size);
 			int size = estimated_remaining <= MAX_ARRAY_LENGTH ? (int)estimated_remaining : MAX_ARRAY_LENGTH;
 			G[] array = new G[size];
@@ -135,7 +135,7 @@ namespace Gpseq {
 			return new ArrayBuffer<G>((owned) array);
 		}
 
-		private ArrayBuffer<G> copy_limited_elements () {
+		private ArrayBuffer<G> copy_limited_elements () throws Error {
 			int64 estimated_remaining = int64.max(0, spliterator.estimated_size);
 			int size = estimated_remaining <= MAX_ARRAY_LENGTH ? (int)estimated_remaining : MAX_ARRAY_LENGTH;
 			G[] array = new G[size];

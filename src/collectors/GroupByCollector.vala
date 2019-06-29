@@ -35,17 +35,17 @@ private class Gpseq.Collectors.GroupByCollector<K,V,G> : Object, Collector<Map<K
 		}
 	}
 
-	public Map<K,Object> create_accumulator () {
+	public Map<K,Object> create_accumulator () throws Error {
 		return new HashMap<K,Object>();
 	}
 
-	public void accumulate (G g, Map<K,Object> a) {
+	public void accumulate (G g, Map<K,Object> a) throws Error {
 		K key = _classifier(g);
 		Object container = getContainer(a, key);
 		_downstream.accumulate(g, container);
 	}
 
-	public Map<K,Object> combine (Map<K,Object> a, Map<K,Object> b) {
+	public Map<K,Object> combine (Map<K,Object> a, Map<K,Object> b) throws Error {
 		foreach (K key in b.keys) {
 			Object container = getContainer(a, key);
 			a[key] = _downstream.combine(container, b[key]);
@@ -53,14 +53,14 @@ private class Gpseq.Collectors.GroupByCollector<K,V,G> : Object, Collector<Map<K
 		return a;
 	}
 
-	public Map<K,V> finish (Map<K,Object> a) {
+	public Map<K,V> finish (Map<K,Object> a) throws Error {
 		foreach (Map.Entry<K,Object> e in a.entries) {
 			e.value = (Object)_downstream.finish(e.value);
 		}
 		return (Map<K,V>)a;
 	}
 
-	private Object getContainer (Map<K,Object> accumulator, K key) {
+	private Object getContainer (Map<K,Object> accumulator, K key) throws Error {
 		if (accumulator.has_key(key)) {
 			return accumulator[key];
 		} else {
