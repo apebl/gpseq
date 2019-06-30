@@ -24,61 +24,49 @@ namespace Gpseq {
 	/**
 	 * A fork-join task that performs a mutable reduction operation.
 	 */
-	internal class CollectTask<A,G> : ForkJoinTask<A> {
-		private Spliterator<G> _spliterator; // may be a Container
+	internal class CollectTask<A,G> : SpliteratorTask<A,G> {
 		private Collector<G,A,void*> _collector;
 
 		/**
 		 * Creates a new collect task.
-		 * @param spliterator a spliterator that may or may not be a container
+		 *
 		 * @param collector a collector
+		 * @param spliterator a spliterator that may or may not be a container
+		 * @param parent the parent of the new task
 		 * @param threshold sequential computation threshold
 		 * @param max_depth max task split depth. unlimited if negative
 		 * @param executor an executor that will invoke the task
 		 */
-		public CollectTask (Spliterator<G> spliterator, Collector<G,A,void*> collector,
+		public CollectTask (
+				Collector<void*,A,G> collector,
+				Spliterator<G> spliterator, CollectTask<A,G>? parent,
 				int64 threshold, int max_depth, Executor executor) {
-			base(threshold, max_depth, executor);
-			_spliterator = spliterator;
+			base(spliterator, parent, threshold, max_depth, executor);
 			_collector = collector;
 		}
 
-		public override void compute () {
-			int64 size = _spliterator.estimated_size;
-			if (0 <= size <= threshold || 0 <= max_depth <= depth) {
-				sequential_compute();
-			} else {
-				Spliterator<G>? split = _spliterator.try_split();
-				if (split == null) {
-					sequential_compute();
-					return;
-				}
-				CollectTask<A,G> left = copy(split);
-				left.fork();
-				CollectTask<A,G> right = copy(_spliterator);
-
-				try {
-					right.invoke();
-					A result_r = right.future.value;
-					A result_l = left.join();
-					A result = _collector.combine(result_l, result_r);
-					promise.set_value((owned) result);
-				} catch (Error err) {
-					promise.set_exception(err);
-				}
+		protected override A empty_result {
+			owned get {
+				assert_not_reached();
 			}
 		}
 
-		private void sequential_compute () {
+		protected override A leaf_compute () throws Error {
 			A result = _collector.create_accumulator();
-			_spliterator.each(g => {
+			spliterator.each(g => {
 				_collector.accumulate(g, result);
 			});
-			promise.set_value((owned) result);
+			return result;
 		}
 
-		private CollectTask<A,G> copy (Spliterator<G> spliterator) {
-			var task = new CollectTask<A,G>(spliterator, _collector, threshold, max_depth, executor);
+		protected override A merge_results (owned A left, owned A right) throws Error {
+			return _collector.combine((owned) left, (owned) right);
+		}
+
+		protected override SpliteratorTask<A,G> make_child (Spliterator<G> spliterator) {
+			var task = new CollectTask<A,G>(
+					_collector, spliterator,
+					this, threshold, max_depth, executor);
 			task.depth = depth + 1;
 			return task;
 		}

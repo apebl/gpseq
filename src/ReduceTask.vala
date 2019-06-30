@@ -22,62 +22,38 @@ namespace Gpseq {
 	/**
 	 * A fork-join task that performs a reduction operation.
 	 */
-	internal class ReduceTask<G> : ForkJoinTask<Optional<G>> {
-		private Spliterator<G> _spliterator; // may be a Container
+	internal class ReduceTask<G> : SpliteratorTask<Optional<G>,G> {
 		private unowned CombineFunc<G> _accumulator;
 
 		/**
 		 * Creates a new reduce task.
-		 * @param spliterator a spliterator that may or may not be a container
+		 *
 		 * @param accumulator an //associative//, //non-interfering//, and
 		 * //stateless// function for combining two values
+		 * @param spliterator a spliterator that may or may not be a container
+		 * @param parent the parent of the new task
 		 * @param threshold sequential computation threshold
 		 * @param max_depth max task split depth. unlimited if negative
 		 * @param executor an executor that will invoke the task
 		 */
-		public ReduceTask (Spliterator<G> spliterator, CombineFunc<G> accumulator,
+		public ReduceTask (
+				CombineFunc<G> accumulator,
+				Spliterator<G> spliterator, ReduceTask<G>? parent,
 				int64 threshold, int max_depth, Executor executor) {
-			base(threshold, max_depth, executor);
-			_spliterator = spliterator;
+			base(spliterator, parent, threshold, max_depth, executor);
 			_accumulator = accumulator;
 		}
 
-		public override void compute () {
-			int64 size = _spliterator.estimated_size;
-			if (0 <= size <= threshold || 0 <= max_depth <= depth) {
-				sequential_compute();
-			} else {
-				Spliterator<G>? split = _spliterator.try_split();
-				if (split == null) {
-					sequential_compute();
-					return;
-				}
-				ReduceTask<G> left = copy(split);
-				left.fork();
-				ReduceTask<G> right = copy(_spliterator);
-
-				try {
-					right.invoke();
-					Optional<G> result_r = right.future.value;
-					Optional<G> result_l = left.join();
-					if (!result_l.is_present) {
-						promise.set_value(result_r); // result_r also may be empty
-					} else if (!result_r.is_present) {
-						promise.set_value(result_l);
-					} else {
-						G result = _accumulator(result_l.value, result_r.value);
-						promise.set_value( new Optional<G>.of(result) );
-					}
-				} catch (Error err) {
-					promise.set_exception(err);
-				}
+		protected override Optional<G> empty_result {
+			owned get {
+				assert_not_reached();
 			}
 		}
 
-		private void sequential_compute () {
+		protected override Optional<G> leaf_compute () throws Error {
 			bool found = false;
 			G? result = null;
-			_spliterator.each(g => {
+			spliterator.each(g => {
 				if (!found) {
 					found = true;
 					result = g;
@@ -85,11 +61,26 @@ namespace Gpseq {
 					result = _accumulator(result, g);
 				}
 			});
-			promise.set_value(found ? new Optional<G>.of(result) : new Optional<G>.empty());
+			return found ? new Optional<G>.of(result) : new Optional<G>.empty();
 		}
 
-		private ReduceTask<G> copy (Spliterator<G> spliterator) {
-			var task = new ReduceTask<G>(spliterator, _accumulator, threshold, max_depth, executor);
+		protected override Optional<G> merge_results
+				(owned Optional<G> left, owned Optional<G> right) throws Error {
+			if (!left.is_present) {
+				return right; // right also may be empty
+			} else if (!right.is_present) {
+				return left;
+			} else {
+				G result = _accumulator(left.value, right.value);
+				return new Optional<G>.of(result);
+			}
+		}
+
+		protected override SpliteratorTask<Optional<G>,G> make_child (Spliterator<G> spliterator) {
+			var task = new ReduceTask<G>(
+					_accumulator,
+					spliterator, this,
+					threshold, max_depth, executor);
 			task.depth = depth + 1;
 			return task;
 		}

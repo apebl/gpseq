@@ -73,7 +73,8 @@ namespace Gpseq {
 			int64 len = estimated_size;
 			int64 threshold = seq.task_env.resolve_threshold(len, seq.task_env.executor.parallels);
 			int max_depth = seq.task_env.resolve_max_depth(len, seq.task_env.executor.parallels);
-			ForEachTask<G> task = new ForEachTask<G>(spliterator, func,
+			ForEachTask<G> task = new ForEachTask<G>(
+					func, spliterator, null,
 					threshold, max_depth, seq.task_env.executor);
 			task.fork();
 			task.join_quietly();

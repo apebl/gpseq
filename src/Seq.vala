@@ -549,8 +549,9 @@ namespace Gpseq {
 				int64 len = _container.estimated_size;
 				int64 threshold = _task_env.resolve_threshold(len, _task_env.executor.parallels);
 				int max_depth = _task_env.resolve_max_depth(len, _task_env.executor.parallels);
-				MatchTask<G> task = new MatchTask<G>(_container, null,
+				MatchTask<G> task = new MatchTask<G>(
 						pred, MatchTask.Option.ALL,
+						_container, null,
 						threshold, max_depth, _task_env.executor);
 				task.fork();
 				task.join_quietly();
@@ -587,8 +588,9 @@ namespace Gpseq {
 				int64 len = _container.estimated_size;
 				int64 threshold = _task_env.resolve_threshold(len, _task_env.executor.parallels);
 				int max_depth = _task_env.resolve_max_depth(len, _task_env.executor.parallels);
-				MatchTask<G> task = new MatchTask<G>(_container, null,
+				MatchTask<G> task = new MatchTask<G>(
 						pred, MatchTask.Option.ANY,
+						_container, null,
 						threshold, max_depth, _task_env.executor);
 				task.fork();
 				task.join_quietly();
@@ -641,8 +643,9 @@ namespace Gpseq {
 				int64 len = _container.estimated_size;
 				int64 threshold = _task_env.resolve_threshold(len, _task_env.executor.parallels);
 				int max_depth = _task_env.resolve_max_depth(len, _task_env.executor.parallels);
-				FindTask<G> task = new FindTask<G>(_container, null,
+				FindTask<G> task = new FindTask<G>(
 						pred, FindTask.Option.ANY,
+						_container, null,
 						threshold, max_depth, _task_env.executor);
 				task.fork();
 				task.join_quietly();
@@ -673,8 +676,9 @@ namespace Gpseq {
 				int64 len = _container.estimated_size;
 				int64 threshold = _task_env.resolve_threshold(len, _task_env.executor.parallels);
 				int max_depth = _task_env.resolve_max_depth(len, _task_env.executor.parallels);
-				FindTask<G> task = new FindTask<G>(_container, null,
+				FindTask<G> task = new FindTask<G>(
 						pred, FindTask.Option.FIRST,
+						_container, null,
 						threshold, max_depth, _task_env.executor);
 				task.fork();
 				task.join_quietly();
@@ -887,8 +891,9 @@ namespace Gpseq {
 				int64 len = _container.estimated_size;
 				int64 threshold = _task_env.resolve_threshold(len, _task_env.executor.parallels);
 				int max_depth = _task_env.resolve_max_depth(len, _task_env.executor.parallels);
-				FoldTask<A,G> task = new FoldTask<A,G>(_container,
+				FoldTask<A,G> task = new FoldTask<A,G>(
 						accumulator, combiner, identity,
+						_container, null,
 						threshold, max_depth, _task_env.executor);
 				task.fork();
 				close();
@@ -936,7 +941,9 @@ namespace Gpseq {
 				int64 len = _container.estimated_size;
 				int64 threshold = _task_env.resolve_threshold(len, _task_env.executor.parallels);
 				int max_depth = _task_env.resolve_max_depth(len, _task_env.executor.parallels);
-				ReduceTask<G> task = new ReduceTask<G>(_container, accumulator, threshold, max_depth, _task_env.executor);
+				ReduceTask<G> task = new ReduceTask<G>(
+						accumulator, _container, null,
+						threshold, max_depth, _task_env.executor);
 				task.fork();
 				close();
 				return task.join_quietly();
@@ -1073,7 +1080,8 @@ namespace Gpseq {
 				int64 threshold = _task_env.resolve_threshold(len, _task_env.executor.parallels);
 				int max_depth = _task_env.resolve_max_depth(len, _task_env.executor.parallels);
 				ForEachTask<G> task = new ForEachTask<G>(
-						_container, f, threshold, max_depth, _task_env.executor);
+						f, _container, null,
+						threshold, max_depth, _task_env.executor);
 				task.fork();
 				task.join_quietly();
 			} else {
@@ -1138,7 +1146,8 @@ namespace Gpseq {
 					int64 len = _container.estimated_size;
 					int64 threshold = _task_env.resolve_threshold(len, _task_env.executor.parallels);
 					int max_depth = _task_env.resolve_max_depth(len, _task_env.executor.parallels);
-					CollectTask<A,G> task = new CollectTask<A,G>(_container, collector,
+					CollectTask<A,G> task = new CollectTask<A,G>(
+							collector, _container, null,
 							threshold, max_depth, _task_env.executor);
 					task.fork();
 					A accumulator = task.join_quietly();

@@ -64,7 +64,7 @@ namespace Gpseq {
 		int64 threshold = env.resolve_threshold(len, num_threads);
 		int max_depth = env.resolve_max_depth(len, num_threads);
 
-		SortTask<G> task = new SortTask<G>(sub, temp, cmp, threshold, max_depth, exe);
+		SortTask<G> task = new SortTask<G>(sub, temp, cmp, null, threshold, max_depth, exe);
 		task.fork();
 		task.join_quietly();
 	}

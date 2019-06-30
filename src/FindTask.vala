@@ -24,7 +24,7 @@ namespace Gpseq {
 	/**
 	 * A fork-join task that performs a find operation.
 	 */
-	internal class FindTask<G> : ShortCircuitTask<G,G> {
+	internal class FindTask<G> : SpliteratorTask<Optional<G>,G> {
 		private const long CHECK_INTERVAL = 32768; // 1 << 15
 
 		private unowned Predicate<G> _pred;
@@ -32,16 +32,18 @@ namespace Gpseq {
 
 		/**
 		 * Creates a new find task.
+		 *
+		 * @param pred a //non-interfering// and //stateless// predicate
+		 * @param option a search option
 		 * @param spliterator a spliterator that may or may not be a container
 		 * @param parent the parent of the new task
-		 * @param pred a //non-interfering// and //stateless// predicate
-		 * @param option a search option.
 		 * @param threshold sequential computation threshold
 		 * @param max_depth max task split depth. unlimited if negative
 		 * @param executor an executor that will invoke the task
 		 */
-		public FindTask (Spliterator<G> spliterator, FindTask<G>? parent,
+		public FindTask (
 				Predicate<G> pred, Option option,
+				Spliterator<G> spliterator, FindTask<G>? parent,
 				int64 threshold, int max_depth, Executor executor)
 		{
 			base(spliterator, parent, threshold, max_depth, executor);
@@ -55,15 +57,7 @@ namespace Gpseq {
 			}
 		}
 
-		private void local_result_found (Optional<G> result) {
-			if (is_leftmost || _option == Option.ANY) {
-				short_circuit(result);
-			} else {
-				cancel_later_nodes();
-			}
-		}
-
-		protected override Optional<G> leaf_compute () {
+		protected override Optional<G> leaf_compute () throws Error {
 			Optional<G>? result = null;
 			long chk = 0;
 			spliterator.each_chunk(chunk => {
@@ -76,7 +70,7 @@ namespace Gpseq {
 				chk += chunk.length;
 				if (chk > CHECK_INTERVAL) {
 					chk = 0;
-					if (is_shared_result_ready || is_canceled) {
+					if (shared_result.ready || is_cancelled) {
 						return false;
 					}
 				}
@@ -85,33 +79,39 @@ namespace Gpseq {
 
 			if (result != null) {
 				local_result_found(result);
-				clear_children();
 				return result;
-			} else {
-				clear_children();
-				return empty_result;
 			}
+			return empty_result;
 		}
 
-		protected override Optional<G> merge_results (Optional<G> left, Optional<G> right) {
+		protected override Optional<G> merge_results (
+				owned Optional<G> left, owned Optional<G> right) throws Error {
 			if (left.is_present) {
 				local_result_found(left);
-				clear_children();
 				return left;
 			} else if (right.is_present){
 				local_result_found(right);
-				clear_children();
 				return right;
 			} else {
-				clear_children();
 				return left; // empty
 			}
 		}
 
-		protected override ShortCircuitTask<G,G> make_child (Spliterator<G> spliterator) {
-			var task = new FindTask<G>(spliterator, this, _pred, _option, threshold, max_depth, executor);
+		protected override SpliteratorTask<Optional<G>,G> make_child (Spliterator<G> spliterator) {
+			var task = new FindTask<G>(
+					_pred, _option,
+					spliterator, this,
+					threshold, max_depth, executor);
 			task.depth = depth + 1;
 			return task;
+		}
+
+		private void local_result_found (Optional<G> result) {
+			if (is_leftmost || _option == Option.ANY) {
+				shared_result.value = result;
+			} else {
+				cancel_later_nodes();
+			}
 		}
 
 		public enum Option {

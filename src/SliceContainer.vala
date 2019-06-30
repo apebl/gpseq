@@ -72,8 +72,9 @@ namespace Gpseq {
 				int64 len = estimated_size;
 				int64 threshold = seq.task_env.resolve_threshold(len, seq.task_env.executor.parallels);
 				int max_depth = seq.task_env.resolve_max_depth(len, seq.task_env.executor.parallels);
-				OrderedSliceTask<G> task = new OrderedSliceTask<G>(spliterator, null,
-						_skip, _limit, threshold, max_depth, seq.task_env.executor);
+				OrderedSliceTask<G> task = new OrderedSliceTask<G>(
+						_skip, _limit, spliterator, null,
+						threshold, max_depth, seq.task_env.executor);
 				task.fork();
 				task.join_quietly();
 				ArrayBuffer<G> result = task.shared_result.value;

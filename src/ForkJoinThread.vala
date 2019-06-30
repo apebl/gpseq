@@ -218,7 +218,7 @@ namespace Gpseq {
 		internal void task_join (ForkJoinTask task) throws Error {
 			while (true) {
 				if (_pool.is_terminating_started) return;
-				if (task.is_done) return;
+				if (task.future.ready) return;
 				balancer.tick(this, true);
 
 				ForkJoinTask? pop = work_queue.poll_tail();

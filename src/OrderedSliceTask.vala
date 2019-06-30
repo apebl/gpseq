@@ -24,7 +24,7 @@ namespace Gpseq {
 	/**
 	 * A fork-join task that performs an ordered slice operation.
 	 */
-	internal class OrderedSliceTask<G> : ShortCircuitTask<G,ArrayBuffer<G>> {
+	internal class OrderedSliceTask<G> : SpliteratorTask<ArrayBuffer<G>,G> {
 		private const long CHECK_INTERVAL = 8192; // 1 << 13
 
 		private int64 _skip; // never changed
@@ -34,17 +34,19 @@ namespace Gpseq {
 
 		/**
 		 * Creates a new ordered slice task.
-		 * @param spliterator a spliterator that may or may not be a container
-		 * @param parent the parent of the new task
+		 *
 		 * @param skip the number of elements to skip
 		 * @param limit maximum number of elements the spliterator may contain,
 		 * or a negative value if unlimited
+		 * @param spliterator a spliterator that may or may not be a container
+		 * @param parent the parent of the new task
 		 * @param threshold sequential computation threshold
 		 * @param max_depth max task split depth. unlimited if negative
 		 * @param executor an executor that will invoke the task
 		 */
-		public OrderedSliceTask (Spliterator<G> spliterator, OrderedSliceTask<G>? parent,
+		public OrderedSliceTask (
 				int64 skip, int64 limit,
+				Spliterator<G> spliterator, OrderedSliceTask<G>? parent,
 				int64 threshold, int max_depth, Executor executor)
 		{
 			base(spliterator, parent, threshold, max_depth, executor);
@@ -54,56 +56,55 @@ namespace Gpseq {
 			_completed = new AtomicBoolRef(false);
 		}
 
-		protected override Optional<ArrayBuffer<G>> empty_result {
+		protected override ArrayBuffer<G> empty_result {
 			owned get {
-				return new Optional<ArrayBuffer<G>>.of( new ArrayBuffer<G>({}) );
+				return new ArrayBuffer<G>({});
 			}
 		}
 
-		protected override Optional<ArrayBuffer<G>> leaf_compute () {
+		protected override ArrayBuffer<G> leaf_compute () throws Error {
 			ArrayBuffer<G> buffer = _limit < 0 ? copy_elements() : copy_limited_elements();
 			if (is_root) {
 				buffer = chop(buffer);
-				var result = new Optional<ArrayBuffer<G>>.of(buffer);
-				short_circuit(result);
-				return result;
+				shared_result.value = buffer;
 			} else {
 				_size.val = buffer.size;
 				_completed.val = true;
 				check_target_size();
-				return new Optional<ArrayBuffer<G>>.of(buffer);
 			}
+			return buffer;
 		}
 
-		protected override Optional<ArrayBuffer<G>> merge_results (
-				Optional<ArrayBuffer<G>> left, Optional<ArrayBuffer<G>> right) {
+		protected override ArrayBuffer<G> merge_results (
+				owned ArrayBuffer<G> left, owned ArrayBuffer<G> right) throws Error {
 			ArrayBuffer<G> array;
-			int64 size = left.value.size + right.value.size;
-			if (size == 0 || is_canceled) {
+			int64 size = left.size + right.size;
+			if (size == 0 || is_cancelled) {
 				_size.val = 0;
 				array = new ArrayBuffer<G>({});
-			} else if (left.value.size == 0) {
+			} else if (left.size == 0) {
 				_size.val = size;
-				array = right.value;
+				array = right;
 			} else {
 				_size.val = size;
-				array = new ConcatArrayBuffer<G>(left.value, right.value);
+				array = new ConcatArrayBuffer<G>(left, right);
 			}
 
 			if (is_root) {
 				array = chop(array);
-				var result = new Optional<ArrayBuffer<G>>.of(array);
-				short_circuit(result);
-				return result;
+				shared_result.value = array;
 			} else {
 				_completed.val = true;
 				check_target_size();
-				return new Optional<ArrayBuffer<G>>.of(array);
 			}
+			return array;
 		}
 
-		protected override ShortCircuitTask<G,ArrayBuffer<G>> make_child (Spliterator<G> spliterator) {
-			var task = new OrderedSliceTask<G>(spliterator, this, _skip, _limit, threshold, max_depth, executor);
+		protected override SpliteratorTask<ArrayBuffer<G>,G> make_child (Spliterator<G> spliterator) {
+			var task = new OrderedSliceTask<G>(
+					_skip, _limit,
+					spliterator, this,
+					threshold, max_depth, executor);
 			task.depth = depth + 1;
 			return task;
 		}
@@ -158,7 +159,7 @@ namespace Gpseq {
 				chk += chunk.length;
 				if (chk > CHECK_INTERVAL) {
 					chk = 0;
-					if (is_canceled || is_left_completed) {
+					if (is_cancelled || is_left_completed) {
 						return false;
 					}
 				}
@@ -185,7 +186,7 @@ namespace Gpseq {
 
 		private ArrayBuffer<G> chop (ArrayBuffer<G> array) {
 			int64 start = int64.min(array.size, _skip);
-			int64 stop = _limit < 0 || _skip + _limit < 0 ? array.size : int64.min(array.size, _skip + _limit);
+			int64 stop = (_limit < 0 || _skip + _limit < 0) ? array.size : int64.min(array.size, _skip + _limit);
 			return array.slice(start, stop);
 		}
 

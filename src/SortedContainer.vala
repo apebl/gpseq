@@ -64,7 +64,9 @@ namespace Gpseq {
 				int64 threshold = seq.task_env.resolve_threshold(len, seq.task_env.executor.parallels);
 				int max_depth = seq.task_env.resolve_max_depth(len, seq.task_env.executor.parallels);
 
-				SortTask<G> task = new SortTask<G>(sub, temp, cmp, threshold, max_depth, seq.task_env.executor);
+				SortTask<G> task = new SortTask<G>(
+						sub, temp, cmp,
+						null, threshold, max_depth, seq.task_env.executor);
 				task.fork();
 				task.join_quietly();
 				spliterator = new ArraySpliterator<G>((owned) array, 0, len);
