@@ -1,5 +1,6 @@
 test_sources = files(
 	'AtomicTests.vala',
+	'FutureTests.vala',
 	'IntSeqTests.vala',
 	'NullableIntSeqTests.vala',
 	'NullableStringSeqTests.vala',

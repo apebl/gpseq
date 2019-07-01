@@ -51,7 +51,7 @@ namespace Gpseq {
 	 */
 	public void parallel_sort<G> (G[] array, owned CompareFunc<G>? compare = null) {
 		int len = array.length;
-		if (len <= 1) return;
+		if (len <= 1) return Future.of<void*>(null);
 		G[] temp_array = new G[len];
 
 		SubArray<G> sub = new SubArray<G>(array);

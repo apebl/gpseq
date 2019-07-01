@@ -18,8 +18,6 @@
  * along with Gpseq.  If not, see <http://www.gnu.org/licenses/>.
  */
 
-using Gee;
-
 namespace Gpseq {
 	/**
 	 * A base class for fork-join tasks that run within a fork-join
@@ -168,11 +166,7 @@ namespace Gpseq {
 		 * @throws Error an error occurred in the {@link future}
 		 */
 		private G external_join () throws Error {
-			try {
-				return future.wait();
-			} catch (FutureError err) {
-				throw future.exception;
-			}
+			return future.wait();
 		}
 
 		/**
