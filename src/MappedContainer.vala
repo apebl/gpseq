@@ -49,9 +49,10 @@ namespace Gpseq {
 			}
 		}
 
-		public virtual void start (Seq seq) {
-			if (_parent != null) _parent.start(seq);
+		public virtual Future<void*> start (Seq seq) {
+			var future = parent != null ? parent.start(seq) : Future.of<void*>(null);
 			_parent = null;
+			return future;
 		}
 
 		public Spliterator<R>? try_split () {

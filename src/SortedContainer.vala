@@ -47,13 +47,21 @@ namespace Gpseq {
 			return new SortedContainer<G>.copy(this, spliterator);
 		}
 
-		public override void start (Seq seq) {
-			if (parent != null) parent.start(seq);
-			sort(seq);
+		public override Future<void*> start (Seq seq) {
+			var future = parent != null ? parent.start(seq) : Future.of<void*>(null);
 			set_parent(null);
+			return future.flat_map<void*>(value => {
+				try {
+					return sort(seq);
+				} catch (Error err) {
+					var promise = new Promise<void*>();
+					promise.set_exception((owned) err);
+					return promise.future;
+				}
+			});
 		}
 
-		private void sort (Seq seq) {
+		private Future<void*> sort (Seq seq) throws Error {
 			G[] array = spliter_to_array();
 			SubArray<G> sub = new SubArray<G>(array);
 			int len = array.length;
@@ -68,11 +76,14 @@ namespace Gpseq {
 						sub, temp, cmp,
 						null, threshold, max_depth, seq.task_env.executor);
 				task.fork();
-				task.join_quietly();
-				spliterator = new ArraySpliterator<G>((owned) array, 0, len);
+				return task.future.map<void*>(value => {
+					spliterator = new ArraySpliterator<G>((owned) array, 0, len);
+					return null;
+				});
 			} else {
 				sub.sort((owned) _compare);
 				spliterator = new ArraySpliterator<G>((owned) array, 0, len);
+				return Future.of<void*>(null);
 			}
 		}
 

@@ -106,7 +106,12 @@ namespace Gpseq {
 
 		private inline void check_traversal () {
 			if (_seq != null) {
-				((Container<G,void*>) _spliterator).start(_seq);
+				Future<void*> future = ((Container<G,void*>) _spliterator).start(_seq);
+				try {
+					future.wait();
+				} catch (Error err) {
+					error("%s", err.message);
+				}
 				_seq = null;
 			}
 		}
