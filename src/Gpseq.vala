@@ -48,14 +48,16 @@ namespace Gpseq {
 	 * @param compare compare function to compare elements. if it is not
 	 * specified, the result of {@link Gee.Functions.get_compare_func_for} is
 	 * used
+	 * @return a future which will be completed with a null value if the sort
+	 * succeeds, or with an exception if the sort fails because an error is
+	 * thrown from the compare function
 	 */
-	public void parallel_sort<G> (G[] array, owned CompareFunc<G>? compare = null) {
+	public Future<void*> parallel_sort<G> (G[] array, owned CompareFunc<G>? compare = null) {
 		int len = array.length;
 		if (len <= 1) return Future.of<void*>(null);
-		G[] temp_array = new G[len];
 
 		SubArray<G> sub = new SubArray<G>(array);
-		SubArray<G> temp = new SubArray<G>(temp_array);
+		G[] temp = new G[len];
 		Comparator<G> cmp = new Comparator<G>((owned) compare);
 
 		TaskEnv env = TaskEnv.get_default_task_env();
@@ -64,9 +66,9 @@ namespace Gpseq {
 		int64 threshold = env.resolve_threshold(len, num_threads);
 		int max_depth = env.resolve_max_depth(len, num_threads);
 
-		SortTask<G> task = new SortTask<G>(sub, temp, cmp, null, threshold, max_depth, exe);
+		SortTask<G> task = new SortTask<G>(sub, (owned)temp, cmp, null, threshold, max_depth, exe);
 		task.fork();
-		task.join_quietly();
+		return task.future;
 	}
 
 	/**

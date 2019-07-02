@@ -26,6 +26,7 @@ namespace Gpseq {
 	 */
 	internal class SortTask<G> : ForkJoinTask<void*> {
 		private SubArray<G> _array;
+		private G[] _owned_temp;
 		private SubArray<G> _temp;
 		private Comparator<G> _comparator;
 
@@ -33,8 +34,8 @@ namespace Gpseq {
 		 * Creates a new sort task.
 		 *
 		 * @param array a sub array
-		 * @param temp a temporary sub array used in the execution. its size
-		 * must be //>= array.size// (//== array.size// is enough)
+		 * @param temp an array used in the execution. its length must be
+		 * //>= array.size// (//== array.size// is enough)
 		 * @param comparator a comparator
 		 * @param parent the parent of the new task
 		 * @param threshold sequential computation threshold
@@ -42,6 +43,19 @@ namespace Gpseq {
 		 * @param executor an executor that will invoke the task
 		 */
 		public SortTask (
+				SubArray<G> array, owned G[] temp, Comparator<G> comparator,
+				SortTask<G>? parent,
+				int64 threshold, int max_depth, Executor executor)
+			requires (temp.length >= array.size)
+		{
+			base(parent, threshold, max_depth, executor);
+			_array = array;
+			_owned_temp = (owned) temp;
+			_temp = new SubArray<G>(_owned_temp);
+			_comparator = comparator;
+		}
+
+		private SortTask.sub (
 				SubArray<G> array, SubArray<G> temp, Comparator<G> comparator,
 				SortTask<G>? parent,
 				int64 threshold, int max_depth, Executor executor)
@@ -93,7 +107,7 @@ namespace Gpseq {
 		}
 
 		private SortTask<G> copy (SubArray<G> array, SubArray<G> temp) {
-			var task = new SortTask<G>(
+			var task = new SortTask<G>.sub(
 					array, temp, _comparator,
 					this, threshold, max_depth, executor);
 			task.depth = depth + 1;

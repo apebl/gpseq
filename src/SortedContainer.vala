@@ -66,14 +66,13 @@ namespace Gpseq {
 			SubArray<G> sub = new SubArray<G>(array);
 			int len = array.length;
 			if (seq.is_parallel) {
-				G[] temp_array = new G[len];
-				SubArray<G> temp = new SubArray<G>(temp_array);
+				G[] temp = new G[len];
 				Comparator<G> cmp = new Comparator<G>((owned) _compare);
 				int64 threshold = seq.task_env.resolve_threshold(len, seq.task_env.executor.parallels);
 				int max_depth = seq.task_env.resolve_max_depth(len, seq.task_env.executor.parallels);
 
 				SortTask<G> task = new SortTask<G>(
-						sub, temp, cmp,
+						sub, (owned)temp, cmp,
 						null, threshold, max_depth, seq.task_env.executor);
 				task.fork();
 				return task.future.map<void*>(value => {

@@ -102,22 +102,22 @@ public class StringSeqTests : SeqTests<string> {
 		string[] list = {"", "d", "on", "", "key", ""};
 		if (parallel) {
 			Seq<string> seq = Seq.of_array<string>(list).parallel();
-			assert(seq.collect(Collectors.join()) == "donkey");
+			assert(seq.collect(Collectors.join()).value == "donkey");
 			seq = Seq.of_array<string>(list).parallel();
-			assert(seq.collect_ordered(Collectors.join()) == "donkey");
+			assert(seq.collect_ordered(Collectors.join()).value == "donkey");
 			seq = Seq.of_array<string>(list).parallel();
-			assert(seq.collect(Collectors.join(",")) == ",d,on,,key,");
+			assert(seq.collect(Collectors.join(",")).value == ",d,on,,key,");
 			seq = Seq.of_array<string>(list).parallel();
-			assert(seq.collect_ordered(Collectors.join(",")) == ",d,on,,key,");
+			assert(seq.collect_ordered(Collectors.join(",")).value == ",d,on,,key,");
 		} else {
 			Seq<string> seq = Seq.of_array<string>(list);
-			assert(seq.collect(Collectors.join()) == "donkey");
+			assert(seq.collect(Collectors.join()).value == "donkey");
 			seq = Seq.of_array<string>(list);
-			assert(seq.collect_ordered(Collectors.join()) == "donkey");
+			assert(seq.collect_ordered(Collectors.join()).value == "donkey");
 			seq = Seq.of_array<string>(list);
-			assert(seq.collect(Collectors.join(",")) == ",d,on,,key,");
+			assert(seq.collect(Collectors.join(",")).value == ",d,on,,key,");
 			seq = Seq.of_array<string>(list);
-			assert(seq.collect_ordered(Collectors.join(",")) == ",d,on,,key,");
+			assert(seq.collect_ordered(Collectors.join(",")).value == ",d,on,,key,");
 		}
 	}
 }

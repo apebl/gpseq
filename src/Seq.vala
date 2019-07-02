@@ -480,25 +480,28 @@ namespace Gpseq {
 		 *
 		 * @return the count of elements
 		 */
-		public int64 count () {
+		public Future<int64?> count () {
 			assert(_is_closed == false);
 			if (_container.is_size_known && _container.estimated_size >= 0) {
 				int64 result = _container.estimated_size;
 				close();
-				return result;
+				return Future.of<int64?>(result);
 			} else if (_is_parallel) {
 				return map<int64?>(g => 1)
 					.fold<int64?>((g, a) => g + a, (a, b) => a + b, 0);
 			} else {
-				_container.start(this);
-				int64 result = 0;
-				if (_container.is_size_known && _container.estimated_size >= 0) {
-					result = _container.estimated_size;
-				} else {
-					_container.each(g => result++);
-				}
+				Future<void*> future = _container.start(this);
+				Container<G,void*> container = (!)_container;
 				close();
-				return result;
+				return future.map<int64?>(value => {
+					int64 result = 0;
+					if (container.is_size_known && container.estimated_size >= 0) {
+						result = container.estimated_size;
+					} else {
+						container.each(g => result++);
+					}
+					return result;
+				});
 			}
 		}
 
@@ -542,32 +545,34 @@ namespace Gpseq {
 		 * @return true if either all elements match the given predicate or the
 		 * seq is empty, otherwise false
 		 */
-		public bool all_match (Predicate<G> pred) {
+		public Future<bool?> all_match (Predicate<G> pred) {
 			assert(_is_closed == false);
-			_container.start(this);
+			Future<void*> future = _container.start(this);
+			Container<G,void*> container = (!)_container;
+			close();
 			if (_is_parallel) {
-				int64 len = _container.estimated_size;
-				int64 threshold = _task_env.resolve_threshold(len, _task_env.executor.parallels);
-				int max_depth = _task_env.resolve_max_depth(len, _task_env.executor.parallels);
-				MatchTask<G> task = new MatchTask<G>(
-						pred, MatchTask.Option.ALL,
-						_container, null,
-						threshold, max_depth, _task_env.executor);
-				task.fork();
-				task.join_quietly();
-				close();
-				return task.shared_result.value;
-			} else {
-				bool result = _container.each_chunk(chunk => {
-					for (int i = 0; i < chunk.length; i++) {
-						if (!pred(chunk[i])) {
-							return false;
-						}
-					}
-					return true;
+				return future.flat_map<bool?>(value => {
+					int64 len = container.estimated_size;
+					int64 threshold = _task_env.resolve_threshold(len, _task_env.executor.parallels);
+					int max_depth = _task_env.resolve_max_depth(len, _task_env.executor.parallels);
+					MatchTask<G> task = new MatchTask<G>(
+							pred, MatchTask.Option.ALL,
+							container, null,
+							threshold, max_depth, _task_env.executor);
+					task.fork();
+					return task.future;
 				});
-				close();
-				return result;
+			} else {
+				return future.map<bool?>(value => {
+					return container.each_chunk(chunk => {
+						for (int i = 0; i < chunk.length; i++) {
+							if (!pred(chunk[i])) {
+								return false;
+							}
+						}
+						return true;
+					});
+				});
 			}
 		}
 
@@ -581,32 +586,34 @@ namespace Gpseq {
 		 * @return true if any elements match the given predicate, otherwise
 		 * false
 		 */
-		public bool any_match (Predicate<G> pred) {
+		public Future<bool?> any_match (Predicate<G> pred) {
 			assert(_is_closed == false);
-			_container.start(this);
+			Future<void*> future = _container.start(this);
+			Container<G,void*> container = (!)_container;
+			close();
 			if (_is_parallel) {
-				int64 len = _container.estimated_size;
-				int64 threshold = _task_env.resolve_threshold(len, _task_env.executor.parallels);
-				int max_depth = _task_env.resolve_max_depth(len, _task_env.executor.parallels);
-				MatchTask<G> task = new MatchTask<G>(
-						pred, MatchTask.Option.ANY,
-						_container, null,
-						threshold, max_depth, _task_env.executor);
-				task.fork();
-				task.join_quietly();
-				close();
-				return task.shared_result.value;
-			} else {
-				bool result = !_container.each_chunk(chunk => {
-					for (int i = 0; i < chunk.length; i++) {
-						if (pred(chunk[i])) {
-							return false;
-						}
-					}
-					return true;
+				return future.flat_map<bool?>(value => {
+					int64 len = container.estimated_size;
+					int64 threshold = _task_env.resolve_threshold(len, _task_env.executor.parallels);
+					int max_depth = _task_env.resolve_max_depth(len, _task_env.executor.parallels);
+					MatchTask<G> task = new MatchTask<G>(
+							pred, MatchTask.Option.ANY,
+							container, null,
+							threshold, max_depth, _task_env.executor);
+					task.fork();
+					return task.future;
 				});
-				close();
-				return result;
+			} else {
+				return future.map<bool?>(value => {
+					return !container.each_chunk(chunk => {
+						for (int i = 0; i < chunk.length; i++) {
+							if (pred(chunk[i])) {
+								return false;
+							}
+						}
+						return true;
+					});
+				});
 			}
 		}
 
@@ -620,7 +627,7 @@ namespace Gpseq {
 		 * @return true if either no elements match the given predicate or the
 		 * seq is empty, otherwise false
 		 */
-		public bool none_match (Predicate<G> pred) {
+		public Future<bool?> none_match (Predicate<G> pred) {
 			return all_match(g => {
 				return !pred(g);
 			});
@@ -636,21 +643,23 @@ namespace Gpseq {
 		 * @return an optional describing the any element that matches the
 		 * given, or an empty optional if not found.
 		 */
-		public Optional<G> find_any (Predicate<G> pred) {
+		public Future<Optional<G>> find_any (Predicate<G> pred) {
 			assert(_is_closed == false);
-			_container.start(this);
+			Future<void*> future = _container.start(this);
 			if (_is_parallel) {
-				int64 len = _container.estimated_size;
-				int64 threshold = _task_env.resolve_threshold(len, _task_env.executor.parallels);
-				int max_depth = _task_env.resolve_max_depth(len, _task_env.executor.parallels);
-				FindTask<G> task = new FindTask<G>(
-						pred, FindTask.Option.ANY,
-						_container, null,
-						threshold, max_depth, _task_env.executor);
-				task.fork();
-				task.join_quietly();
+				Container<G,void*> container = (!)_container;
 				close();
-				return task.shared_result;
+				return future.flat_map<Optional<G>>(value => {
+					int64 len = container.estimated_size;
+					int64 threshold = _task_env.resolve_threshold(len, _task_env.executor.parallels);
+					int max_depth = _task_env.resolve_max_depth(len, _task_env.executor.parallels);
+					FindTask<G> task = new FindTask<G>(
+							pred, FindTask.Option.ANY,
+							container, null,
+							threshold, max_depth, _task_env.executor);
+					task.fork();
+					return task.future;
+				});
 			} else {
 				return find_first(pred);
 			}
@@ -669,36 +678,39 @@ namespace Gpseq {
 		 * @return an optional describing the first element that matches the
 		 * given, or an empty optional if not found.
 		 */
-		public Optional<G> find_first (Predicate<G> pred) {
+		public Future<Optional<G>> find_first (Predicate<G> pred) {
 			assert(_is_closed == false);
-			_container.start(this);
+			Future<void*> future = _container.start(this);
+			Container<G,void*> container = (!)_container;
+			close();
 			if (_is_parallel) {
-				int64 len = _container.estimated_size;
-				int64 threshold = _task_env.resolve_threshold(len, _task_env.executor.parallels);
-				int max_depth = _task_env.resolve_max_depth(len, _task_env.executor.parallels);
-				FindTask<G> task = new FindTask<G>(
-						pred, FindTask.Option.FIRST,
-						_container, null,
-						threshold, max_depth, _task_env.executor);
-				task.fork();
-				task.join_quietly();
-				close();
-				return task.shared_result;
-			} else {
-				G? result = null;
-				bool found = false;
-				_container.each_chunk(chunk => {
-					for (int i = 0; i < chunk.length; i++) {
-						if (pred(chunk[i])) {
-							result = chunk[i];
-							found = true;
-							return false;
-						}
-					}
-					return true;
+				return future.flat_map<Optional<G>>(value => {
+					int64 len = container.estimated_size;
+					int64 threshold = _task_env.resolve_threshold(len, _task_env.executor.parallels);
+					int max_depth = _task_env.resolve_max_depth(len, _task_env.executor.parallels);
+					FindTask<G> task = new FindTask<G>(
+							pred, FindTask.Option.FIRST,
+							container, null,
+							threshold, max_depth, _task_env.executor);
+					task.fork();
+					return task.future;
 				});
-				close();
-				return found ? new Optional<G>.of(result) : new Optional<G>.empty();
+			} else {
+				return future.map<Optional<G>>(value => {
+					G? result = null;
+					bool found = false;
+					container.each_chunk(chunk => {
+						for (int i = 0; i < chunk.length; i++) {
+							if (pred(chunk[i])) {
+								result = chunk[i];
+								found = true;
+								return false;
+							}
+						}
+						return true;
+					});
+					return found ? new Optional<G>.of(result) : new Optional<G>.empty();
+				});
 			}
 		}
 
@@ -884,27 +896,31 @@ namespace Gpseq {
 		 * @param identity the identity value for the combiner function
 		 * @return the result of the reduction
 		 */
-		public A fold<A> (FoldFunc<A,G> accumulator, CombineFunc<A> combiner, A identity) {
+		public Future<A> fold<A> (FoldFunc<A,G> accumulator, CombineFunc<A> combiner, A identity) {
 			assert(_is_closed == false);
-			_container.start(this);
+			Future<void*> future = _container.start(this);
+			Container<G,void*> container = (!)_container;
+			close();
 			if (_is_parallel) {
-				int64 len = _container.estimated_size;
-				int64 threshold = _task_env.resolve_threshold(len, _task_env.executor.parallels);
-				int max_depth = _task_env.resolve_max_depth(len, _task_env.executor.parallels);
-				FoldTask<A,G> task = new FoldTask<A,G>(
-						accumulator, combiner, identity,
-						_container, null,
-						threshold, max_depth, _task_env.executor);
-				task.fork();
-				close();
-				return task.join_quietly();
-			} else {
-				A result = identity;
-				_container.each(g => {
-					result = accumulator(g, result);
+				return future.flat_map<A>(value => {
+					int64 len = container.estimated_size;
+					int64 threshold = _task_env.resolve_threshold(len, _task_env.executor.parallels);
+					int max_depth = _task_env.resolve_max_depth(len, _task_env.executor.parallels);
+					FoldTask<A,G> task = new FoldTask<A,G>(
+							accumulator, combiner, identity,
+							container, null,
+							threshold, max_depth, _task_env.executor);
+					task.fork();
+					return task.future;
 				});
-				close();
-				return result;
+			} else {
+				return future.map<A>(value => {
+					A result = identity;
+					container.each(g => {
+						result = accumulator(g, result);
+					});
+					return result;
+				});
 			}
 		}
 
@@ -934,32 +950,36 @@ namespace Gpseq {
 		 * //stateless// function for combining two values
 		 * @return the result of the reduction
 		 */
-		public Optional<G> reduce (CombineFunc<G> accumulator) {
+		public Future<Optional<G>> reduce (CombineFunc<G> accumulator) {
 			assert(_is_closed == false);
-			_container.start(this);
+			Future<void*> future = _container.start(this);
+			Container<G,void*> container = (!)_container;
+			close();
 			if (_is_parallel) {
-				int64 len = _container.estimated_size;
-				int64 threshold = _task_env.resolve_threshold(len, _task_env.executor.parallels);
-				int max_depth = _task_env.resolve_max_depth(len, _task_env.executor.parallels);
-				ReduceTask<G> task = new ReduceTask<G>(
-						accumulator, _container, null,
-						threshold, max_depth, _task_env.executor);
-				task.fork();
-				close();
-				return task.join_quietly();
-			} else {
-				bool found = false;
-				G? result = null;
-				_container.each(g => {
-					if (!found) {
-						found = true;
-						result = g;
-					} else {
-						result = accumulator(result, g);
-					}
+				return future.flat_map<Optional<G>>(value => {
+					int64 len = container.estimated_size;
+					int64 threshold = _task_env.resolve_threshold(len, _task_env.executor.parallels);
+					int max_depth = _task_env.resolve_max_depth(len, _task_env.executor.parallels);
+					ReduceTask<G> task = new ReduceTask<G>(
+							accumulator, container, null,
+							threshold, max_depth, _task_env.executor);
+					task.fork();
+					return task.future;
 				});
-				close();
-				return found ? new Optional<G>.of(result) : new Optional<G>.empty();
+			} else {
+				return future.map<Optional<G>>(value => {
+					bool found = false;
+					G? result = null;
+					container.each(g => {
+						if (!found) {
+							found = true;
+							result = g;
+						} else {
+							result = accumulator(result, g);
+						}
+					});
+					return found ? new Optional<G>.of(result) : new Optional<G>.empty();
+				});
 			}
 		}
 
@@ -1008,13 +1028,15 @@ namespace Gpseq {
 		 * @return an optional describing the maximum element, or an empty
 		 * optional if the seq is empty
 		 */
-		public Optional<G> max (owned CompareFunc<G>? compare = null) {
+		public Future<Optional<G>> max (owned CompareFunc<G>? compare = null) {
 			if (compare == null) {
 				CompareDataFunc func = Functions.get_compare_func_for(element_type);
 				compare = (a, b) => func(a, b);
 			}
 			return reduce((a, b) => {
 				return compare(a, b) >= 0 ? a : b;
+			}).then(future => { // for keeping block data
+				compare = null;
 			});
 		}
 
@@ -1030,13 +1052,15 @@ namespace Gpseq {
 		 * @return an optional describing the minimum element, or an empty
 		 * optional if the seq is empty
 		 */
-		public Optional<G> min (owned CompareFunc<G>? compare = null) {
+		public Future<Optional<G>> min (owned CompareFunc<G>? compare = null) {
 			if (compare == null) {
 				CompareDataFunc func = Functions.get_compare_func_for(element_type);
 				compare = (a, b) => func(a, b);
 			}
 			return reduce((a, b) => {
 				return compare(a, b) <= 0 ? a : b;
+			}).then(future => { // for keeping block data
+				compare = null;
 			});
 		}
 
@@ -1072,22 +1096,28 @@ namespace Gpseq {
 		 *
 		 * @param f a //non-interfering// function
 		 */
-		public void foreach (owned Func<G> f) {
+		public Future<void*> foreach (owned Func<G> f) {
 			assert(_is_closed == false);
-			_container.start(this);
-			if (_is_parallel) {
-				int64 len = _container.estimated_size;
-				int64 threshold = _task_env.resolve_threshold(len, _task_env.executor.parallels);
-				int max_depth = _task_env.resolve_max_depth(len, _task_env.executor.parallels);
-				ForEachTask<G> task = new ForEachTask<G>(
-						f, _container, null,
-						threshold, max_depth, _task_env.executor);
-				task.fork();
-				task.join_quietly();
-			} else {
-				_container.each(f);
-			}
+			Future<void*> future = _container.start(this);
+			Container<G,void*> container = (!)_container;
 			close();
+			if (_is_parallel) {
+				return future.flat_map<void*>(value => {
+					int64 len = container.estimated_size;
+					int64 threshold = _task_env.resolve_threshold(len, _task_env.executor.parallels);
+					int max_depth = _task_env.resolve_max_depth(len, _task_env.executor.parallels);
+					ForEachTask<G> task = new ForEachTask<G>(
+							f, container, null,
+							threshold, max_depth, _task_env.executor);
+					task.fork();
+					return task.future;
+				});
+			} else {
+				return future.map<void*>(value => {
+					container.each(f);
+					return null;
+				});
+			}
 		}
 
 		/**
@@ -1102,17 +1132,24 @@ namespace Gpseq {
 		 * @return the result of the reduction
 		 * @see Collector
 		 */
-		public R collect<R,A> (Collector<R,A,G> collector) {
+		public Future<R> collect<R,A> (Collector<R,A,G> collector) {
 			assert(_is_closed == false);
 			if (_is_parallel) {
 				if (CollectorFeatures.CONCURRENT in collector.features) {
-					_container.start(this);
-					A accumulator = collector.create_accumulator();
-					this.foreach(g => {
+					A accumulator;
+					try {
+						accumulator = collector.create_accumulator();
+					} catch (Error err) {
+						close();
+						var promise = new Promise<R>();
+						promise.set_exception((owned) err);
+						return promise.future;
+					}
+					return this.foreach(g => {
 						collector.accumulate(g, accumulator);
+					}).map<R>(value => {
+						return collector.finish(accumulator);
 					});
-					close();
-					return collector.finish(accumulator);
 				} else {
 					return collect_ordered<R,A>(collector);
 				}
@@ -1135,33 +1172,40 @@ namespace Gpseq {
 		 * @return the result of the reduction
 		 * @see Collector
 		 */
-		public R collect_ordered<R,A> (Collector<R,A,G> collector) {
+		public Future<R> collect_ordered<R,A> (Collector<R,A,G> collector) {
 			assert(_is_closed == false);
 			if (_is_parallel) {
 				if (CollectorFeatures.CONCURRENT in collector.features
 				&& CollectorFeatures.UNORDERED in collector.features) {
 					return collect<R,A>(collector);
 				} else {
-					_container.start(this);
-					int64 len = _container.estimated_size;
-					int64 threshold = _task_env.resolve_threshold(len, _task_env.executor.parallels);
-					int max_depth = _task_env.resolve_max_depth(len, _task_env.executor.parallels);
-					CollectTask<A,G> task = new CollectTask<A,G>(
-							collector, _container, null,
-							threshold, max_depth, _task_env.executor);
-					task.fork();
-					A accumulator = task.join_quietly();
+					Future<void*> future = _container.start(this);
+					Container<G,void*> container = (!)_container;
 					close();
-					return collector.finish(accumulator);
+					return future.flat_map<A>(value => {
+						int64 len = container.estimated_size;
+						int64 threshold = _task_env.resolve_threshold(len, _task_env.executor.parallels);
+						int max_depth = _task_env.resolve_max_depth(len, _task_env.executor.parallels);
+						CollectTask<A,G> task = new CollectTask<A,G>(
+								collector, container, null,
+								threshold, max_depth, _task_env.executor);
+						task.fork();
+						return task.future;
+					}).map<R>(accumulator => {
+						return collector.finish(accumulator);
+					});
 				}
 			} else {
-				_container.start(this);
-				A accumulator = collector.create_accumulator();
-				_container.each(g => {
-					collector.accumulate(g, accumulator);
-				});
+				Future<void*> future = _container.start(this);
+				Container<G,void*> container = (!)_container;
 				close();
-				return collector.finish(accumulator);
+				return future.map<R>(value => {
+					A accumulator = collector.create_accumulator();
+					container.each(g => {
+						collector.accumulate(g, accumulator);
+					});
+					return collector.finish(accumulator);
+				});
 			}
 		}
 
@@ -1184,7 +1228,7 @@ namespace Gpseq {
 		 * @return the result map
 		 * @see Collectors.group_by
 		 */
-		public Map<K,Gee.List<G>> group_by<K> (owned MapFunc<K,G> classifier) {
+		public Future< Map<K,Gee.List<G>> > group_by<K> (owned MapFunc<K,G> classifier) {
 			return collect( Collectors.group_by<K,G>((owned)classifier) );
 		}
 
@@ -1208,7 +1252,7 @@ namespace Gpseq {
 		 * @return the result map
 		 * @see Collectors.partition
 		 */
-		public Map<bool,Gee.List<G>> partition (owned Predicate<G> pred) {
+		public Future< Map<bool,Gee.List<G>> > partition (owned Predicate<G> pred) {
 			return collect( Collectors.partition<G>((owned)pred) );
 		}
 	}
