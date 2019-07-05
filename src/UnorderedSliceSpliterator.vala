@@ -59,7 +59,7 @@ namespace Gpseq {
 			return spliter == null ? null : new UnorderedSliceSpliterator<G>.from_parent(spliter, this);
 		}
 
-		public bool try_advance (Func<G> consumer) {
+		public bool try_advance (Func<G> consumer) throws Error {
 			while (_unlimited || _permits.val > 0) {
 				G? temp = null;
 				bool found = false;
@@ -118,7 +118,7 @@ namespace Gpseq {
 			}
 		}
 
-		public void each (Func<G> f) {
+		public void each (Func<G> f) throws Error {
 			each_chunk(chunk => {
 				for (int i = 0; i < chunk.length; i++) {
 					f(chunk[i]);
@@ -127,7 +127,7 @@ namespace Gpseq {
 			});
 		}
 
-		public bool each_chunk (EachChunkFunc<G> f) {
+		public bool each_chunk (EachChunkFunc<G> f) throws Error {
 			bool result = true;
 			_spliterator.each_chunk(chunk => {
 				if (_permits.val > 0) {

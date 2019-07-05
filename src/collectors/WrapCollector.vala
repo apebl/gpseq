@@ -33,19 +33,19 @@ private class Gpseq.Collectors.WrapCollector<A,G> : Object, Collector<Wrapper<A>
 		}
 	}
 
-	public Object create_accumulator () {
+	public Object create_accumulator () throws Error {
 		return _collector.create_accumulator();
 	}
 
-	public void accumulate (G g, Object a) {
+	public void accumulate (G g, Object a) throws Error {
 		_collector.accumulate(g, a);
 	}
 
-	public Object combine (Object a, Object b) {
+	public Object combine (Object a, Object b) throws Error {
 		return _collector.combine(a, b);
 	}
 
-	public Wrapper<A> finish (Object a) {
+	public Wrapper<A> finish (Object a) throws Error {
 		return new Wrapper<A>(_collector.finish(a));
 	}
 }

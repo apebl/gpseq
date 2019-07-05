@@ -35,18 +35,18 @@ private class Gpseq.Collectors.PartitionCollector<V,G> : Object, Collector<Map<b
 		}
 	}
 
-	public Map<bool,Object> create_accumulator () {
+	public Map<bool,Object> create_accumulator () throws Error {
 		var map = new HashMap<bool,Object>();
 		map.set(true, _downstream.create_accumulator());
 		map.set(false, _downstream.create_accumulator());
 		return map;
 	}
 
-	public void accumulate (G g, Map<bool,Object> a) {
+	public void accumulate (G g, Map<bool,Object> a) throws Error {
 		_downstream.accumulate(g, a[_pred(g)]);
 	}
 
-	public Map<bool,Object> combine (Map<bool,Object> a, Map<bool,Object> b) {
+	public Map<bool,Object> combine (Map<bool,Object> a, Map<bool,Object> b) throws Error {
 		a[true] = _downstream.combine(a[true], b[true]);
 		a[false] = _downstream.combine(a[false], b[false]);
 		return a;

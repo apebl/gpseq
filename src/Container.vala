@@ -45,8 +45,9 @@ namespace Gpseq {
 		 * Will be called once before traversal of the input is started.
 		 *
 		 * All methods overriding this method must call the parent's start()
-		 * before their implementation if the container has a parent.
+		 * before their implementation and handle the result future properly
+		 * if the container has a parent.
 		 */
-		public abstract void start (Seq seq);
+		public abstract Future<void*> start (Seq seq);
 	}
 }

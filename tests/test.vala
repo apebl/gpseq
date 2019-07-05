@@ -32,6 +32,7 @@ void main (string[] args) {
 void register_tests () {
 	new TestUtilsTests().register();
 	new AtomicTests().register();
+	new FutureTests().register();
 	new SubArrayTests().register();
 	new UtilsTests().register();
 	new IntSeqTests().register();

@@ -54,7 +54,8 @@ using Gee;
  */
 internal class Gpseq.TimSort<G> : Object {
 
-	public static void sort_sub_array<G> (SubArray<G> array, CompareDataFunc<G> compare) {
+	public static void sort_sub_array<G>
+			(SubArray<G> array, CompareFunc<G> compare) throws Error {
 		TimSort<G> helper = new TimSort<G> ();
 
 		helper.list = array.get_data();
@@ -72,9 +73,9 @@ internal class Gpseq.TimSort<G> : Object {
 	private int size;
 	private Slice<G>[] pending;
 	private int minimum_gallop;
-	private unowned CompareDataFunc<G> compare;
+	private unowned CompareFunc<G> compare;
 
-	private void do_sort () {
+	private void do_sort () throws Error {
 		if (size < 2) {
 			return;
 		}
@@ -127,11 +128,11 @@ internal class Gpseq.TimSort<G> : Object {
 
 	private delegate bool LowerFunc (G left, G right);
 
-	private inline bool lower_than (G left, G right) {
+	private inline bool lower_than (G left, G right) throws Error {
             return compare (left, right) < 0;
 	}
 
-	private inline bool lower_than_or_equal_to (G left, G right) {
+	private inline bool lower_than_or_equal_to (G left, G right) throws Error {
             return compare (left, right) <= 0;
 	}
 
@@ -144,7 +145,7 @@ internal class Gpseq.TimSort<G> : Object {
 		return length + run_length;
 	}
 
-	private Slice<G> compute_longest_run (Slice<G> a, out bool descending) {
+	private Slice<G> compute_longest_run (Slice<G> a, out bool descending) throws Error {
 		int run_length;
 		if (a.length <= 1) {
 			run_length = a.length;
@@ -174,7 +175,7 @@ internal class Gpseq.TimSort<G> : Object {
 		return new Slice<G> (a.list, a.index, run_length);
 	}
 
-	private void insertion_sort (Slice<G> a, int offset) {
+	private void insertion_sort (Slice<G> a, int offset) throws Error {
 		#if DEBUG
 			message ("Sorting (%d, %d) at %d", a.index, a.length, offset);
 		#endif
@@ -198,7 +199,7 @@ internal class Gpseq.TimSort<G> : Object {
 		}
 	}
 
-	private void merge_collapse () {
+	private void merge_collapse () throws Error {
 		#if DEBUG
 			message ("Merge Collapse");
 		#endif
@@ -229,7 +230,7 @@ internal class Gpseq.TimSort<G> : Object {
 		}
 	}
 
-	private void merge_force_collapse () {
+	private void merge_force_collapse () throws Error {
 		#if DEBUG
 			message ("Merge Force Collapse");
 		#endif
@@ -250,7 +251,7 @@ internal class Gpseq.TimSort<G> : Object {
 		}
 	}
 
-	private void merge_at (int index) {
+	private void merge_at (int index) throws Error {
 		#if DEBUG
 			message ("Merge at %d", index);
 		#endif
@@ -283,7 +284,7 @@ internal class Gpseq.TimSort<G> : Object {
 		}
 	}
 
-	private int gallop_leftmost (G key, Slice<G> a, int hint) {
+	private int gallop_leftmost (G key, Slice<G> a, int hint) throws Error {
 		#if DEBUG
 			message ("Galop leftmost in (%d, %d), hint=%d", a.index, a.length, hint);
 		#endif
@@ -351,7 +352,7 @@ internal class Gpseq.TimSort<G> : Object {
 		return offset;
 	}
 
-	private int gallop_rightmost (G key, Slice<G> a, int hint) {
+	private int gallop_rightmost (G key, Slice<G> a, int hint) throws Error {
 		#if DEBUG
 			message ("Galop rightmost in (%d, %d), hint=%d", a.index, a.length, hint);
 		#endif
@@ -419,7 +420,7 @@ internal class Gpseq.TimSort<G> : Object {
 		return offset;
 	}
 
-	private void merge_low (owned Slice<G> a, owned Slice<G> b) {
+	private void merge_low (owned Slice<G> a, owned Slice<G> b) throws Error {
 		#if DEBUG
 			message ("Merge low (%d, %d) (%d, %d)", a.index, a.length, b.index, b.length);
 		#endif
@@ -515,7 +516,7 @@ internal class Gpseq.TimSort<G> : Object {
 		}
 	}
 
-	private void merge_high (owned Slice<G> a, owned Slice<G> b) {
+	private void merge_high (owned Slice<G> a, owned Slice<G> b) throws Error {
 		#if DEBUG
 			message ("Merge high (%d, %d) (%d, %d)", a.index, a.length, b.index, b.length);
 		#endif

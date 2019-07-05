@@ -76,7 +76,7 @@ namespace Gpseq {
 		/**
 		 * Creates a new accumulator.
 		 */
-		public abstract A create_accumulator ();
+		public abstract A create_accumulator () throws Error;
 		/**
 		 * Accumulates a element into a accumulator.
 		 *
@@ -86,7 +86,7 @@ namespace Gpseq {
 		 * @param g element
 		 * @param a accumulator
 		 */
-		public abstract void accumulate (G g, A a);
+		public abstract void accumulate (G g, A a) throws Error;
 		/**
 		 * Combines two accumulators into one.
 		 *
@@ -95,11 +95,11 @@ namespace Gpseq {
 		 *
 		 * @return combined accumulator.
 		 */
-		public abstract A combine (A a, A b);
+		public abstract A combine (A a, A b) throws Error;
 		/**
 		 * Transforms an accumulator into a final result.
 		 * @return the final result
 		 */
-		public abstract R finish (A a);
+		public abstract R finish (A a) throws Error;
 	}
 }

@@ -24,23 +24,23 @@ private class Gpseq.Collectors.JoinCollector : Object, Collector<string,Accumula
 	public JoinCollector (owned string delimiter) {
 		_delimiter = (owned) delimiter;
 	}
-	
+
 	public CollectorFeatures features {
 		get {
 			return 0;
 		}
 	}
 
-	public Accumulator create_accumulator () {
+	public Accumulator create_accumulator () throws Error {
 		return new Accumulator();
 	}
 
-	public void accumulate (string g, Accumulator a) {
+	public void accumulate (string g, Accumulator a) throws Error {
 		if (!a.empty) a.val.append(_delimiter);
 		a.val.append(g);
 	}
 
-	public Accumulator combine (Accumulator a, Accumulator b) {
+	public Accumulator combine (Accumulator a, Accumulator b) throws Error {
 		if (a.empty) {
 			return b;
 		} else if (b.empty) {
@@ -51,25 +51,25 @@ private class Gpseq.Collectors.JoinCollector : Object, Collector<string,Accumula
 		}
 	}
 
-	public string finish (Accumulator a) {
+	public string finish (Accumulator a) throws Error {
 		return a.val.str;
 	}
 
 	public class Accumulator : Object {
 		private StringBuilder _val;
-		
+
 		public Accumulator () {
 			_val = new StringBuilder();
 			empty = true;
 		}
-		
+
 		public StringBuilder val {
 			get {
 				empty = false;
 				return _val;
 			}
 		}
-		
+
 		public bool empty {
 			get; private set;
 		}

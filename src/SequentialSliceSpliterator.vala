@@ -46,7 +46,7 @@ namespace Gpseq {
 			return null;
 		}
 
-		public bool try_advance (Func<G> consumer) {
+		public bool try_advance (Func<G> consumer) throws Error {
 			if (_limit == 0) return false;
 			return _spliterator.try_advance(g => {
 				if (_skip > 0) {
@@ -79,7 +79,7 @@ namespace Gpseq {
 			}
 		}
 
-		public void each (Func<G> f) {
+		public void each (Func<G> f) throws Error {
 			each_chunk(chunk => {
 				for (int i = 0; i < chunk.length; i++) {
 					f(chunk[i]);
@@ -88,7 +88,7 @@ namespace Gpseq {
 			});
 		}
 
-		public bool each_chunk (EachChunkFunc<G> f) {
+		public bool each_chunk (EachChunkFunc<G> f) throws Error {
 			if (_limit == 0) return true;
 			bool result = true;
 			_spliterator.each_chunk(chunk => {

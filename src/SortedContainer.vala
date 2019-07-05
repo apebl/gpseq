@@ -24,7 +24,7 @@ namespace Gpseq {
 	 * compare function.
 	 */
 	internal class SortedContainer<G> : DefaultContainer<G> {
-		private CompareDataFunc<G>? _compare;
+		private CompareFunc<G>? _compare;
 
 		/**
 		 * Creates a new sorted container.
@@ -34,7 +34,7 @@ namespace Gpseq {
 		 * function
 		 */
 		public SortedContainer (Spliterator<G> spliterator, Container<G,void*> parent,
-				owned CompareDataFunc<G> compare) {
+				owned CompareFunc<G> compare) {
 			base(spliterator, parent, new Consumer<G>());
 			_compare = (owned) compare;
 		}
@@ -47,34 +47,46 @@ namespace Gpseq {
 			return new SortedContainer<G>.copy(this, spliterator);
 		}
 
-		public override void start (Seq seq) {
-			if (parent != null) parent.start(seq);
-			sort(seq);
+		public override Future<void*> start (Seq seq) {
+			var future = parent != null ? parent.start(seq) : Future.of<void*>(null);
 			set_parent(null);
+			return future.flat_map<void*>(value => {
+				try {
+					return sort(seq);
+				} catch (Error err) {
+					var promise = new Promise<void*>();
+					promise.set_exception((owned) err);
+					return promise.future;
+				}
+			});
 		}
 
-		private void sort (Seq seq) {
+		private Future<void*> sort (Seq seq) throws Error {
 			G[] array = spliter_to_array();
 			SubArray<G> sub = new SubArray<G>(array);
 			int len = array.length;
 			if (seq.is_parallel) {
-				G[] temp_array = new G[len];
-				SubArray<G> temp = new SubArray<G>(temp_array);
+				G[] temp = new G[len];
 				Comparator<G> cmp = new Comparator<G>((owned) _compare);
 				int64 threshold = seq.task_env.resolve_threshold(len, seq.task_env.executor.parallels);
 				int max_depth = seq.task_env.resolve_max_depth(len, seq.task_env.executor.parallels);
 
-				SortTask<G> task = new SortTask<G>(sub, temp, cmp, threshold, max_depth, seq.task_env.executor);
+				SortTask<G> task = new SortTask<G>(
+						sub, (owned)temp, cmp,
+						null, threshold, max_depth, seq.task_env.executor);
 				task.fork();
-				task.join_quietly();
-				spliterator = new ArraySpliterator<G>((owned) array, 0, len);
+				return task.future.map<void*>(value => {
+					spliterator = new ArraySpliterator<G>((owned) array, 0, len);
+					return null;
+				});
 			} else {
 				sub.sort((owned) _compare);
 				spliterator = new ArraySpliterator<G>((owned) array, 0, len);
+				return Future.of<void*>(null);
 			}
 		}
 
-		private G[] spliter_to_array () {
+		private G[] spliter_to_array () throws Error {
 			G[] array;
 			if (!spliterator.is_size_known || spliterator.estimated_size < 0) {
 				array = {}; // XXX use estimated_size

@@ -38,7 +38,7 @@ namespace Gpseq {
 			return new SupplierSpliterator<G>(_supplier);
 		}
 
-		public bool try_advance (Func<G> consumer) {
+		public bool try_advance (Func<G> consumer) throws Error {
 			consumer(_supplier.supply());
 			return true;
 		}

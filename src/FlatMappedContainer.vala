@@ -52,9 +52,10 @@ namespace Gpseq {
 			}
 		}
 
-		public virtual void start (Seq seq) {
-			if (_parent != null) _parent.start(seq);
+		public virtual Future<void*> start (Seq seq) {
+			var future = parent != null ? parent.start(seq) : Future.of<void*>(null);
 			_parent = null;
+			return future;
 		}
 
 		public Spliterator<R>? try_split () {
@@ -66,7 +67,7 @@ namespace Gpseq {
 			}
 		}
 
-		public bool try_advance (Func<R> consumer) {
+		public bool try_advance (Func<R> consumer) throws Error {
 			bool result = false;
 			if (_storage == null) {
 				result = _spliterator.try_advance(g => {
@@ -95,24 +96,25 @@ namespace Gpseq {
 			}
 		}
 
-		public void each (Func<R> f) {
+		public void each (Func<R> f) throws Error {
 			if (_storage != null) {
-				_storage.foreach(g => {
-					f(g);
-					return true;
-				});
+				foreach_iter(_storage, f);
 				_storage = null;
 			}
 			_spliterator.each(g => {
 				Iterator<R> iter = _mapper(g);
-				iter.foreach(g => {
-					f(g);
-					return true;
-				});
+				foreach_iter(iter, f);
 			});
 		}
 
-		public bool each_chunk (EachChunkFunc<R> f) {
+		private void foreach_iter (Iterator<R> iter, Func<R> f) throws Error {
+			if (iter.valid) f(iter.get());
+			while ( iter.next() ) {
+				f(iter.get());
+			}
+		}
+
+		public bool each_chunk (EachChunkFunc<R> f) throws Error {
 			R[] buf = new R[CHUNK_SIZE];
 
 			if (_storage != null) {

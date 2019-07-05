@@ -54,7 +54,7 @@ namespace Gpseq {
 			}
 		}
 
-		public bool try_advance (Func<G> consumer) {
+		public bool try_advance (Func<G> consumer) throws Error {
 			if (_spliterator == null) return false;
 			check_traversal();
 			G? item = null;
@@ -89,14 +89,14 @@ namespace Gpseq {
 			}
 		}
 
-		public void each (Func<G> f) {
+		public void each (Func<G> f) throws Error {
 			if (_spliterator == null) return;
 			check_traversal();
 			_spliterator.each(f);
 			_spliterator = null;
 		}
 
-		public bool each_chunk (EachChunkFunc<G> f) {
+		public bool each_chunk (EachChunkFunc<G> f) throws Error {
 			if (_spliterator == null) return true;
 			check_traversal();
 			bool result = _spliterator.each_chunk(f);
@@ -106,7 +106,12 @@ namespace Gpseq {
 
 		private inline void check_traversal () {
 			if (_seq != null) {
-				((Container<G,void*>) _spliterator).start(_seq);
+				Future<void*> future = ((Container<G,void*>) _spliterator).start(_seq);
+				try {
+					future.wait();
+				} catch (Error err) {
+					error("%s", err.message);
+				}
 				_seq = null;
 			}
 		}

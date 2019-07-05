@@ -26,34 +26,60 @@ namespace Gpseq {
 	 */
 	internal class SortTask<G> : ForkJoinTask<void*> {
 		private SubArray<G> _array;
+		private G[] _owned_temp;
 		private SubArray<G> _temp;
 		private Comparator<G> _comparator;
 
 		/**
 		 * Creates a new sort task.
+		 *
 		 * @param array a sub array
-		 * @param temp a temporary sub array used in the execution. its size
-		 * must be //>= array.size// (//== array.size// is enough)
+		 * @param temp an array used in the execution. its length must be
+		 * //>= array.size// (//== array.size// is enough)
 		 * @param comparator a comparator
+		 * @param parent the parent of the new task
 		 * @param threshold sequential computation threshold
 		 * @param max_depth max task split depth. unlimited if negative
 		 * @param executor an executor that will invoke the task
 		 */
-		public SortTask (SubArray<G> array, SubArray<G> temp, Comparator<G> comparator,
+		public SortTask (
+				SubArray<G> array, owned G[] temp, Comparator<G> comparator,
+				SortTask<G>? parent,
+				int64 threshold, int max_depth, Executor executor)
+			requires (temp.length >= array.size)
+		{
+			base(parent, threshold, max_depth, executor);
+			_array = array;
+			_owned_temp = (owned) temp;
+			_temp = new SubArray<G>(_owned_temp);
+			_comparator = comparator;
+		}
+
+		private SortTask.sub (
+				SubArray<G> array, SubArray<G> temp, Comparator<G> comparator,
+				SortTask<G>? parent,
 				int64 threshold, int max_depth, Executor executor)
 			requires (temp.size >= array.size)
 		{
-			base(threshold, max_depth, executor);
+			base(parent, threshold, max_depth, executor);
 			_array = array;
 			_temp = temp;
 			_comparator = comparator;
 		}
 
 		public override void compute () {
+			if (shared_result.ready || is_cancelled) {
+				promise.set_value(null);
+				return;
+			}
+
 			int size = _array.size;
 			if (size <= threshold || 0 <= max_depth <= depth) {
-				_comparator.sort_sub_array(_array); // timsort
-				promise.set_value(null);
+				try {
+					_comparator.sort_sub_array(_array);
+				} catch (Error err) {
+					shared_result.error = (owned) err;
+				}
 			} else {
 				int mid = size >> 1;
 				SubArray<G> left_array = _array.sub_array(0, mid);
@@ -67,22 +93,28 @@ namespace Gpseq {
 				try {
 					right.invoke();
 					left.join();
+					merge(left, right);
 				} catch (Error err) {
-					promise.set_exception(err);
-					return;
+					shared_result.error = (owned) err;
 				}
-				merge(left, right);
+			}
+
+			if (is_root && shared_result.ready) {
+				shared_result.bake_promise(promise);
+			} else {
 				promise.set_value(null);
 			}
 		}
 
 		private SortTask<G> copy (SubArray<G> array, SubArray<G> temp) {
-			var task = new SortTask<G>(array, temp, _comparator, threshold, max_depth, executor);
+			var task = new SortTask<G>.sub(
+					array, temp, _comparator,
+					this, threshold, max_depth, executor);
 			task.depth = depth + 1;
 			return task;
 		}
 
-		private void merge (SortTask<G> left, SortTask<G> right) {
+		private void merge (SortTask<G> left, SortTask<G> right) throws Error {
 			SubArray<G> ary0 = left._array;
 			SubArray<G> ary1 = right._array;
 
@@ -92,15 +124,11 @@ namespace Gpseq {
 				return; // already sorted
 			}
 
-			MergeTask<G> task = new MergeTask<G>(ary0, ary1, _temp,
-					_comparator, threshold, max_depth, executor);
+			MergeTask<G> task = new MergeTask<G>(
+					ary0, ary1, _temp, _comparator,
+					this, threshold, max_depth, executor);
 			task.depth = depth;
-			try {
-				task.invoke();
-			} catch (Error err) {
-				promise.set_exception(err);
-				return;
-			}
+			task.invoke();
 			_array.copy(0, _temp, 0, _array.size);
 		}
 
@@ -110,10 +138,12 @@ namespace Gpseq {
 			private SubArray<G> _output;
 			private Comparator<G> _comparator;
 
-			public MergeTask (SubArray<G> left, SubArray<G> right,
+			public MergeTask (
+					SubArray<G> left, SubArray<G> right,
 					SubArray<G> output, Comparator<G> comparator,
+					ForkJoinTask<void*>? parent,
 					int64 threshold, int max_depth, Executor executor) {
-				base(threshold, max_depth, executor);
+				base(parent, threshold, max_depth, executor);
 				_left = left;
 				_right = right;
 				_output = output;
@@ -121,12 +151,19 @@ namespace Gpseq {
 			}
 
 			private MergeTask<G> copy (SubArray<G> left, SubArray<G> right, SubArray<G> output) {
-				var task = new MergeTask<G>(left, right, output, _comparator, threshold, max_depth, executor);
+				var task = new MergeTask<G>(
+						left, right, output, _comparator,
+						this, threshold, max_depth, executor);
 				task.depth = depth + 1;
 				return task;
 			}
 
 			public override void compute () {
+				if (shared_result.ready || is_cancelled) {
+					promise.set_value(null);
+					return;
+				}
+
 				SubArray<G> left = _left;
 				SubArray<G> right = _right;
 				int len_l = left.size;
@@ -135,11 +172,22 @@ namespace Gpseq {
 				if (len_l == 0) {
 					promise.set_value(null);
 				} else if (len_l + len_r <= threshold || 0 <= max_depth <= depth) {
-					sequential_merge(left, right, _output);
+					try {
+						sequential_merge(left, right, _output);
+					} catch (Error err) {
+						shared_result.error = (owned) err;
+					}
 					promise.set_value(null);
 				} else {
 					int q = (len_l-1) >> 1;
-					int q2 = binary_search(left[q], right);
+					int q2;
+					try {
+						q2 = binary_search(left[q], right);
+					} catch (Error err) {
+						shared_result.error = (owned) err;
+						promise.set_value(null);
+						return;
+					}
 					int q3 = q + q2;
 					_output[q3] = left[q];
 
@@ -151,14 +199,13 @@ namespace Gpseq {
 						task2.invoke();
 						task.join();
 					} catch (Error err) {
-						promise.set_exception(err);
-						return;
+						shared_result.error = (owned) err;
 					}
 					promise.set_value(null);
 				}
 			}
 
-			private void sequential_merge (SubArray<G> left, SubArray<G> right, SubArray<G> output) {
+			private void sequential_merge (SubArray<G> left, SubArray<G> right, SubArray<G> output) throws Error {
 				int l = 0; // left index
 				int r = 0; // right index
 				int o = 0; // output index
@@ -180,7 +227,7 @@ namespace Gpseq {
 				}
 			}
 
-			private int binary_search (G find, SubArray<G> array) {
+			private int binary_search (G find, SubArray<G> array) throws Error {
 				int lo = 0;
 				int hi = array.size;
 				while (lo < hi) {

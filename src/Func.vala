@@ -1,4 +1,4 @@
-/* TeeMergeFunc.vala
+/* Func.vala
  *
  * Copyright (C) 2019  Космос Преда́ние (kosmospredanie@yandex.ru)
  *
@@ -19,8 +19,5 @@
  */
 
 namespace Gpseq {
-	/**
-	 * Merges the given results and returns the final result.
-	 */
-	public delegate A TeeMergeFunc<A> (Object[] results) throws Error;
+	public delegate void Func<G> (G g) throws Error;
 }

@@ -33,20 +33,20 @@ private class Gpseq.Collectors.SumFloatCollector<G> : Object, Collector<float?,A
 		}
 	}
 
-	public Accumulator create_accumulator () {
+	public Accumulator create_accumulator () throws Error {
 		return new Accumulator(0);
 	}
 
-	public void accumulate (G g, Accumulator a) {
+	public void accumulate (G g, Accumulator a) throws Error {
 		a.val += _mapper(g);
 	}
 
-	public Accumulator combine (Accumulator a, Accumulator b) {
+	public Accumulator combine (Accumulator a, Accumulator b) throws Error {
 		a.val += b.val;
 		return a;
 	}
 
-	public float? finish (Accumulator a) {
+	public float? finish (Accumulator a) throws Error {
 		return a.val;
 	}
 

@@ -51,33 +51,38 @@ namespace Gpseq {
 			return new DistinctContainer<G>.copy(this, spliterator);
 		}
 
-		public override void start (Seq seq) {
-			if (parent != null) parent.start(seq);
-			perform(seq);
+		public override Future<void*> start (Seq seq) {
+			var future = parent != null ? parent.start(seq) : Future.of<void*>(null);
 			set_parent(null);
-			_started = true;
+			return future.flat_map<void*>(value => {
+				return perform(seq);
+			});
 		}
 
-		private void perform (Seq seq) {
+		private Future<void*> perform (Seq seq) {
 			if (seq.is_parallel) {
-				perform_parallel(seq);
+				return perform_parallel(seq);
 			} else {
-				perform_sequential();
+				return perform_sequential();
 			}
 		}
 
-		private void perform_parallel (Seq seq) {
+		private Future<void*> perform_parallel (Seq seq) {
 			// TODO implement lock-free hash set/map
 			Set<G> seen = new HashSet<G>((owned) _hash, (owned) _equal);
 			Func<G> func = (g) => add_to_set(g, seen);
 			int64 len = estimated_size;
 			int64 threshold = seq.task_env.resolve_threshold(len, seq.task_env.executor.parallels);
 			int max_depth = seq.task_env.resolve_max_depth(len, seq.task_env.executor.parallels);
-			ForEachTask<G> task = new ForEachTask<G>(spliterator, func,
+			ForEachTask<G> task = new ForEachTask<G>(
+					func, spliterator, null,
 					threshold, max_depth, seq.task_env.executor);
 			task.fork();
-			task.join_quietly();
-			spliterator = new IteratorSpliterator<G>.from_collection(seen);
+			return task.future.map<void*>(value => {
+				spliterator = new IteratorSpliterator<G>.from_collection(seen);
+				_started = true;
+				return null;
+			});
 		}
 
 		private void add_to_set (G g, Set<G> seen) {
@@ -86,12 +91,14 @@ namespace Gpseq {
 			}
 		}
 
-		private void perform_sequential () {
+		private Future<void*> perform_sequential () {
 			// XXX optimize distinct() of sorted container
 			// sorted container doesn't need to store all seen elements but only
 			// a last seen element. the optimization needs to add 'attributes'
 			// flags property to spliterator.
 			consumer = new SequentialDistinctConsumer<G>((owned) _hash, (owned) _equal);
+			_started = true;
+			return Future.of<void*>(null);
 		}
 
 		public override bool is_size_known {

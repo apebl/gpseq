@@ -38,20 +38,20 @@ private class Gpseq.Collectors.FoldCollector<A,G> : Object, Collector<A,Accumula
 		}
 	}
 
-	public Accumulator<A> create_accumulator () {
+	public Accumulator<A> create_accumulator () throws Error {
 		return new Accumulator<A>(_identity);
 	}
 
-	public void accumulate (G g, Accumulator<A> a) {
+	public void accumulate (G g, Accumulator<A> a) throws Error {
 		a.val = _accumulator(g, a.val);
 	}
 
-	public Accumulator<A> combine (Accumulator<A> a, Accumulator<A> b) {
+	public Accumulator<A> combine (Accumulator<A> a, Accumulator<A> b) throws Error {
 		a.val = _combiner(a.val, b.val);
 		return a;
 	}
 
-	public A finish (Accumulator<A> a) {
+	public A finish (Accumulator<A> a) throws Error {
 		return a.val;
 	}
 

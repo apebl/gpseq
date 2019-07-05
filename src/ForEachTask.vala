@@ -24,58 +24,46 @@ namespace Gpseq {
 	/**
 	 * A fork-join task that performs a for-each operation.
 	 */
-	internal class ForEachTask<G> : ForkJoinTask<void*> {
-		private Spliterator<G> _spliterator;
+	internal class ForEachTask<G> : SpliteratorTask<void*,G> {
 		private unowned Func<G> _func;
 
 		/**
 		 * Creates a new for-each task.
-		 * @param spliterator a spliterator that may or may not be a container
+		 *
 		 * @param func a //non-interfering// function
+		 * @param spliterator a spliterator that may or may not be a container
+		 * @param parent the parent of the new task
 		 * @param threshold sequential computation threshold
 		 * @param max_depth max task split depth. unlimited if negative
 		 * @param executor an executor that will invoke the task
 		 */
-		public ForEachTask (Spliterator<G> spliterator, Func<G> func,
+		public ForEachTask (
+				Func<G> func,
+				Spliterator<G> spliterator, ForEachTask<G>? parent,
 				int64 threshold, int max_depth, Executor executor)
 		{
-			base(threshold, max_depth, executor);
-			_spliterator = spliterator;
+			base(spliterator, parent, threshold, max_depth, executor);
 			_func = func;
 		}
 
-		public override void compute () {
-			int64 size = _spliterator.estimated_size;
-			if (0 <= size <= threshold || 0 <= max_depth <= depth) {
-				sequential_compute();
-			} else {
-				Spliterator<G>? split = _spliterator.try_split();
-				if (split == null) {
-					sequential_compute();
-					return;
-				}
-				ForEachTask<G> left = copy(split);
-				left.fork();
-				ForEachTask<G> right = copy(_spliterator);
-
-				try {
-					right.invoke();
-					left.join();
-				} catch (Error err) {
-					promise.set_exception(err);
-					return;
-				}
-				promise.set_value(null);
+		protected override void* empty_result {
+			owned get {
+				assert_not_reached();
 			}
 		}
 
-		private void sequential_compute () {
-			_spliterator.each(_func);
-			promise.set_value(null);
+		protected override void* leaf_compute () throws Error {
+			spliterator.each(_func);
+			return null;
 		}
 
-		private ForEachTask<G> copy (Spliterator<G> spliterator) {
-			var task = new ForEachTask<G>(spliterator, _func, threshold, max_depth, executor);
+		protected override void* merge_results (owned void* left, owned void* right) throws Error {
+			return null;
+		}
+
+		protected override SpliteratorTask<void*,G> make_child (Spliterator<G> spliterator) {
+			var task = new ForEachTask<G>(_func,
+					spliterator, this, threshold, max_depth, executor);
 			task.depth = depth + 1;
 			return task;
 		}

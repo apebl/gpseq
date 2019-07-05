@@ -27,15 +27,15 @@ namespace Gpseq {
 	// XXX Implement a spliterator instead of an iterator for data-owned consumer?
 	internal class IterateIterator<G> : Object, Traversable<G>, Iterator<G> {
 		private G _cur;
-		private Predicate<G> _pred;
-		private MapFunc<G,G> _next;
+		private Gee.Predicate<G> _pred;
+		private Gee.MapFunc<G,G> _next;
 		private bool _first = true;
 		private bool _finish;
 
 		public IterateIterator (
 				owned G seed,
-				owned Predicate<G> pred,
-				owned MapFunc<G,G> next) {
+				owned Gee.Predicate<G> pred,
+				owned Gee.MapFunc<G,G> next) {
 			_cur = (owned) seed;
 			_pred = (owned) pred;
 			_next = (owned) next;

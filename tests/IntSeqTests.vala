@@ -106,14 +106,14 @@ public class IntSeqTests : SeqTests<int> {
 
 	private void test_iterate () {
 		int[] array = {};
-		Seq.iterate<int>(0, i => i < 10, i => ++i).foreach(i => array += i);
+		Seq.iterate<int>(0, i => i < 10, i => ++i).foreach(i => array += i).value;
 		assert(array.length == 10);
 		for (int i = 0; i < 10; i++) {
 			assert(array[i] == i);
 		}
 
 		int n = 0;
-		Seq.iterate<int>(0, i => false, i => i).foreach(i => n++);
+		Seq.iterate<int>(0, i => false, i => i).foreach(i => n++).value;
 		assert(n == 0);
 	}
 }

@@ -18,8 +18,6 @@
  * along with Gpseq.  If not, see <http://www.gnu.org/licenses/>.
  */
 
-using Gee;
-
 namespace Gpseq {
 	/**
 	 * A base class for fork-join tasks that run within a fork-join
@@ -28,25 +26,68 @@ namespace Gpseq {
 	 * Note. Instances of a fork-join task class are not reusable.
 	 */
 	public abstract class ForkJoinTask<G> : Object {
+		private unowned ForkJoinTask<G>? _parent;
+
 		private int64 _threshold;
 		private int _max_depth;
 		private int _depth;
 		private Executor _executor;
+
 		private Promise<G> _promise;
+		private SharedResult<G> _shared_result;
+		private AtomicBoolRef _cancelled;
 
 		/**
 		 * Creates a fork-join task.
+		 *
+		 * @param parent the parent of this task
 		 * @param threshold sequential computation threshold
 		 * @param max_depth max task split depth. unlimited if negative
 		 * @param executor an executor that will invoke the task
 		 */
-		public ForkJoinTask (int64 threshold, int max_depth, Executor executor)
+		public ForkJoinTask (
+				ForkJoinTask<G>? parent,
+				int64 threshold, int max_depth, Executor executor)
 			requires (threshold > 0)
 		{
+			_parent = parent;
 			_threshold = threshold;
 			_max_depth = max_depth;
 			_executor = executor;
 			_promise = new Promise<G>();
+			_shared_result = parent == null ? new SharedResult<G>() : parent._shared_result;
+			_cancelled = new AtomicBoolRef();
+		}
+
+		/**
+		 * Gets the parent of this task.
+		 */
+		public ForkJoinTask<G>? parent {
+			get {
+				return _parent;
+			}
+		}
+
+		/**
+		 * Gets the root task.
+		 */
+		public ForkJoinTask<G> root {
+			get {
+				unowned ForkJoinTask<G>? task = this;
+				while (task.parent != null) {
+					task = task.parent;
+				}
+				return task;
+			}
+		}
+
+		/**
+		 * Whether or not this task is root.
+		 */
+		public bool is_root {
+			get {
+				return _parent == null;
+			}
 		}
 
 		/**
@@ -107,16 +148,6 @@ namespace Gpseq {
 		}
 
 		/**
-		 * Whether or not this task has been completed or an exception has been
-		 * occurred.
-		 */
-		public bool is_done {
-			get {
-				return future.ready || future.exception != null;
-			}
-		}
-
-		/**
 		 * Blocks until this task is done, and returns the task result.
 		 * @throws Error an error occurred in the {@link future}
 		 */
@@ -135,11 +166,7 @@ namespace Gpseq {
 		 * @throws Error an error occurred in the {@link future}
 		 */
 		private G external_join () throws Error {
-			try {
-				return future.wait();
-			} catch (FutureError err) {
-				throw future.exception;
-			}
+			return future.wait();
 		}
 
 		/**
@@ -188,8 +215,109 @@ namespace Gpseq {
 		}
 
 		/**
-		 * Computes and sets {@link ForkJoinTask.future} value.
+		 * Gets the shared result.
+		 *
+		 * All tasks share the same shared result instance with their root task.
+		 */
+		public SharedResult<G> shared_result {
+			get {
+				return _shared_result;
+			}
+		}
+
+		/**
+		 * Marks this task as cancelled.
+		 */
+		protected void cancel () {
+			_cancelled.val = true;
+		}
+
+		/**
+		 * Whether or not this task have been cancelled.
+		 *
+		 * A task is considered cancelled if it or any of its ancestors have
+		 * been cancelled.
+		 */
+		protected bool is_cancelled {
+			get {
+				ForkJoinTask<G>? p = parent;
+				bool cancelled = _cancelled.val;
+				while (!cancelled && p != null) {
+					cancelled = p._cancelled.val;
+					p = p.parent;
+				}
+				return cancelled;
+			}
+		}
+
+		/**
+		 * Computes the task and sets a value or an error to the
+		 * {@link ForkJoinTask.future}.
 		 */
 		public abstract void compute ();
+
+		public class SharedResult<G> {
+			private const int INIT = 0;
+			private const int READY = 1;
+			private const int ERROR = 2;
+
+			private int _prestate;
+			private int _state;
+			private G? _value;
+			private Error? _error;
+
+			/**
+			 * Whether or not this is ready -- the value has been assigned or
+			 * an error has been set.
+			 */
+			public bool ready {
+				get {
+					return INIT != AtomicInt.get(ref _state);
+				}
+			}
+
+			public G value {
+				get {
+					assert( READY == AtomicInt.get(ref _state) );
+					return _value;
+				}
+				owned set {
+					if ( AtomicInt.compare_and_exchange(ref _prestate, INIT, READY) ) {
+						_value = (owned) value;
+						assert( AtomicInt.compare_and_exchange(ref _state, INIT, READY) );
+					}
+				}
+			}
+
+			public Error? error {
+				get {
+					assert( INIT != AtomicInt.get(ref _state) );
+					return _error;
+				}
+				owned set {
+					if ( AtomicInt.compare_and_exchange(ref _prestate, INIT, ERROR) ) {
+						_error = (owned) value;
+						assert( AtomicInt.compare_and_exchange(ref _state, INIT, ERROR) );
+					}
+				}
+			}
+
+			/**
+			 * Sets the value or error to the promise.
+			 *
+			 * The ownership of the value or error is transferred to the
+			 * promise, therefore this result should not be used after this
+			 * method called.
+			 */
+			public void bake_promise (Promise<G> promise) {
+				int state = AtomicInt.get(ref _state);
+				assert(state != INIT);
+				if (state == READY) {
+					promise.set_value((owned) _value);
+				} else {
+					promise.set_exception((owned) _error);
+				}
+			}
+		}
 	}
 }

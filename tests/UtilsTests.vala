@@ -50,7 +50,7 @@ public class UtilsTests : Gpseq.TestSuite {
 		array.add(11);
 		array.add(0);
 
-		parallel_sort<int>(array.data);
+		parallel_sort<int>(array.data).value;
 
 		assert( array[0] == 0 );
 		assert( array[1] == 11 );
@@ -67,7 +67,7 @@ public class UtilsTests : Gpseq.TestSuite {
 
 	private void test_parallel_sort_nullable_ints_few () {
 		int?[] array = {null, 1010, 99, 88, 77, 66, 55, 44, 33, 22, 11, 0, null};
-		parallel_sort<int?>(array, compare_nullable_int);
+		parallel_sort<int?>(array, (a, b) => compare_nullable_int(a, b)).value;
 
 		assert( array[0] == null );
 		assert( array[1] == null );
@@ -89,7 +89,7 @@ public class UtilsTests : Gpseq.TestSuite {
 		for (int i = 0; i < MANY_SORT_LENGTH; i++) {
 			array.add( Random.int_range(0, MANY_SORT_LENGTH) );
 		}
-		parallel_sort<int>(array.data);
+		parallel_sort<int>(array.data).value;
 		assert_sorted<int>(array.data);
 		assert_all_elements<int>(array.data, g => (0 <= g < MANY_SORT_LENGTH));
 	}
@@ -99,7 +99,7 @@ public class UtilsTests : Gpseq.TestSuite {
 		for (int i = 0; i < MANY_SORT_LENGTH; i++) {
 			array[i] = Random.int_range(0, MANY_SORT_LENGTH);
 		}
-		parallel_sort<int?>(array, compare_nullable_int);
+		parallel_sort<int?>(array, (a, b) => compare_nullable_int(a, b)).value;
 		assert_sorted<int?>(array, compare_nullable_int);
 		assert_all_elements<int?>(array, g => (0 <= g < MANY_SORT_LENGTH));
 	}
@@ -110,7 +110,7 @@ public class UtilsTests : Gpseq.TestSuite {
 			"six", "seven", "eight", "nine", "ten",
 			"eleven", "twelve", "0", "1", "10"
 		};
-		parallel_sort<string>(array);
+		parallel_sort<string>(array).value;
 
 		assert(array[0] == "0");
 		assert(array[1] == "1");
@@ -135,7 +135,7 @@ public class UtilsTests : Gpseq.TestSuite {
 			"six", "seven", "eight", "nine", "ten",
 			"eleven", "twelve", "0", "1", "10", null
 		};
-		parallel_sort<string?>(array);
+		parallel_sort<string?>(array).value;
 
 		assert(array[0] == null);
 		assert(array[1] == null);
@@ -162,7 +162,7 @@ public class UtilsTests : Gpseq.TestSuite {
 			"six", "seven", "eight", "nine", "ten",
 			"eleven", "twelve", "0", "1", "10"
 		};
-		parallel_sort<unowned string>(array);
+		parallel_sort<unowned string>(array).value;
 
 		assert(array[0] == "0");
 		assert(array[1] == "1");
@@ -197,7 +197,7 @@ public class UtilsTests : Gpseq.TestSuite {
 			int v1 = b.value;
 			return v0 < v1 ? -1 : (v0 == v1 ? 0 : 1);
 		};
-		parallel_sort<Wrapper<int>>(array.data, (a, b) => cmp(a, b));
+		parallel_sort<Wrapper<int>>(array.data, (a, b) => cmp(a, b)).value;
 		// g_ptr_array_sort_with_data is guaranteed to be a stable sort since glib 2.32
 		validation.sort_with_data((a, b) => cmp(a, b));
 		assert_array_equals<Wrapper<int>>(array.data, validation.data, (a, b) => a == b);

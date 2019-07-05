@@ -104,7 +104,7 @@ namespace Gpseq {
 			}
 		}
 
-		public bool try_advance (Func<G> consumer) {
+		public bool try_advance (Func<G> consumer) throws Error {
 			if (_first && _iterator.valid) {
 				consumer(_iterator.get());
 				_first = false;

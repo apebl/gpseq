@@ -50,7 +50,7 @@ namespace Gpseq {
 			}
 		}
 
-		public bool try_advance (Func<G> consumer) {
+		public bool try_advance (Func<G> consumer) throws Error {
 			if (estimated_size > 0) {
 				consumer(_array[++_index]);
 				return true;

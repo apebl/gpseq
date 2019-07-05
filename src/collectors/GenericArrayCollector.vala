@@ -27,22 +27,22 @@ private class Gpseq.Collectors.GenericArrayCollector<G> : Object, Collector<Gene
 		}
 	}
 
-	public Accumulator<G> create_accumulator () {
+	public Accumulator<G> create_accumulator () throws Error {
 		return new Accumulator<G>();
 	}
 
-	public void accumulate (G g, Accumulator<G> a) {
+	public void accumulate (G g, Accumulator<G> a) throws Error {
 		a.array.add(g);
 	}
 
-	public Accumulator<G> combine (Accumulator<G> a, Accumulator<G> b) {
+	public Accumulator<G> combine (Accumulator<G> a, Accumulator<G> b) throws Error {
 		for (int i = 0; i < b.array.length; i++) {
 			a.array.add(b.array[i]);
 		}
 		return a;
 	}
 
-	public GenericArray<G> finish (Accumulator<G> a) {
+	public GenericArray<G> finish (Accumulator<G> a) throws Error {
 		return a.array;
 	}
 

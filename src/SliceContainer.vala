@@ -54,16 +54,19 @@ namespace Gpseq {
 			return new SliceContainer<G>.copy(this, spliterator);
 		}
 
-		public override void start (Seq seq) {
-			if (parent != null) parent.start(seq);
-			set_up(seq);
+		public override Future<void*> start (Seq seq) {
+			var future = parent != null ? parent.start(seq) : Future.of<void*>(null);
 			set_parent(null);
-			_started = true;
+			return future.flat_map<void*>(value => {
+				return set_up(seq);
+			});
 		}
 
-		private void set_up (Seq seq) {
+		private Future<void*> set_up (Seq seq) {
 			if (!seq.is_parallel) {
 				spliterator = new SequentialSliceSpliterator<G>(spliterator, _skip, _limit);
+				_started = true;
+				return Future.of<void*>(null);
 			} else if (_ordered) {
 				// XXX perform unordered slice if the spliterator is unordered.
 				// this needs to add 'attributes' flags to spliterator.
@@ -72,14 +75,20 @@ namespace Gpseq {
 				int64 len = estimated_size;
 				int64 threshold = seq.task_env.resolve_threshold(len, seq.task_env.executor.parallels);
 				int max_depth = seq.task_env.resolve_max_depth(len, seq.task_env.executor.parallels);
-				OrderedSliceTask<G> task = new OrderedSliceTask<G>(spliterator, null,
-						_skip, _limit, threshold, max_depth, seq.task_env.executor);
+				OrderedSliceTask<G> task = new OrderedSliceTask<G>(
+						_skip, _limit, spliterator, null,
+						threshold, max_depth, seq.task_env.executor);
 				task.fork();
-				task.join_quietly();
-				ArrayBuffer<G> result = task.shared_result.value;
-				spliterator = new ArrayBufferSpliterator<G>(result, 0, result.size);
+				return task.future.map<void*>(value => {
+					ArrayBuffer<G> result = value;
+					spliterator = new ArrayBufferSpliterator<G>(result, 0, result.size);
+					_started = true;
+					return null;
+				});
 			} else {
 				spliterator = new UnorderedSliceSpliterator<G>(spliterator, _skip, _limit);
+				_started = true;
+				return Future.of<void*>(null);
 			}
 		}
 

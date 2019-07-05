@@ -22,5 +22,5 @@ namespace Gpseq {
 	/**
 	 * Combines two values and returns the result.
 	 */
-	public delegate G CombineFunc<G> (owned G a, owned G b);
+	public delegate G CombineFunc<G> (owned G a, owned G b) throws Error;
 }

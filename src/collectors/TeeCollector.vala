@@ -42,24 +42,24 @@ private class Gpseq.Collectors.TeeCollector<A,G> : Object, Collector<A,Accumulat
 		}
 	}
 
-	public Accumulator<G> create_accumulator () {
+	public Accumulator<G> create_accumulator () throws Error {
 		return new Accumulator<G>(_downstreams);
 	}
 
-	public void accumulate (G g, Accumulator<G> a) {
+	public void accumulate (G g, Accumulator<G> a) throws Error {
 		for (int i = 0; i < _downstreams.length; i++) {
 			_downstreams[i].accumulate(g, a.list[i]);
 		}
 	}
 
-	public Accumulator<G> combine (Accumulator<G> a, Accumulator<G> b) {
+	public Accumulator<G> combine (Accumulator<G> a, Accumulator<G> b) throws Error {
 		for (int i = 0; i < _downstreams.length; i++) {
 			a.list[i] = _downstreams[i].combine(a.list[i], b.list[i]);
 		}
 		return a;
 	}
 
-	public A finish (Accumulator<G> a) {
+	public A finish (Accumulator<G> a) throws Error {
 		for (int i = 0; i < _downstreams.length; i++) {
 			a.list[i] = _downstreams[i].finish(a.list[i]);
 		}
@@ -69,7 +69,7 @@ private class Gpseq.Collectors.TeeCollector<A,G> : Object, Collector<A,Accumulat
 	public class Accumulator<G> : Object {
 		public Object[] list;
 
-		public Accumulator (Collector<Object,Object,G>[] downstreams) {
+		public Accumulator (Collector<Object,Object,G>[] downstreams) throws Error {
 			list = new Object[downstreams.length];
 			for (int i = 0; i < list.length; i++) {
 				list[i] = downstreams[i].create_accumulator();
