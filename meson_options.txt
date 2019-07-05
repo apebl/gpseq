@@ -1,15 +1,15 @@
-option('build_benchmark',
+option('benchmark',
 	type: 'boolean',
 	value: false,
 	description: 'Whether to build benchmark')
 
-option('build_doc',
+option('docs',
 	type: 'array',
 	choices: ['valadoc', 'gtkdoc'],
 	value: [],
 	description: 'Documentations that will be built')
 
-option('build_typelib',
+option('typelib',
 	type: 'boolean',
 	value: false,
 	description: 'Whether to build typelib')

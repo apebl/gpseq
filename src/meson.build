@@ -128,7 +128,7 @@ pkg.generate(libraries: gpseq_lib,
 	description: project_desc,
 	subdirs: libname)
 
-if get_option('build_typelib')
+if get_option('typelib')
 	g_ir_compiler = find_program('g-ir-compiler')
 	typelib_cmd = [g_ir_compiler,
 		'--shared-library=' + gpseq_lib.full_path().split('/')[-1],

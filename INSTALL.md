@@ -23,11 +23,11 @@ meson _build --buildtype=release
 ninja -C _build
 ```
 
-In order to build documentations, add the `-Dbuild_doc` option.
+In order to build documentations, add the `-Ddocs` option.
 
-- Build valadoc: `-Dbuild_doc=valadoc`
-- Build gtkdoc: `-Dbuild_doc=gtkdoc`
-- Build both: `-Dbuild_doc=valadoc,gtkdoc`
+- Build valadoc: `-Ddocs=valadoc`
+- Build gtkdoc: `-Ddocs=gtkdoc`
+- Build both: `-Ddocs=valadoc,gtkdoc`
 
 ### Test
 

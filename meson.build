@@ -35,11 +35,11 @@ vala_args = [
 
 subdir('src')
 subdir('tests')
-if get_option('build_benchmark')
+if get_option('benchmark')
 	subdir('benchmark')
 endif
 
-if get_option('build_doc').length() > 0
+if get_option('docs').length() > 0
 	valadoc = find_program('valadoc')
 	doc_cmd_base = [valadoc,
 		'--package-name=' + libname,
@@ -53,7 +53,7 @@ if get_option('build_doc').length() > 0
 		'@INPUT@'
 	]
 
-	if get_option('build_doc').contains('valadoc')
+	if get_option('docs').contains('valadoc')
 		valadoc_cmd = [doc_cmd_base, '--doclet=html']
 		custom_target('valadoc', command: valadoc_cmd,
 			input: sources,
@@ -63,7 +63,7 @@ if get_option('build_doc').length() > 0
 			install_dir: get_option('datadir') / 'doc' / libname)
 	endif
 
-	if get_option('build_doc').contains('gtkdoc')
+	if get_option('docs').contains('gtkdoc')
 		gtkdoc_cmd = [doc_cmd_base,
 			'--doclet=gtkdoc',
 			'--doclet-arg=' + (meson.current_build_dir() / 'src' / (meson.project_name() + '.h'))
