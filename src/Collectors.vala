@@ -380,7 +380,7 @@ namespace Gpseq {
 		 */
 		public Collector<Map<bool,V>,Object,G> partition_with<V,G> (
 				owned Predicate<G> pred, Collector<V,Object,G> downstream) {
-			return new PartitionCollector<G,V>((owned) pred, downstream);
+			return new PartitionCollector<V,G>((owned) pred, downstream);
 		}
 
 		/**
