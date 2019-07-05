@@ -81,7 +81,7 @@ namespace Gpseq {
 		}
 
 		public new void set (int index, owned G item) {
-			_data[index] = item;
+			_data[index] = (owned) item;
 		}
 
 		/**
