@@ -38,7 +38,7 @@ void benchmark_fmf () {
 			Seq.of_generic_array<int>(array)
 				.filter(g => g % 4 == 0)
 				.map<int>(g => g * 726)
-				.fold<int>((g, a) => g + a, (a, b) => a + b, 0);
+				.fold<int>((g, a) => g + a, (a, b) => a + b, 0).value;
 		});
 
 		r.report("parallel", s => {
@@ -48,7 +48,7 @@ void benchmark_fmf () {
 				.parallel()
 				.filter(g => g % 4 == 0)
 				.map<int>(g => g * 726)
-				.fold<int>((g, a) => g + a, (a, b) => a + b, 0);
+				.fold<int>((g, a) => g + a, (a, b) => a + b, 0).value;
 		});
 	}).print().save_data("fmf.dat");
 }

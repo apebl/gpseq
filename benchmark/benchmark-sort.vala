@@ -52,7 +52,7 @@ void benchmark_sort () {
 		r.report("Gpseq.parallel_sort", s => {
 			var array = create_rand_generic_int_array(length);
 			s.start();
-			parallel_sort<int>(array.data);
+			parallel_sort<int>(array.data).value;
 		});
 	}).print().save_data("sort.dat");
 }
