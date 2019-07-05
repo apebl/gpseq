@@ -52,9 +52,10 @@ private class Gpseq.Collectors.PartitionCollector<V,G> : Object, Collector<Map<b
 		return a;
 	}
 
-	public Map<bool,V> finish (Map<bool,Object> a) {
-		a[true] = (Object)_downstream.finish(a[true]);
-		a[false] = (Object)_downstream.finish(a[false]);
-		return (Map<bool,V>)a;
+	public Map<bool,V> finish (Map<bool,Object> a) throws Error {
+		var map = new HashMap<bool,V>();
+		map[true] = _downstream.finish(a[true]);
+		map[false] = _downstream.finish(a[false]);
+		return map;
 	}
 }
