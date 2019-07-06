@@ -8,18 +8,49 @@ Gpseq is a GObject utility library providing parallel data processing.
 ```vala
 using Gpseq;
 
-// main ()
-string[] array = {"dog", "cat", "pig", "boar", "bear"};
-Seq.of_array<string>(array)
-	.parallel()
-	.filter(g => g.length == 3)
-	.map<string>(g => g.up())
-	.foreach(g => print("%s\n", g));
+void main () {
+	string[] array = {"dog", "cat", "pig", "boar", "bear"};
+	Seq.of_array<string>(array)
+		.parallel()
+		.filter(g => g.length == 3)
+		.map<string>(g => g.up())
+		.foreach(g => print("%s\n", g))
+		.wait(); // Gpseq.Future.wait() throws Error
+}
 
-// (unordered) output:
+// (possibly unordered) output:
 // DOG
 // CAT
 // PIG
+```
+
+```vala
+using Gpseq;
+using Gpseq.Collectors;
+
+void main () {
+	var list = Seq.iterate<int>(0, i => i < 100, i => ++i)
+		.parallel()
+		.filter(i => i%2 == 0)
+		.limit(5)
+		.collect( to_list<int>() )
+		.value; // Gpseq.Future.value
+	Seq.of_list<int>(list).foreach(g => print("%d ", g));
+}
+
+// output:
+// 0 2 4 6 8
+```
+
+```vala
+Seq.iterate<int>(0, i => i < 100, i => ++i)
+	.parallel()
+	.foreach(i => {
+		if (i == 42) {
+			throw new OptionalError.NOT_PRESENT("%d? Oops!", i);
+		}
+	}).wait();
+// uncaught error: 42? Oops!
 ```
 
 See [valadoc](https://gitlab.com/kosmospredanie/gpseq/-/jobs/artifacts/master/file/valadoc/index.html?job=build)
