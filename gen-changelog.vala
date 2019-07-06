@@ -10,7 +10,7 @@
 const string REPOSITORY = "https://gitlab.com/kosmospredanie/gpseq";
 const string TIME_FORMAT = "%Y-%m-%d";
 const string[] TYPES = {
-	"feat", "fix", "refactor", "improvement", "deps", "revert"
+	"feat", "fix", "refactor", "perf", "deps", "revert"
 };
 
 void main () {
