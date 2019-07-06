@@ -478,7 +478,7 @@ namespace Gpseq {
 		 *
 		 * This is a terminal operation.
 		 *
-		 * @return the count of elements
+		 * @return a future of the count of elements
 		 */
 		public Future<int64?> count () {
 			assert(_is_closed == false);
@@ -542,8 +542,8 @@ namespace Gpseq {
 		 * This is a short-circuiting terminal operation.
 		 *
 		 * @param pred a //non-interfering// and //stateless// predicate
-		 * @return true if either all elements match the given predicate or the
-		 * seq is empty, otherwise false
+		 * @return a future of the result -- true if either all elements match
+		 * the given predicate or the seq is empty, otherwise false
 		 */
 		public Future<bool?> all_match (Predicate<G> pred) {
 			assert(_is_closed == false);
@@ -583,8 +583,8 @@ namespace Gpseq {
 		 * This is a short-circuiting terminal operation.
 		 *
 		 * @param pred a //non-interfering// and //stateless// predicate
-		 * @return true if any elements match the given predicate, otherwise
-		 * false
+		 * @return a future of the result -- true if any elements match the
+		 * given predicate, otherwise false
 		 */
 		public Future<bool?> any_match (Predicate<G> pred) {
 			assert(_is_closed == false);
@@ -624,8 +624,8 @@ namespace Gpseq {
 		 * This is a short-circuiting terminal operation.
 		 *
 		 * @param pred a //non-interfering// and //stateless// predicate
-		 * @return true if either no elements match the given predicate or the
-		 * seq is empty, otherwise false
+		 * @return a future of the result -- true if either no elements match
+		 * the given predicate or the seq is empty, otherwise false
 		 */
 		public Future<bool?> none_match (Predicate<G> pred) {
 			return all_match(g => {
@@ -640,8 +640,8 @@ namespace Gpseq {
 		 * This is a short-circuiting terminal operation.
 		 *
 		 * @param pred a //non-interfering// and //stateless// predicate
-		 * @return an optional describing the any element that matches the
-		 * given, or an empty optional if not found.
+		 * @return a future of an optional describing the any element that
+		 * matches the given, or an empty optional if not found.
 		 */
 		public Future<Optional<G>> find_any (Predicate<G> pred) {
 			assert(_is_closed == false);
@@ -675,8 +675,8 @@ namespace Gpseq {
 		 * This is a short-circuiting terminal operation.
 		 *
 		 * @param pred a //non-interfering// and //stateless// predicate
-		 * @return an optional describing the first element that matches the
-		 * given, or an empty optional if not found.
+		 * @return a future of an optional describing the first element that
+		 * matches the given, or an empty optional if not found.
 		 */
 		public Future<Optional<G>> find_first (Predicate<G> pred) {
 			assert(_is_closed == false);
@@ -894,7 +894,7 @@ namespace Gpseq {
 		 * @param combiner an //associative//, //non-interfering//, and
 		 * //stateless// function for combining two values
 		 * @param identity the identity value for the combiner function
-		 * @return the result of the reduction
+		 * @return a future of the result of the reduction
 		 */
 		public Future<A> fold<A> (FoldFunc<A,G> accumulator, CombineFunc<A> combiner, A identity) {
 			assert(_is_closed == false);
@@ -948,7 +948,7 @@ namespace Gpseq {
 		 *
 		 * @param accumulator an //associative//, //non-interfering//, and
 		 * //stateless// function for combining two values
-		 * @return the result of the reduction
+		 * @return a future of the result of the reduction
 		 */
 		public Future<Optional<G>> reduce (CombineFunc<G> accumulator) {
 			assert(_is_closed == false);
@@ -1025,8 +1025,8 @@ namespace Gpseq {
 		 * @param compare a //non-interfering// and //stateless// compare
 		 * function. if not specified, {@link Gee.Functions.get_compare_func_for}
 		 * is used to get a proper function
-		 * @return an optional describing the maximum element, or an empty
-		 * optional if the seq is empty
+		 * @return a future of an optional describing the maximum element, or
+		 * an empty optional if the seq is empty
 		 */
 		public Future<Optional<G>> max (owned CompareFunc<G>? compare = null) {
 			if (compare == null) {
@@ -1049,8 +1049,8 @@ namespace Gpseq {
 		 * @param compare a //non-interfering// and //stateless// compare
 		 * function. if not specified, {@link Gee.Functions.get_compare_func_for}
 		 * is used to get a proper function
-		 * @return an optional describing the minimum element, or an empty
-		 * optional if the seq is empty
+		 * @return a future of an optional describing the minimum element, or
+		 * an empty optional if the seq is empty
 		 */
 		public Future<Optional<G>> min (owned CompareFunc<G>? compare = null) {
 			if (compare == null) {
@@ -1095,6 +1095,8 @@ namespace Gpseq {
 		 * This is a terminal operation.
 		 *
 		 * @param f a //non-interfering// function
+		 * @return a future that will be completed with null, or the error if
+		 * an error occurs during the operation
 		 */
 		public Future<void*> foreach (owned Func<G> f) {
 			assert(_is_closed == false);
@@ -1129,7 +1131,7 @@ namespace Gpseq {
 		 * This is a terminal operation.
 		 *
 		 * @param collector the collector describing the reduction
-		 * @return the result of the reduction
+		 * @return a future of the result of the reduction
 		 * @see Collector
 		 */
 		public Future<R> collect<R,A> (Collector<R,A,G> collector) {
@@ -1169,7 +1171,7 @@ namespace Gpseq {
 		 * This is a terminal operation.
 		 *
 		 * @param collector the collector describing the reduction
-		 * @return the result of the reduction
+		 * @return a future of the result of the reduction
 		 * @see Collector
 		 */
 		public Future<R> collect_ordered<R,A> (Collector<R,A,G> collector) {
@@ -1225,7 +1227,7 @@ namespace Gpseq {
 		 * This is a terminal operation.
 		 *
 		 * @param classifier a classifier function mapping elements to keys
-		 * @return the result map
+		 * @return a future of the result map
 		 * @see Collectors.group_by
 		 */
 		public Future< Map<K,Gee.List<G>> > group_by<K> (owned MapFunc<K,G> classifier) {
@@ -1249,7 +1251,7 @@ namespace Gpseq {
 		 * This is a terminal operation.
 		 *
 		 * @param pred a predicate function
-		 * @return the result map
+		 * @return a future of the result map
 		 * @see Collectors.partition
 		 */
 		public Future< Map<bool,Gee.List<G>> > partition (owned Predicate<G> pred) {
