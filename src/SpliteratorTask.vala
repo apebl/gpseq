@@ -124,18 +124,24 @@ namespace Gpseq {
 		/**
 		 * Gets an empty result.
 		 *
-		 * When the {@link shared_result} is already ready, this task has been
-		 * cancelled, this task throws an error and the task is not root, or
-		 * a class that inherits this class needs, the empty result is used and
-		 * set to the promise of this task.
+		 * When the {@link shared_result} is already ready without exceptions,
+		 * this task has been cancelled, or a class that inherits this class
+		 * needs, the empty result is used and set to the promise of this task.
 		 */
 		protected abstract R empty_result {
 			owned get;
 		}
 
 		protected override void compute () {
-			if (shared_result.ready || is_cancelled) {
-				set_value(empty_result);
+			if (shared_result.ready) {
+				if (shared_result.error == null) {
+					promise.set_value(empty_result);
+				} else {
+					promise.set_exception(shared_result.error);
+				}
+				return;
+			} else if (is_cancelled) {
+				promise.set_value(empty_result);
 				return;
 			}
 
@@ -213,12 +219,10 @@ namespace Gpseq {
 
 		private void set_error (owned Error? error) {
 			_spliterator = null;
-			if (is_root) {
-				promise.set_exception((owned) error);
-			} else {
-				shared_result.error = (owned) error;
-				promise.set_value(empty_result);
+			if (!is_root && !shared_result.ready) {
+				shared_result.error = error;
 			}
+			promise.set_exception((owned) error);
 		}
 	}
 }
