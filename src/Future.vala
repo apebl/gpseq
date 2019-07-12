@@ -32,7 +32,6 @@ namespace Gpseq {
 		public delegate A MapFunc<A,G> (G value) throws Error;
 		public delegate unowned A LightMapFunc<A,G> (G value) throws Error;
 		public delegate C ZipFunc<A,B,C> (A a, B b) throws Error;
-		public delegate void CallbackFunc ();
 
 		public static Future<G> of<G> (owned G value) {
 			var promise = new Promise<G>();

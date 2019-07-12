@@ -193,10 +193,12 @@ namespace Gpseq {
 				EXCEPTION
 			}
 
-			private struct CallbackFuncObject {
-				public Gpseq.Future.CallbackFunc func;
+			private delegate void CallbackFunc ();
 
-				public CallbackFuncObject (owned Gpseq.Future.CallbackFunc func) {
+			private struct CallbackFuncObject {
+				public CallbackFunc func;
+
+				public CallbackFuncObject (owned CallbackFunc func) {
 					this.func = (owned) func;
 				}
 			}
