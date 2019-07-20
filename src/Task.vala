@@ -1,4 +1,4 @@
-/* Executor.vala
+/* Task.vala
  *
  * Copyright (C) 2019  Космос Преда́ние (kosmospredanie@yandex.ru)
  *
@@ -20,19 +20,31 @@
 
 namespace Gpseq {
 	/**
-	 * An object that executes tasks. the execution is performed sequentially
-	 * or in parallel, depending on the executor implementation.
+	 * A task that will be executed by a {@link Executor}.
+	 *
+	 * Note. Tasks are not reusable.
 	 */
-	public interface Executor : Object {
+	public interface Task<G> : Object {
 		/**
-		 * Submits a task.
-		 * @param task a task to execute
+		 * The future result of this task.
 		 */
-		public abstract void submit (Task task);
+		public abstract Future<G> future { get; }
 
 		/**
-		 * The (maximal) number of threads.
+		 * Computes the task and sets a value or an error to the
+		 * {@link Task.future}.
 		 */
-		public abstract int parallels { get; }
+		public abstract void compute ();
+
+		/**
+		 * Immediately performs the task computation.
+		 *
+		 * @throws Error an error occurred in the {@link future}
+		 */
+		public virtual void invoke () throws Error {
+			compute();
+			Error? err = future.exception;
+			if (err != null) throw err;
+		}
 	}
 }

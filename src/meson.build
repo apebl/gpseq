@@ -66,6 +66,7 @@ sources = files(
 	'Supplier.vala',
 	'SupplierSpliterator.vala',
 	'SupplyFunc.vala',
+	'Task.vala',
 	'TaskEnv.vala',
 	'TeeMergeFunc.vala',
 	'ThreadFactory.vala',

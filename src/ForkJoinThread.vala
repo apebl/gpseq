@@ -22,7 +22,7 @@ using Gee;
 
 namespace Gpseq {
 	/**
-	 * Fork-join worker thread.
+	 * A worker thread.
 	 */
 	public class ForkJoinThread : Object {
 		/**
@@ -208,20 +208,20 @@ namespace Gpseq {
 		 * Queues the given task into the work queue of this thread.
 		 * @param task a task to queue.
 		 */
-		public void push_task (ForkJoinTask task) {
+		public void push_task (Task task) {
 			_work_queue.offer_tail(task);
 		}
 
 		/**
 		 * Loop for task join.
 		 */
-		internal void task_join (ForkJoinTask task) throws Error {
+		internal void task_join (Task task) throws Error {
 			while (true) {
 				if (_pool.is_terminating_started) return;
 				if (task.future.ready) return;
 				balancer.tick(this, true);
 
-				ForkJoinTask? pop = work_queue.poll_tail();
+				Task? pop = work_queue.poll_tail();
 				if (pop != null) {
 					pop.invoke(); // can throw an Error
 					balancer.computed(this, true);

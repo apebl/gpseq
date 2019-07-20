@@ -20,7 +20,7 @@
 
 namespace Gpseq {
 	/**
-	 * An object to configure the environment of execution of fork-join tasks
+	 * An object to configure the environment of execution of tasks
 	 */
 	public abstract class TaskEnv : Object {
 		private static TaskEnv? default_task_env;
@@ -28,8 +28,8 @@ namespace Gpseq {
 		/**
 		 * Gets the default task environment.
 		 *
-		 * The default task environment is constructed when this method is called
-		 * initially, if has not yet been set.
+		 * The default task environment is constructed when this method is
+		 * called initially, if has not yet been set.
 		 *
 		 * @return the default task environment
 		 */

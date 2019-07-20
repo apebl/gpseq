@@ -20,12 +20,11 @@
 
 namespace Gpseq {
 	/**
-	 * A base class for fork-join tasks that run within a fork-join
-	 * pool.
+	 * A base class for fork-join tasks that run within a fork-join pool.
 	 *
-	 * Note. Instances of a fork-join task class are not reusable.
+	 * Note. Fork-join tasks are not reusable.
 	 */
-	public abstract class ForkJoinTask<G> : Object {
+	public abstract class ForkJoinTask<G> : Object, Task<G> {
 		private unowned ForkJoinTask<G>? _parent;
 
 		private int64 _threshold;
@@ -185,16 +184,6 @@ namespace Gpseq {
 
 		/**
 		 * Immediately performs the task computation.
-		 * @throws Error an error occurred in the {@link future}
-		 */
-		public void invoke () throws Error { // no return to avoid generic
-			compute();
-			Error? err = future.exception;
-			if (err != null) throw err;
-		}
-
-		/**
-		 * Immediately performs the task computation.
 		 *
 		 * This method calls {@link GLib.error} instead of throwing a
 		 * {@link GLib.Error}.
@@ -251,8 +240,7 @@ namespace Gpseq {
 		}
 
 		/**
-		 * Computes the task and sets a value or an error to the
-		 * {@link ForkJoinTask.future}.
+		 * {@inheritDoc}
 		 */
 		public abstract void compute ();
 

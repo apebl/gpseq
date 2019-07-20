@@ -72,12 +72,12 @@ namespace Gpseq {
 			return max_queue_log_capacity;
 		}
 
-		private CircularArray<ForkJoinTask> _array;
+		private CircularArray<Task> _array;
 		private int _head; // AtomicInt
 		private int _tail;
 
 		public WorkQueue () {
-			_array = new CircularArray<ForkJoinTask>( get_initial_queue_log_capacity() );
+			_array = new CircularArray<Task>( get_initial_queue_log_capacity() );
 		}
 
 		public bool is_empty {
@@ -99,7 +99,7 @@ namespace Gpseq {
 			}
 		}
 
-		private void grow_array (CircularArray<ForkJoinTask> current, int tail, int head) {
+		private void grow_array (CircularArray<Task> current, int tail, int head) {
 			int new_log_len = current.log_length + 1;
 			if (new_log_len > get_max_queue_log_capacity()) {
 				error( "Queue capacity exceeded: %d > %d",
@@ -107,9 +107,9 @@ namespace Gpseq {
 						(1 << get_max_queue_log_capacity()) );
 			}
 
-			CircularArray<ForkJoinTask> new_array = new CircularArray<ForkJoinTask>(new_log_len);
+			CircularArray<Task> new_array = new CircularArray<Task>(new_log_len);
 			for (int i = head; i < tail; i++) {
-				ForkJoinTask cmp = current[i];
+				Task cmp = current[i];
 				if (compare_and_exchange(current, i, cmp, null)) {
 					new_array[i] = cmp;
 					cmp.unref();
@@ -121,10 +121,10 @@ namespace Gpseq {
 		/**
 		 * Note. Called by owner thread
 		 */
-		public void offer_tail (ForkJoinTask item) {
+		public void offer_tail (Task item) {
 			int old_tail = _tail;
 			int old_head = AtomicInt.get(ref _head);
-			CircularArray<ForkJoinTask> cur_array = _array;
+			CircularArray<Task> cur_array = _array;
 
 			// resize
 			int size = old_tail - old_head;
@@ -139,8 +139,8 @@ namespace Gpseq {
 		/**
 		 * Note. Called by owner thread
 		 */
-		public ForkJoinTask? poll_tail () {
-			CircularArray<ForkJoinTask> cur_array = _array;
+		public Task? poll_tail () {
+			CircularArray<Task> cur_array = _array;
 			int t = _tail - 1;
 			int old_head = AtomicInt.get(ref _head);
 
@@ -149,11 +149,11 @@ namespace Gpseq {
 				return null;
 			}
 
-			ForkJoinTask* oldval = (ForkJoinTask*) *cur_array.get_pointer(t);
+			Task* oldval = (Task*) *cur_array.get_pointer(t);
 			if (oldval != null) {
 				if (compare_and_exchange(cur_array, t, oldval, null)) {
 					_tail = t;
-					ForkJoinTask? result = (ForkJoinTask?) oldval;
+					Task? result = (Task?) oldval;
 					result.unref();
 					return result;
 				}
@@ -164,19 +164,19 @@ namespace Gpseq {
 		/**
 		 * Note. Called by non-owner threads
 		 */
-		public ForkJoinTask? poll_head () {
+		public Task? poll_head () {
 			int old_head = AtomicInt.get(ref _head); // never decreases
 			int old_tail = _tail;
-			CircularArray<ForkJoinTask> cur_array = _array;
+			CircularArray<Task> cur_array = _array;
 
 			int size = old_tail - old_head;
 			if (size <= 0) return null;
 
-			ForkJoinTask* oldval = (ForkJoinTask*) *cur_array.get_pointer(old_head);
+			Task* oldval = (Task*) *cur_array.get_pointer(old_head);
 			if (oldval != null) {
 				if (compare_and_exchange(cur_array, old_head, oldval, null)) {
 					AtomicInt.set(ref _head, old_head + 1);
-					ForkJoinTask? result = (ForkJoinTask?) oldval;
+					Task? result = (Task?) oldval;
 					result.unref();
 					return result;
 				}
@@ -184,8 +184,8 @@ namespace Gpseq {
 			return null;
 		}
 
-		private bool compare_and_exchange (CircularArray<ForkJoinTask> array,
-				int idx, ForkJoinTask* oldval, ForkJoinTask* newval) {
+		private bool compare_and_exchange (CircularArray<Task> array,
+				int idx, Task* oldval, Task* newval) {
 			return AtomicPointer.compare_and_exchange(array.get_pointer(idx), oldval, newval);
 		}
 

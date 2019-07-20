@@ -22,7 +22,7 @@ using Gee;
 
 namespace Gpseq {
 	/**
-	 * A thread pool for executing fork-join tasks in parallel.
+	 * A thread pool for executing tasks in parallel.
 	 */
 	public class ForkJoinPool : Object, Executor {
 		private static ThreadFactory? default_factory = null;
@@ -159,7 +159,7 @@ namespace Gpseq {
 		 *
 		 * @param task a task to execute
 		 */
-		public void submit (ForkJoinTask task) {
+		public void submit (Task task) {
 			if (is_terminating_started) return;
 			ForkJoinThread? thread = ForkJoinThread.self();
 			if (thread != null && thread.pool == this) {
@@ -174,7 +174,7 @@ namespace Gpseq {
 		 * Submits a task to the submission queue of this pool.
 		 * @param task a task to submit
 		 */
-		private void add_submission (ForkJoinTask task) {
+		private void add_submission (Task task) {
 			lock (_submission_queue) {
 				_submission_queue.offer_tail(task);
 			}
@@ -208,7 +208,7 @@ namespace Gpseq {
 			while (true) {
 				if (is_terminating_started) return;
 				bal.tick(thread, false);
-				ForkJoinTask? pop = thread.work_queue.poll_tail();
+				Task? pop = thread.work_queue.poll_tail();
 				if (pop != null) {
 					pop.compute();
 					bal.computed(thread, false);

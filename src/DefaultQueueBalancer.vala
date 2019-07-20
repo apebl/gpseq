@@ -70,7 +70,7 @@ namespace Gpseq {
 				if (size > 1) size = size >> 1;
 				bool taken = false;
 				while (size > 0) {
-					ForkJoinTask? task = vq.poll_head();
+					Task? task = vq.poll_head();
 					if (task == null) break;
 					sq.offer_tail(task);
 					size--;
@@ -84,7 +84,7 @@ namespace Gpseq {
 		private void try_drain_submissions (ForkJoinThread thread) {
 			ForkJoinPool pool = thread.pool;
 			for (int i = 0; i < DRAIN_CAPACITY; i++) {
-				ForkJoinTask? task = pool.submission_queue.poll_head();
+				Task? task = pool.submission_queue.poll_head();
 				if (task == null) break;
 				thread.work_queue.offer_tail(task);
 			}
