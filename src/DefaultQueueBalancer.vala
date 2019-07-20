@@ -82,7 +82,7 @@ namespace Gpseq {
 		}
 
 		private void try_drain_submissions (WorkerThread thread) {
-			ForkJoinPool pool = thread.pool;
+			WorkerPool pool = thread.pool;
 			for (int i = 0; i < DRAIN_CAPACITY; i++) {
 				Task? task = pool.submission_queue.poll_head();
 				if (task == null) break;

@@ -78,7 +78,7 @@ namespace Gpseq {
 		}
 
 		private Thread<void*>? _thread = null; // also used to lock
-		private unowned ForkJoinPool _pool;
+		private unowned WorkerPool _pool;
 		private int _id; // index in pool
 		private string _name;
 		private WorkQueue _work_queue;
@@ -87,9 +87,9 @@ namespace Gpseq {
 
 		/**
 		 * Creates a new worker thread.
-		 * @param pool a fork-join pool
+		 * @param pool a worker pool
 		 */
-		public WorkerThread (ForkJoinPool pool) {
+		public WorkerThread (WorkerPool pool) {
 			_pool = pool;
 			_id = pool.next_thread_id();
 			_name = pool.thread_name(_id);
@@ -114,9 +114,9 @@ namespace Gpseq {
 		}
 
 		/**
-		 * The fork-join pool to which this thread belongs.
+		 * The worker pool to which this thread belongs.
 		 */
-		public ForkJoinPool pool {
+		public WorkerPool pool {
 			get {
 				return _pool;
 			}

@@ -24,9 +24,9 @@ namespace Gpseq {
 	 */
 	public interface ThreadFactory : Object {
 		/**
-		 * @param pool a fork-join thread pool
+		 * @param pool a worker thread pool
 		 * @return a new thread that has not yet started
 		 */
-		public abstract WorkerThread create_thread (ForkJoinPool pool);
+		public abstract WorkerThread create_thread (WorkerPool pool);
 	}
 }

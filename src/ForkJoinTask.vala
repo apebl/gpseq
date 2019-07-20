@@ -20,7 +20,7 @@
 
 namespace Gpseq {
 	/**
-	 * A base class for fork-join tasks that run within a fork-join pool.
+	 * A base class for fork-join tasks that run within a worker pool.
 	 *
 	 * Note. Fork-join tasks are not reusable.
 	 */

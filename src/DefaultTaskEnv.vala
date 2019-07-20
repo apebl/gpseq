@@ -29,7 +29,7 @@ namespace Gpseq {
 		private Executor _executor;
 
 		public DefaultTaskEnv () {
-			_executor = new ForkJoinPool.with_defaults();
+			_executor = new WorkerPool.with_defaults();
 		}
 
 		public override Executor executor {

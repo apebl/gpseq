@@ -75,13 +75,13 @@ namespace Gpseq {
 	 * Schedules the given function to execute asynchronously.
 	 *
 	 * The {@link Executor} of {@link TaskEnv.get_default_task_env} will
-	 * execute the function. By default, it is a {@link ForkJoinPool} which
-	 * uses work-stealing algorithm.
+	 * execute the function. By default, it is a {@link WorkerPool} which uses
+	 * work-stealing algorithm.
 	 *
 	 * @param func a task function to execute
 	 * @return a future of the execution
 	 *
-	 * @see ForkJoinPool
+	 * @see WorkerPool
 	 * @see FuncTask
 	 */
 	public Future<G> task<G> (owned TaskFunc<G> func) {

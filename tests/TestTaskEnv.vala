@@ -34,7 +34,7 @@ public class TestTaskEnv : TaskEnv {
 	private Executor _executor;
 
 	private TestTaskEnv () {
-		_executor = new ForkJoinPool.with_defaults();
+		_executor = new WorkerPool.with_defaults();
 	}
 
 	public override Executor executor {

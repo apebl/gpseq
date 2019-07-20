@@ -1,4 +1,4 @@
-/* ForkJoinPool.vala
+/* WorkerPool.vala
  *
  * Copyright (C) 2019  Космос Преда́ние (kosmospredanie@yandex.ru)
  *
@@ -24,7 +24,7 @@ namespace Gpseq {
 	/**
 	 * A thread pool for executing tasks in parallel.
 	 */
-	public class ForkJoinPool : Object, Executor {
+	public class WorkerPool : Object, Executor {
 		private static ThreadFactory? default_factory = null;
 		/**
 		 * Gets the default thread factory. the factory is constructed when this
@@ -64,9 +64,9 @@ namespace Gpseq {
 		private int _terminating = -1; // AtomicInt
 
 		/**
-		 * Creates a new fork join pool, with default settings.
+		 * Creates a new worker pool, with default settings.
 		 */
-		public ForkJoinPool.with_defaults ()
+		public WorkerPool.with_defaults ()
 		{
 			// try 2x processors
 			uint processors = GLib.get_num_processors();
@@ -76,25 +76,25 @@ namespace Gpseq {
 		}
 
 		/**
-		 * Creates a new fork join pool.
+		 * Creates a new worker pool.
 		 * @param parallels the number of threads
 		 * @param factory a thread factory to create new threads
 		 */
-		public ForkJoinPool (int parallels, ThreadFactory factory)
+		public WorkerPool (int parallels, ThreadFactory factory)
 				requires (0 < parallels)
 		{
 			_factory = factory;
 			_threads = new ArrayList<WorkerThread>();
 			_submission_queue = new WorkQueue();
 
-			var sb = new StringBuilder("GpseqForkJoinPool-");
+			var sb = new StringBuilder("GpseqWorkerPool-");
 			sb.append(next_pool_number().to_string()).append("-thread-");
 			_thread_name_prefix = sb.str;
 
 			init_threads(parallels);
 		}
 
-		~ForkJoinPool () {
+		~WorkerPool () {
 			if (!is_terminated) {
 				terminate_now();
 			}
@@ -321,7 +321,7 @@ namespace Gpseq {
 		}
 
 		private class DefaultThreadFactory : Object, ThreadFactory {
-			public WorkerThread create_thread (ForkJoinPool pool) {
+			public WorkerThread create_thread (WorkerPool pool) {
 				return new WorkerThread(pool);
 			}
 		}
