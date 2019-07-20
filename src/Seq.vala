@@ -119,6 +119,10 @@ namespace Gpseq {
 	 *
 	 * If an operation method is tried after the seq has been closed, the try
 	 * is (assertion) failed.
+	 *
+	 * A result future of a sequential pipeline is already completed when
+	 * returned from the terminal operation method, and therefore you do not
+	 * have to wait the future for getting the value.
 	 */
 	public class Seq<G> : Object {
 		/**
