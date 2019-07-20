@@ -118,12 +118,14 @@ namespace Gpseq {
 					_mutex.unlock();
 					return true;
 				case State.EXCEPTION:
+					value = null;
 					unowned Error result = _exception;
 					_mutex.unlock();
 					throw result;
 				case State.INIT:
 					_cond.wait_until(_mutex, end_time);
 					if (_state == State.INIT) {
+						value = null;
 						_mutex.unlock();
 						return false;
 					}

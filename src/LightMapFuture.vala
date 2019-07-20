@@ -48,6 +48,7 @@ namespace Gpseq {
 		public bool wait_until (int64 end_time, out unowned A? value = null) throws Error {
 			unowned A arg;
 			bool result = _base.wait_until(end_time, out arg);
+			value = null;
 			if (result) {
 				value = _func(arg);
 			}

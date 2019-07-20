@@ -105,6 +105,7 @@ namespace TestUtils {
 				return iter.get();
 			}
 		}
+		index = null;
 		return null;
 	}
 
