@@ -34,6 +34,7 @@ public class UtilsTests : Gpseq.TestSuite {
 		add_test("parallel_sort<string?>:few", test_parallel_sort_nullable_strings_few);
 		add_test("parallel_sort<unowned string>:few", test_parallel_sort_unowned_strings_few);
 		add_test("parallel_sort:check-stable", test_parallel_sort_stable);
+		add_test("task", test_task);
 	}
 
 	private void test_parallel_sort_ints_few () {
@@ -201,5 +202,11 @@ public class UtilsTests : Gpseq.TestSuite {
 		// g_ptr_array_sort_with_data is guaranteed to be a stable sort since glib 2.32
 		validation.sort_with_data((a, b) => cmp(a, b));
 		assert_array_equals<Wrapper<int>>(array.data, validation.data, (a, b) => a == b);
+	}
+
+	private void test_task () {
+		var future = Gpseq.task<int>(() => 726);
+		assert(future.value == 726);
+		assert(future.exception == null);
 	}
 }

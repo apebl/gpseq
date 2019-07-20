@@ -72,6 +72,25 @@ namespace Gpseq {
 	}
 
 	/**
+	 * Schedules the given function to execute asynchronously.
+	 *
+	 * The {@link Executor} of {@link TaskEnv.get_default_task_env} will
+	 * execute the function. By default, it is a {@link ForkJoinPool} which
+	 * uses work-stealing algorithm.
+	 *
+	 * @param func a task function to execute
+	 * @return a future of the execution
+	 *
+	 * @see ForkJoinPool
+	 * @see FuncTask
+	 */
+	public Future<G> task<G> (owned TaskFunc<G> func) {
+		var task = new FuncTask<G>((owned) func);
+		TaskEnv.get_default_task_env().executor.submit(task);
+		return task.future;
+	}
+
+	/**
 	 * Gets the current value of //atomic//.
 	 *
 	 * This call acts as a full compiler and hardware
