@@ -22,10 +22,10 @@ namespace Gpseq {
 	/**
 	 * An object that performs load balancing of work queues.
 	 *
-	 * A {@link ForkJoinThread} have its own {@link QueueBalancer}. so, the
+	 * A {@link WorkerThread} have its own {@link QueueBalancer}. so, the
 	 * balancers can declare and use member variables to store data per thread.
 	 *
-	 * All methods are called in the owner {@link ForkJoinThread} thread.
+	 * All methods are called in the owner {@link WorkerThread} thread.
 	 *
 	 * loop flow:
 	 *
@@ -41,24 +41,24 @@ namespace Gpseq {
 	internal interface QueueBalancer : Object {
 		/**
 		 * Will be called at every loop start.
-		 * @param thread the fork-join thread
+		 * @param thread the worker thread
 		 * @param join whether or not current loop is joining loop of a task
 		 */
-		public abstract void tick (ForkJoinThread thread, bool join);
+		public abstract void tick (WorkerThread thread, bool join);
 
 		/**
 		 * Will be called after the thread obtained a task and has computed it.
-		 * @param thread the fork-join thread
+		 * @param thread the worker thread
 		 * @param join whether or not current loop is joining loop of a task
 		 */
-		public abstract void computed (ForkJoinThread thread, bool join);
+		public abstract void computed (WorkerThread thread, bool join);
 
 		/**
 		 * Will be called after the thread failed to obtain a task.
-		 * @param thread the fork-join thread
+		 * @param thread the worker thread
 		 * @param join whether or not current loop is joining loop of a task
 		 */
-		public abstract void no_tasks (ForkJoinThread thread, bool join);
+		public abstract void no_tasks (WorkerThread thread, bool join);
 
 		/**
 		 * Finds and takes tasks from other threads' work queue and the
@@ -67,9 +67,9 @@ namespace Gpseq {
 		 * This method must take at least one task, if possible -- at least one
 		 * task exists in other threads' work queue or the submission queue.
 		 *
-		 * @param thread the fork-join thread
+		 * @param thread the worker thread
 		 * @param join whether or not current loop is joining loop of a task
 		 */
-		public abstract void scan (ForkJoinThread thread, bool join);
+		public abstract void scan (WorkerThread thread, bool join);
 	}
 }

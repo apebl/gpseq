@@ -20,13 +20,13 @@
 
 namespace Gpseq {
 	/**
-	 * An object that creates new fork-join threads.
+	 * An object that creates new worker threads.
 	 */
 	public interface ThreadFactory : Object {
 		/**
 		 * @param pool a fork-join thread pool
 		 * @return a new thread that has not yet started
 		 */
-		public abstract ForkJoinThread create_thread (ForkJoinPool pool);
+		public abstract WorkerThread create_thread (ForkJoinPool pool);
 	}
 }

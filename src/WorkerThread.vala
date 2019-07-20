@@ -1,4 +1,4 @@
-/* ForkJoinThread.vala
+/* WorkerThread.vala
  *
  * Copyright (C) 2019  Космос Преда́ние (kosmospredanie@yandex.ru)
  *
@@ -24,54 +24,54 @@ namespace Gpseq {
 	/**
 	 * A worker thread.
 	 */
-	public class ForkJoinThread : Object {
+	public class WorkerThread : Object {
 		/**
-		 * A table storing fork-join threads.
+		 * A table storing worker threads.
 		 */
-		private static Map<Thread, ForkJoinThread>? threads;
+		private static Map<Thread, WorkerThread>? threads;
 
 		/**
-		 * Gets the fork-join thread corresponding to the given thread.
-		 * @return the fork-join thread corresponding to the given Thread, or
+		 * Gets the worker thread corresponding to the given thread.
+		 * @return the worker thread corresponding to the given Thread, or
 		 * null if not found
 		 */
-		public static ForkJoinThread? get_by (Thread thread) {
+		public static WorkerThread? get_by (Thread thread) {
 			lock (threads) {
 				if (threads == null) {
-					threads = new HashMap<Thread, ForkJoinThread>();
+					threads = new HashMap<Thread, WorkerThread>();
 				}
 				return threads[thread];
 			}
 		}
 
 		/**
-		 * Gets the fork-join thread corresponding to the current thread.
-		 * @return the fork-join thread corresponding to the current thread, or
-		 * null if the current thread is not a fork-join thread
+		 * Gets the worker thread corresponding to the current thread.
+		 * @return the worker thread corresponding to the current thread, or
+		 * null if the current thread is not a worker thread
 		 */
-		public static ForkJoinThread? self () {
+		public static WorkerThread? self () {
 			return get_by(Thread.self<void*>());
 		}
 
 		/**
-		 * Registers the fork-join thread.
+		 * Registers the worker thread.
 		 */
-		private static void set_thread (Thread k, ForkJoinThread v) {
+		private static void set_thread (Thread k, WorkerThread v) {
 			lock (threads) {
 				if (threads == null) {
-					threads = new HashMap<Thread, ForkJoinThread>();
+					threads = new HashMap<Thread, WorkerThread>();
 				}
 				threads[k] = v;
 			}
 		}
 
 		/**
-		 * Unregisters the fork-join thread corresponding to the given thread.
+		 * Unregisters the worker thread corresponding to the given thread.
 		 */
 		private static void unset_thread (Thread k) {
 			lock (threads) {
 				if (threads == null) {
-					threads = new HashMap<Thread, ForkJoinThread>();
+					threads = new HashMap<Thread, WorkerThread>();
 				}
 				threads.unset(k);
 			}
@@ -86,10 +86,10 @@ namespace Gpseq {
 		private bool _terminated;
 
 		/**
-		 * Creates a new fork-join thread.
+		 * Creates a new worker thread.
 		 * @param pool a fork-join pool
 		 */
-		public ForkJoinThread (ForkJoinPool pool) {
+		public WorkerThread (ForkJoinPool pool) {
 			_pool = pool;
 			_id = pool.next_thread_id();
 			_name = pool.thread_name(_id);
@@ -97,12 +97,12 @@ namespace Gpseq {
 			_balancer = new DefaultQueueBalancer();
 		}
 
-		~ForkJoinThread () {
+		~WorkerThread () {
 			unset_thread(_thread);
 		}
 
 		/**
-		 * The internal thread object, or null if this fork-join thread has not
+		 * The internal thread object, or null if this worker thread has not
 		 * yet started.
 		 */
 		public Thread<void*>? thread {

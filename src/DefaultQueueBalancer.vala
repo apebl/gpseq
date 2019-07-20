@@ -34,37 +34,37 @@ namespace Gpseq {
 			_rand = new Rand();
 		}
 
-		public void tick (ForkJoinThread thread, bool join) {
+		public void tick (WorkerThread thread, bool join) {
 		}
 
-		public void computed (ForkJoinThread thread, bool join) {
+		public void computed (WorkerThread thread, bool join) {
 		}
 
-		public void no_tasks (ForkJoinThread thread, bool join) {
+		public void no_tasks (WorkerThread thread, bool join) {
 			Thread.yield();
 		}
 
-		public void scan (ForkJoinThread thread, bool join) {
+		public void scan (WorkerThread thread, bool join) {
 			if (!try_steal(thread)) try_drain_submissions(thread);
 		}
 
 		/**
 		 * @return whether or not tasks are taken successfully
 		 */
-		private bool try_steal (ForkJoinThread thread) {
+		private bool try_steal (WorkerThread thread) {
 			int size = thread.pool.threads.size;
 			if (size <= 1) return false;
 			int start = _rand.int_range(0, size);
 			return do_steal(thread, start);
 		}
 
-		private bool do_steal (ForkJoinThread stealer, int search_start) {
+		private bool do_steal (WorkerThread stealer, int search_start) {
 			WorkQueue sq = stealer.work_queue;
-			Gee.List<ForkJoinThread> threads = stealer.pool.threads;
+			Gee.List<WorkerThread> threads = stealer.pool.threads;
 			int tsize = threads.size;
 			for (long i = search_start, n = search_start + tsize; i < n; i++) {
 				int idx = (int) (i % tsize);
-				ForkJoinThread victim = threads[idx];
+				WorkerThread victim = threads[idx];
 				WorkQueue vq = victim.work_queue;
 				int size = vq.size;
 				if (size > 1) size = size >> 1;
@@ -81,7 +81,7 @@ namespace Gpseq {
 			return false;
 		}
 
-		private void try_drain_submissions (ForkJoinThread thread) {
+		private void try_drain_submissions (WorkerThread thread) {
 			ForkJoinPool pool = thread.pool;
 			for (int i = 0; i < DRAIN_CAPACITY; i++) {
 				Task? task = pool.submission_queue.poll_head();

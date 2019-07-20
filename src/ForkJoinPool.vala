@@ -50,7 +50,7 @@ namespace Gpseq {
 		private WorkQueue _submission_queue; // also used to lock
 
 		private ThreadFactory _factory;
-		private Gee.List<ForkJoinThread> _threads;
+		private Gee.List<WorkerThread> _threads;
 		private string _thread_name_prefix;
 		private int _next_thread_id; // AtomicInt
 		private Mutex _lock = Mutex();
@@ -84,7 +84,7 @@ namespace Gpseq {
 				requires (0 < parallels)
 		{
 			_factory = factory;
-			_threads = new ArrayList<ForkJoinThread>();
+			_threads = new ArrayList<WorkerThread>();
 			_submission_queue = new WorkQueue();
 
 			var sb = new StringBuilder("GpseqForkJoinPool-");
@@ -102,15 +102,15 @@ namespace Gpseq {
 
 		private void init_threads (int n) {
 			for (int i = 0; i < n; i++) {
-				ForkJoinThread t = new_thread();
+				WorkerThread t = new_thread();
 				_threads.add(t);
 			}
-			foreach (ForkJoinThread t in _threads) {
+			foreach (WorkerThread t in _threads) {
 				t.start();
 			}
 		}
 
-		private ForkJoinThread new_thread () {
+		private WorkerThread new_thread () {
 			return _factory.create_thread(this);
 		}
 
@@ -127,7 +127,7 @@ namespace Gpseq {
 		/**
 		 * A read-only view of the threads in this pool.
 		 */
-		public Gee.List<ForkJoinThread> threads {
+		public Gee.List<WorkerThread> threads {
 			owned get { return _threads.read_only_view; }
 		}
 
@@ -140,7 +140,7 @@ namespace Gpseq {
 
 		/**
 		 * The submission queue. when a task is submitted from the outside of
-		 * fork-join threads, the task is queued in this queue.
+		 * worker threads, the task is queued in this queue.
 		 */
 		internal WorkQueue submission_queue {
 			get { return _submission_queue; }
@@ -149,10 +149,10 @@ namespace Gpseq {
 		/**
 		 * Submits a task.
 		 *
-		 * If the submission is happened in a fork-join thread, the task is
-		 * queued in the work queue of the thread directly. otherwise, the task
-		 * is queued in the submission queue of this pool, and the task will be
-		 * taken by fork-join threads.
+		 * If the submission is happened in a worker thread, the task is queued
+		 * in the work queue of the thread directly. otherwise, the task is
+		 * queued in the submission queue of this pool, and the task will be
+		 * taken by worker threads.
 		 *
 		 * This method does nothing if this pool has been terminating or
 		 * terminated.
@@ -161,7 +161,7 @@ namespace Gpseq {
 		 */
 		public void submit (Task task) {
 			if (is_terminating_started) return;
-			ForkJoinThread? thread = ForkJoinThread.self();
+			WorkerThread? thread = WorkerThread.self();
 			if (thread != null && thread.pool == this) {
 				thread.push_task(task);
 			} else {
@@ -193,16 +193,16 @@ namespace Gpseq {
 		 * Deactivates the given thread.
 		 * @param t a thread to deactivate
 		 */
-		private void block_idle (ForkJoinThread t) {
+		private void block_idle (WorkerThread t) {
 			_lock.lock();
 			_cond.wait(_lock);
 			_lock.unlock();
 		}
 
 		/**
-		 * Top-level loop for fork-join threads
+		 * Top-level loop for worker threads
 		 */
-		internal void work (ForkJoinThread thread) {
+		internal void work (WorkerThread thread) {
 			QueueBalancer bal = thread.balancer;
 			int barrens = 0;
 			while (true) {
@@ -321,8 +321,8 @@ namespace Gpseq {
 		}
 
 		private class DefaultThreadFactory : Object, ThreadFactory {
-			public ForkJoinThread create_thread (ForkJoinPool pool) {
-				return new ForkJoinThread(pool);
+			public WorkerThread create_thread (ForkJoinPool pool) {
+				return new WorkerThread(pool);
 			}
 		}
 	}

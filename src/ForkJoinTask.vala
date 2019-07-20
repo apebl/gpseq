@@ -151,7 +151,7 @@ namespace Gpseq {
 		 * @throws Error an error occurred in the {@link future}
 		 */
 		public G join () throws Error {
-			ForkJoinThread? t = ForkJoinThread.self();
+			WorkerThread? t = WorkerThread.self();
 			if (t == null) {
 				return external_join();
 			} else {
