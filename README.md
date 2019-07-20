@@ -15,7 +15,7 @@ void main () {
 		.filter(g => g.length == 3)
 		.map<string>(g => g.up())
 		.foreach(g => print("%s\n", g))
-		.wait(); // Gpseq.Future.wait() throws Error
+		.wait();
 }
 
 // (possibly unordered) output:
@@ -36,6 +36,7 @@ void main () {
 		.collect( to_list<int>() )
 		.value; // Gpseq.Future.value
 	Seq.of_list<int>(list).foreach(g => print("%d ", g));
+	// Sequential (non-parallel) operations do not have to wait()
 }
 
 // output:
@@ -49,7 +50,8 @@ Seq.iterate<int>(0, i => i < 100, i => ++i)
 		if (i == 42) {
 			throw new OptionalError.NOT_PRESENT("%d? Oops!", i);
 		}
-	}).wait();
+	}).wait(); // Gpseq.Future.wait() throws Error
+
 // uncaught error: 42? Oops!
 ```
 
