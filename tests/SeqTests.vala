@@ -46,6 +46,8 @@ public abstract class SeqTests<G> : Gpseq.TestSuite {
 		add_test("closed", () => test_closed(false));
 		add_test("closed:parallel", () => test_closed(true));
 
+		add_test("sequential-ready", () => test_sequential_ready);
+
 		add_test("iterator", test_iterator, prepare);
 		add_test("spliterator", test_spliterator, prepare);
 
@@ -360,6 +362,24 @@ public abstract class SeqTests<G> : Gpseq.TestSuite {
 		seq = empty_seq(parallel); seq.collect_ordered( Collectors.sum_int<G>(() => 0) ); assert(seq.is_closed);
 		seq = empty_seq(parallel); seq.group_by<int>(g => 0); assert(seq.is_closed);
 		seq = empty_seq(parallel); seq.partition(g => true); assert(seq.is_closed);
+	}
+
+	private void test_sequential_ready () {
+		assert( create_rand_seq().limit(LENGTH).count().ready );
+		assert( create_rand_seq().limit(LENGTH).all_match(g => true).ready );
+		assert( create_rand_seq().limit(LENGTH).any_match(g => false).ready );
+		assert( create_rand_seq().limit(LENGTH).none_match(g => false).ready );
+		assert( create_rand_seq().limit(LENGTH).find_any(g => false).ready );
+		assert( create_rand_seq().limit(LENGTH).find_first(g => false).ready );
+		assert( create_rand_seq().limit(LENGTH).fold<void*>(g => { return null; }, (a, b) => { return null; }, null).ready );
+		assert( create_rand_seq().limit(LENGTH).reduce((a, b) => { return a; }).ready );
+		assert( create_rand_seq().limit(LENGTH).max().ready );
+		assert( create_rand_seq().limit(LENGTH).min().ready );
+		assert( create_rand_seq().limit(LENGTH).foreach(g => {}).ready );
+		assert( create_rand_seq().limit(LENGTH).collect(Collectors.sum_int<G>(() => 0)).ready );
+		assert( create_rand_seq().limit(LENGTH).collect_ordered(Collectors.sum_int<G>(() => 0)).ready );
+		assert( create_rand_seq().limit(LENGTH).group_by<int>(g => 0).ready );
+		assert( create_rand_seq().limit(LENGTH).partition(g => true).ready );
 	}
 
 	private void test_iterator () {
