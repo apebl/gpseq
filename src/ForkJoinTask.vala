@@ -169,34 +169,6 @@ namespace Gpseq {
 		}
 
 		/**
-		 * Blocks until this task is done, and returns the task result.
-		 *
-		 * This method calls {@link GLib.error} instead of throwing a
-		 * {@link GLib.Error}.
-		 */
-		public G join_quietly () {
-			try {
-				return join();
-			} catch (Error err) {
-				error("%s", err.message);
-			}
-		}
-
-		/**
-		 * Immediately performs the task computation.
-		 *
-		 * This method calls {@link GLib.error} instead of throwing a
-		 * {@link GLib.Error}.
-		 */
-		public void invoke_quietly () {
-			try {
-				invoke();
-			} catch (Error err) {
-				error("%s", err.message);
-			}
-		}
-
-		/**
 		 * Submits this task to the {@link executor}.
 		 */
 		public void fork () {
