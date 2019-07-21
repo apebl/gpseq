@@ -26,7 +26,7 @@ public class SubArrayTests : Gpseq.TestSuite {
 
 	public SubArrayTests () {
 		base("sub-array");
-		add_test("constructor;get_data;get;get_owned;size", test_constructor);
+		add_test("constructor;get_data;get;size", test_constructor);
 		add_test("set", test_set);
 		add_test("foreach", test_foreach);
 		add_test("sort", test_sort);
@@ -54,7 +54,6 @@ public class SubArrayTests : Gpseq.TestSuite {
 		for (int i = 0; i < array.length; i++) {
 			assert(array[i] == sub[i] && sub[i] == sub2[i]);
 			assert(array[i] == sub.get_data()[i] && sub.get_data()[i] == sub2.get_data()[i]);
-			assert(array[i] == sub.get_owned(i) && sub.get_owned(i) == sub2.get_owned(i));
 		}
 	}
 

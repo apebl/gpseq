@@ -76,10 +76,6 @@ namespace Gpseq {
 			return _data[index];
 		}
 
-		public G get_owned (int index) {
-			return _data[index];
-		}
-
 		public new void set (int index, owned G item) {
 			_data[index] = (owned) item;
 		}
@@ -174,7 +170,7 @@ namespace Gpseq {
 				assert(!_removed);
 				assert(_index >= 0);
 				// assume(_index < _array.size);
-				return _array.get_owned(_index);
+				return _array[_index];
 			}
 
 			public void remove () {
