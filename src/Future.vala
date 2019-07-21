@@ -208,5 +208,32 @@ namespace Gpseq {
 				return future;
 			});
 		}
+
+		/**
+		 * Runs the function with the future value in future -- when this
+		 * future is completed with a value.
+		 *
+		 * If this future is completed with an exception or the function throws
+		 * an exception, the result future is completed with the exception.
+		 *
+		 * @param func a function called in future
+		 * @return the future
+		 */
+		public virtual Future<G> and_then (owned Func<G> func) {
+			return transform<G>(future => {
+				if (future.exception == null) {
+					try {
+						func(future.value);
+						return future;
+					} catch (Error err) {
+						var promise = new Promise<G>();
+						promise.set_exception((owned) err);
+						return promise.future;
+					}
+				} else {
+					return future;
+				}
+			});
+		}
 	}
 }
