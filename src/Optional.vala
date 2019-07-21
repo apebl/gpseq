@@ -120,17 +120,24 @@ namespace Gpseq {
 		}
 
 		/**
-		 * If a value is present, returns the value, otherwise throws an
-		 * {@link OptionalError.NOT_PRESENT} error.
+		 * If a value is present, returns the value, otherwise throws an error
+		 * produced by the supply function -- or an
+		 * {@link OptionalError.NOT_PRESENT} error if the function is not
+		 * specified.
 		 *
-		 * @throws OptionalError.NOT_PRESENT if no value is present
+		 * @param error_supplier the supply function
 		 * @return the value if present
+		 *
+		 * @throws Error an error produced by the supply function if no value
+		 * is present
 		 */
-		public G or_else_throw () throws OptionalError {
+		public G or_else_throw (SupplyFunc<Error>? error_supplier = null) throws Error {
 			if (_is_present) {
 				return _value;
 			} else {
-				throw new OptionalError.NOT_PRESENT("No value present");
+				throw error_supplier != null
+					? error_supplier()
+					: new OptionalError.NOT_PRESENT("No value present");
 			}
 		}
 
