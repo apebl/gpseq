@@ -128,7 +128,7 @@ namespace Gpseq {
 		 *
 		 * @return the value if present
 		 */
-		public G or_else_error () {
+		public G or_else_fail () {
 			if (_is_present) {
 				return _value;
 			} else {
