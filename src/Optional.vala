@@ -108,6 +108,18 @@ namespace Gpseq {
 		}
 
 		/**
+		 * If a value is present, returns the value, otherwise returns the
+		 * result produced by the supply function.
+		 *
+		 * @param supplier the supply function
+		 * @return the value if present, otherwise the result produced by the
+		 * supply function
+		 */
+		public G or_else_get (SupplyFunc<G> supplier) {
+			return _is_present ? _value : supplier();
+		}
+
+		/**
 		 * If a value is present, returns the value, otherwise throws an
 		 * {@link OptionalError.NOT_PRESENT} error.
 		 *
