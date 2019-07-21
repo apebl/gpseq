@@ -23,6 +23,8 @@ namespace Gpseq {
 	 * A value which might not yet be available, but will be available at some
 	 * point.
 	 *
+	 * Futures must be thread-safe.
+	 *
 	 * @see Promise
 	 */
 	[GenericAccessors]
