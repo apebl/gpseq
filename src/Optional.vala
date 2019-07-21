@@ -123,7 +123,7 @@ namespace Gpseq {
 		}
 
 		/**
-		 * If a value is present, returns the value, otherwise calls
+		 * If a value is present, returns the value, otherwise fails with
 		 * {@link GLib.error}.
 		 *
 		 * @return the value if present
