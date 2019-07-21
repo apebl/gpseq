@@ -91,15 +91,6 @@ namespace Gpseq {
 			}
 		}
 
-		public override G get_owned (int64 index) {
-			assert(0 <= index && index < size);
-			if (index < _left.size) {
-				return _left.get_owned(index);
-			} else {
-				return _right.get_owned(index - _left.size);
-			}
-		}
-
 		public new override void set (int64 index, owned G item) {
 			assert(0 <= index && index < size);
 			if (index < _left.size) {

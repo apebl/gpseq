@@ -57,10 +57,6 @@ namespace Gpseq {
 			return _data[index];
 		}
 
-		public virtual G get_owned (int64 index) {
-			return _data[index];
-		}
-
 		public new virtual void set (int64 index, owned G item) {
 			_data[index] = item;
 		}
