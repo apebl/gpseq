@@ -1,7 +1,8 @@
 project('gpseq', 'vala', 'c',
 	version: '0.1.0-beta',
 	license: 'LGPL3',
-	meson_version: '>=0.49.0')
+	meson_version: '>=0.49.0',
+	default_options: ['c_std=c89'])
 
 project_desc = 'A GObject utility library providing parallel data processing'
 
