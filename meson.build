@@ -33,6 +33,11 @@ vala_args = [
 	'--verbose'
 ]
 
+# Trap on signed integer overflow
+if get_option('buildtype') == 'debug' and cc.get_argument_syntax() == 'gcc'
+	add_global_arguments('-ftrapv', language: 'c')
+endif
+
 subdir('src')
 subdir('tests')
 if get_option('benchmark')
