@@ -1,5 +1,6 @@
 sources = files(
 	'atomic.c',
+	'overflow.c',
 	'ArrayBuffer.vala',
 	'ArrayBufferSpliterator.vala',
 	'ArraySpliterator.vala',
@@ -47,6 +48,7 @@ sources = files(
 	'Optional.vala',
 	'OptionalError.vala',
 	'OrderedSliceTask.vala',
+	'Overflow.vala',
 	'Predicate.vala',
 	'Promise.vala',
 	'QueueBalancer.vala',

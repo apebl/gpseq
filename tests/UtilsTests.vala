@@ -19,6 +19,7 @@
  */
 
 using Gpseq;
+using Gpseq.Overflow;
 using TestUtils;
 
 public class UtilsTests : Gpseq.TestSuite {
@@ -35,6 +36,10 @@ public class UtilsTests : Gpseq.TestSuite {
 		add_test("parallel_sort<unowned string>:few", test_parallel_sort_unowned_strings_few);
 		add_test("parallel_sort:check-stable", test_parallel_sort_stable);
 		add_test("task", test_task);
+		add_test("overflow:int", test_overflow_int);
+		add_test("overflow:long", test_overflow_long);
+		add_test("overflow:int32", test_overflow_int32);
+		add_test("overflow:int64", test_overflow_int64);
 	}
 
 	private void test_parallel_sort_ints_few () {
@@ -208,5 +213,101 @@ public class UtilsTests : Gpseq.TestSuite {
 		var future = Gpseq.task<int>(() => 726);
 		assert(future.value == 726);
 		assert(future.exception == null);
+	}
+
+	private void test_overflow_int () {
+		int val;
+		assert( !int_add(1, 2, out val) );
+		assert(val == 3);
+		assert( int_add(int.MAX, 1, out val) );
+		assert(val == int.MIN);
+
+		assert( !int_sub(1, 2, out val) );
+		assert(val == -1);
+		assert( int_sub(int.MIN, 1, out val) );
+		assert(val == int.MAX);
+
+		assert( !int_mul(1, 2, out val) );
+		assert(val == 2);
+		assert( !int_mul(int.MAX, -1, out val) );
+		assert(val == -int.MAX);
+		assert( int_mul(int.MAX, 2, out val) );
+		assert(val == -2);
+		assert( int_mul(int.MAX, int.MAX, out val) );
+		assert( int_mul(int.MAX, -int.MAX, out val) );
+		assert( int_mul(-int.MAX, int.MAX, out val) );
+		assert( int_mul(-int.MAX, -int.MAX, out val) );
+	}
+
+	private void test_overflow_long () {
+		long val;
+		assert( !long_add(1, 2, out val) );
+		assert(val == 3);
+		assert( long_add(long.MAX, 1, out val) );
+		assert(val == long.MIN);
+
+		assert( !long_sub(1, 2, out val) );
+		assert(val == -1);
+		assert( long_sub(long.MIN, 1, out val) );
+		assert(val == long.MAX);
+
+		assert( !long_mul(1, 2, out val) );
+		assert(val == 2);
+		assert( !long_mul(long.MAX, -1, out val) );
+		assert(val == -long.MAX);
+		assert( long_mul(long.MAX, 2, out val) );
+		assert(val == -2);
+		assert( long_mul(long.MAX, long.MAX, out val) );
+		assert( long_mul(long.MAX, -long.MAX, out val) );
+		assert( long_mul(-long.MAX, long.MAX, out val) );
+		assert( long_mul(-long.MAX, -long.MAX, out val) );
+	}
+
+	private void test_overflow_int32 () {
+		int32 val;
+		assert( !int32_add(1, 2, out val) );
+		assert(val == 3);
+		assert( int32_add(int32.MAX, 1, out val) );
+		assert(val == int32.MIN);
+
+		assert( !int32_sub(1, 2, out val) );
+		assert(val == -1);
+		assert( int32_sub(int32.MIN, 1, out val) );
+		assert(val == int32.MAX);
+
+		assert( !int32_mul(1, 2, out val) );
+		assert(val == 2);
+		assert( !int32_mul(int32.MAX, -1, out val) );
+		assert(val == -int32.MAX);
+		assert( int32_mul(int32.MAX, 2, out val) );
+		assert(val == -2);
+		assert( int32_mul(int32.MAX, int32.MAX, out val) );
+		assert( int32_mul(int32.MAX, -int32.MAX, out val) );
+		assert( int32_mul(-int32.MAX, int32.MAX, out val) );
+		assert( int32_mul(-int32.MAX, -int32.MAX, out val) );
+	}
+
+	private void test_overflow_int64 () {
+		int64 val;
+		assert( !int64_add(1, 2, out val) );
+		assert(val == 3);
+		assert( int64_add(int64.MAX, 1, out val) );
+		assert(val == int64.MIN);
+
+		assert( !int64_sub(1, 2, out val) );
+		assert(val == -1);
+		assert( int64_sub(int64.MIN, 1, out val) );
+		assert(val == int64.MAX);
+
+		assert( !int64_mul(1, 2, out val) );
+		assert(val == 2);
+		assert( !int64_mul(int64.MAX, -1, out val) );
+		assert(val == -int64.MAX);
+		assert( int64_mul(int64.MAX, 2, out val) );
+		assert(val == -2);
+		assert( int64_mul(int64.MAX, int64.MAX, out val) );
+		assert( int64_mul(int64.MAX, -int64.MAX, out val) );
+		assert( int64_mul(-int64.MAX, int64.MAX, out val) );
+		assert( int64_mul(-int64.MAX, -int64.MAX, out val) );
 	}
 }
