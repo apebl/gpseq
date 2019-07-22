@@ -77,9 +77,13 @@ namespace Gpseq {
 					int64 half = _estimated_size >> 1;
 					n = half <= MAX_ARRAY_LENGTH ? (int)half : MAX_ARRAY_LENGTH;
 				} else {
-					n = _batch + BATCH_INCR_UNIT;
-					if (n < 0 || n > get_max_batch_size()) {
+					if (_batch > int.MAX - BATCH_INCR_UNIT) {
 						n = get_max_batch_size();
+					} else {
+						n = _batch + BATCH_INCR_UNIT;
+						if (n > get_max_batch_size()) {
+							n = get_max_batch_size();
+						}
 					}
 				}
 

@@ -47,7 +47,7 @@ public class IntSeqTests : SeqTests<int> {
 
 	protected override Iterator<int> create_distinct_iter (int64 length) {
 		int i = 0;
-		SupplyFunc<int> func = () => AtomicInt.add(ref i, 1);
+		SupplyFunc<int> func = () => wrap_atomic_int_add(ref i, 1);
 		return new FiniteSupplyIterator<int>((owned) func, length);
 	}
 
@@ -78,7 +78,7 @@ public class IntSeqTests : SeqTests<int> {
 	}
 
 	protected override int combine (owned int a, owned int b) {
-		return a + b;
+		return wrap_int_add(a, b);
 	}
 
 	protected override int identity () {

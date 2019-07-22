@@ -63,7 +63,7 @@ namespace Gpseq {
 		 */
 		public ConcatArrayBuffer (ArrayBuffer<G> left, ArrayBuffer<G> right) {
 			base({});
-			if (left.size + right.size < 0) {
+			if (left.size > int64.MAX - right.size) {
 				error("Buffer exceeds max buffer size");
 			}
 			_left = left;

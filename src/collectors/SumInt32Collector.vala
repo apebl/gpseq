@@ -38,11 +38,11 @@ private class Gpseq.Collectors.SumInt32Collector<G> : Object, Collector<int32,Ac
 	}
 
 	public void accumulate (G g, Accumulator a) throws Error {
-		a.val += _mapper(g);
+		a.add(_mapper(g));
 	}
 
 	public Accumulator combine (Accumulator a, Accumulator b) throws Error {
-		a.val += b.val;
+		a.add(b.val);
 		return a;
 	}
 
@@ -52,8 +52,15 @@ private class Gpseq.Collectors.SumInt32Collector<G> : Object, Collector<int32,Ac
 
 	public class Accumulator : Object {
 		public int32 val { get; set; }
+
 		public Accumulator (int32 val) {
 			_val = val;
+		}
+
+		public void add (int32 amount) {
+			uint32 temp = _val;
+			temp += amount;
+			_val = (int32) temp;
 		}
 	}
 }

@@ -44,7 +44,13 @@ namespace Gpseq {
 
 		private static int _next_pool_number; // AtomicInt
 		private static int next_pool_number () {
-			return AtomicInt.add(ref _next_pool_number, 1);
+			while (true) {
+				int oldval = _next_pool_number;
+				int newval = (oldval > int.MAX - 1) ? 0 : oldval+1;
+				if ( AtomicInt.compare_and_exchange(ref _next_pool_number, oldval, newval) ) {
+					return oldval;
+				}
+			}
 		}
 
 		private WorkQueue _submission_queue; // also used to lock
@@ -234,7 +240,13 @@ namespace Gpseq {
 		}
 
 		internal int next_thread_id () {
-			return AtomicInt.add(ref _next_thread_id, 1);
+			while (true) {
+				int oldval = _next_thread_id;
+				int newval = (oldval > int.MAX - 1) ? 0 : oldval+1;
+				if ( AtomicInt.compare_and_exchange(ref _next_thread_id, oldval, newval) ) {
+					return oldval;
+				}
+			}
 		}
 
 		internal void dec_terminating () {

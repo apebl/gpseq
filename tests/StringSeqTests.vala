@@ -47,7 +47,7 @@ public class StringSeqTests : SeqTests<string> {
 
 	protected override Iterator<string> create_distinct_iter (int64 length) {
 		int i = 0;
-		SupplyFunc<string> func = () => AtomicInt.add(ref i, 1).to_string();
+		SupplyFunc<string> func = () => wrap_atomic_int_add(ref i, 1).to_string();
 		return new FiniteSupplyIterator<string>((owned) func, length);
 	}
 
@@ -74,7 +74,7 @@ public class StringSeqTests : SeqTests<string> {
 	protected override string combine (owned string a, owned string b) {
 		int i = a == MAGIC_STRING ? 0 : int.parse(a);
 		int i2 = b == MAGIC_STRING ? 0 : int.parse(b);
-		int sum = i + i2;
+		int sum = wrap_int_add(i, i2);
 		return sum.to_string();
 	}
 

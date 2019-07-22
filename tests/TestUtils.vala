@@ -22,6 +22,42 @@ using Gee;
 using Gpseq;
 
 namespace TestUtils {
+	public int wrap_int_add (int val, int amount) {
+		uint result = val;
+		result += amount;
+		return (int) result;
+	}
+
+	public long wrap_long_add (long val, long amount) {
+		ulong result = val;
+		result += amount;
+		return (long) result;
+	}
+
+	public int32 wrap_int32_add (int32 val, int32 amount) {
+		uint32 result = val;
+		result += amount;
+		return (int32) result;
+	}
+
+	public int64 wrap_int64_add (int64 val, int64 amount) {
+		uint64 result = val;
+		result += amount;
+		return (int64) result;
+	}
+
+	public int wrap_atomic_int_add (ref int val, int amount) {
+		while (true) {
+			int oldval = val;
+			uint result = oldval;
+			result += amount;
+			int newval = (int) result;
+			if ( AtomicInt.compare_and_exchange(ref val, oldval, newval) ) {
+				return oldval;
+			}
+		}
+	}
+
 	public void assert_sorted<G> (G[] array, owned CompareDataFunc<G>? compare = null) {
 		if (compare == null) compare = Gee.Functions.get_compare_func_for(typeof(G));
 		for (int i = 0; i < array.length - 1; i++) {

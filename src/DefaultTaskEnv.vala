@@ -41,20 +41,42 @@ namespace Gpseq {
 		public override int64 resolve_threshold (int64 elements, int threads) {
 			if (threads == 1) return elements;
 			if (elements < 0) return THRESHOLD_UNKNOWN;
-			int64 t = elements / (threads * 2);
+			int64 t = threads;
+			t = elements / t*2;
 			return int64.max(t, MIN_THRESHOLD);
 		}
 
 		public override int resolve_max_depth (int64 elements, int threads) {
 			if (threads == 1) return 0;
-			int n = int.max(threads * 4, threads * 8);
-			n = int.max(threads, n);
+
+			int n = threads;
+			bool safe = safe_mul(ref n, 8);
+			if (!safe) safe = safe_mul(ref n, 4);
+			if (!safe) n = threads;
+
 			int v = 1, i = 0;
-			while (v < n && v > 0) {
-				v = v << 1;
+			while (v < n) {
+				safe = safe_add(ref v, v);
 				i++;
+				if (!safe) break;
 			}
 			return i;
+		}
+
+		private inline bool safe_add (ref int val, int amount) {
+			if (val > int.MAX - amount) {
+				return false;
+			} else {
+				val += amount;
+				return true;
+			}
+		}
+
+		private inline bool safe_mul (ref int val, int amount) {
+			for (int i = 0; i < amount; i++) {
+				if (!safe_add(ref val, val)) return false;
+			}
+			return true;
 		}
 	}
 }

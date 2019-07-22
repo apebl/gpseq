@@ -150,6 +150,9 @@ namespace Gpseq {
 		 *
 		 * The //mapper// function must not return null.
 		 *
+		 * The arithmetic wraps around on overflow;
+		 * e.g. //the sum of int.MAX and 1 => int.MIN//
+		 *
 		 * @param mapper a mapping function
 		 * @return the collector implementation
 		 */
@@ -175,6 +178,9 @@ namespace Gpseq {
 		 * applied to the elements. If there are no elements, the result is 0.
 		 *
 		 * The //mapper// function must not return null.
+		 *
+		 * The arithmetic wraps around on overflow;
+		 * e.g. //the sum of long.MAX and 1 => long.MIN//
 		 *
 		 * @param mapper a mapping function
 		 * @return the collector implementation
@@ -233,6 +239,9 @@ namespace Gpseq {
 		 *
 		 * The //mapper// function must not return null.
 		 *
+		 * The arithmetic wraps around on overflow;
+		 * e.g. //the sum of int32.MAX and 1 => int32.MIN//
+		 *
 		 * @param mapper a mapping function
 		 * @return the collector implementation
 		 */
@@ -258,6 +267,9 @@ namespace Gpseq {
 		 * applied to the elements. If there are no elements, the result is 0.
 		 *
 		 * The //mapper// function must not return null.
+		 *
+		 * The arithmetic wraps around on overflow;
+		 * e.g. //the sum of int64.MAX and 1 => int64.MIN//
 		 *
 		 * @param mapper a mapping function
 		 * @return the collector implementation

@@ -43,8 +43,8 @@ public class NullableIntSeqTests : SeqTests<int?> {
 	protected override Iterator<int?> create_distinct_iter (int64 length) {
 		int i = 0;
 		SupplyFunc<int?> func = () => {
-			int atomic = AtomicInt.add(ref i, 1);
-			return atomic == 0 ? (int?)null : (atomic-2);
+			int val = wrap_atomic_int_add(ref i, 1);
+			return val == 0 ? (int?)null : (val-2);
 		};
 		return new FiniteSupplyIterator<int?>((owned) func, length);
 	}
@@ -79,7 +79,7 @@ public class NullableIntSeqTests : SeqTests<int?> {
 	protected override int? combine (owned int? a, owned int? b) {
 		if (a == null) a = (int)0xdeadbeef;
 		if (b == null) b = (int)0xdeadbeef;
-		return a + b;
+		return wrap_int_add(a, b);
 	}
 
 	protected override int? identity () {

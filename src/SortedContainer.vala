@@ -130,8 +130,7 @@ namespace Gpseq {
 			n |= n >> 8;
 			n |= n >> 16;
 			n |= n >> 32;
-			n++;
-			return n;
+			return (n > int64.MAX - 1) ? -1 : ++n;
 		}
 	}
 }

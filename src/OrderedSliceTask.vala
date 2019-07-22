@@ -50,6 +50,7 @@ namespace Gpseq {
 				int64 threshold, int max_depth, Executor executor)
 		{
 			base(spliterator, parent, threshold, max_depth, executor);
+			assert(limit < 0 || skip <= int64.MAX - limit);
 			_skip = skip;
 			_limit = limit;
 			_size = new AtomicInt64Ref(0);
@@ -180,13 +181,12 @@ namespace Gpseq {
 			n |= n >> 8;
 			n |= n >> 16;
 			n |= n >> 32;
-			n++;
-			return n;
+			return (n > int64.MAX - 1) ? -1 : ++n;
 		}
 
 		private ArrayBuffer<G> chop (ArrayBuffer<G> array) {
 			int64 start = int64.min(array.size, _skip);
-			int64 stop = (_limit < 0 || _skip + _limit < 0) ? array.size : int64.min(array.size, _skip + _limit);
+			int64 stop = _limit < 0 ? array.size : int64.min(array.size, _skip + _limit);
 			return array.slice(start, stop);
 		}
 
@@ -200,8 +200,9 @@ namespace Gpseq {
 				OrderedSliceTask<G> cur = this;
 				while (p != null) {
 					if (cur == p.right_child) {
-						size += ((OrderedSliceTask<G>) p.left_child).calc_completed_size(target);
-						if (size >= target) return true;
+						int64 amount = ((OrderedSliceTask<G>) p.left_child).calc_completed_size(target);
+						if (size > int64.MAX - amount || size + amount >= target) return true;
+						size += amount;
 					}
 					cur = p;
 					p = (OrderedSliceTask<G>?) p.parent;
@@ -223,7 +224,11 @@ namespace Gpseq {
 					if (left_size >= target) {
 						return left_size;
 					} else {
-						return left_size + right.calc_completed_size(target);
+						int64 amount = right.calc_completed_size(target);
+						if (left_size > int64.MAX - amount) {
+							return target;
+						}
+						return left_size + amount;
 					}
 				}
 			}

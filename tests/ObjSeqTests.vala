@@ -52,7 +52,7 @@ public class ObjSeqTests : SeqTests<Obj> {
 
 	protected override Iterator<Obj> create_distinct_iter (int64 length) {
 		int i = 0;
-		SupplyFunc<Obj> func = () => new Obj(AtomicInt.add(ref i, 1));
+		SupplyFunc<Obj> func = () => new Obj(wrap_atomic_int_add(ref i, 1));
 		return new FiniteSupplyIterator<Obj>((owned) func, length);
 	}
 
@@ -83,7 +83,7 @@ public class ObjSeqTests : SeqTests<Obj> {
 	}
 
 	protected override Obj combine (owned Obj a, owned Obj b) {
-		return new Obj(a.val + b.val);
+		return new Obj( wrap_int_add(a.val, b.val) );
 	}
 
 	protected override Obj identity () {

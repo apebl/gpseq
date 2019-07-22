@@ -920,11 +920,11 @@ public abstract class SeqTests<G> : Gpseq.TestSuite {
 		if (parallel) seq = seq.parallel();
 
 		int result = 0;
-		seq.foreach( g => AtomicInt.add(ref result, map_to_int(g)) ).value;
+		seq.foreach( g => wrap_atomic_int_add(ref result, map_to_int(g)) ).value;
 
 		int validation = 0;
 		while (iters[1].next()) {
-			validation += map_to_int( iters[1].get() );
+			validation = wrap_int_add(validation, map_to_int(iters[1].get()));
 		}
 		assert(result == validation);
 	}
@@ -949,7 +949,7 @@ public abstract class SeqTests<G> : Gpseq.TestSuite {
 			.order_by((a, b) => compare(a, b))
 			.chop_ordered(__skip, __limit)
 			.map<int>((g) => map_to_int(g))
-			.fold<int>((g, a) => g + a, (a, b) => a + b, 0).value;
+			.fold<int>((g, a) => wrap_int_add(g, a), (a, b) => wrap_int_add(a, b), 0).value;
 		int validation = get_complex_fold_validation(array);
 		assert(result == validation);
 	}
@@ -975,7 +975,7 @@ public abstract class SeqTests<G> : Gpseq.TestSuite {
 		if (skip < distinct.length) {
 			int limit = (__skip + __limit) <= distinct.length ? (int)(__skip + __limit) : distinct.length;
 			for (int i = skip; i < limit; i++) {
-				sum += map_to_int(distinct[i]);
+				sum = wrap_int_add(sum, map_to_int(distinct[i]));
 			}
 		}
 		return sum;
@@ -1122,7 +1122,7 @@ public abstract class SeqTests<G> : Gpseq.TestSuite {
 		int result = seq.collect( Collectors.sum_int<G>((g) => map_to_int(g)) ).value;
 		int validation = 0;
 		while (iters[1].next()) {
-			validation += map_to_int(iters[1].get());
+			validation = wrap_int_add( validation, map_to_int(iters[1].get()) );
 		}
 		assert(result == validation);
 	}
@@ -1146,7 +1146,7 @@ public abstract class SeqTests<G> : Gpseq.TestSuite {
 		long result = seq.collect( Collectors.sum_long<G>(g => (long)map_to_int(g)) ).value;
 		long validation = 0;
 		while (iters[1].next()) {
-			validation += (long) map_to_int(iters[1].get());
+			validation = wrap_long_add( validation, (long) map_to_int(iters[1].get()) );
 		}
 		assert(result == validation);
 	}
@@ -1170,7 +1170,7 @@ public abstract class SeqTests<G> : Gpseq.TestSuite {
 		int32 result = seq.collect( Collectors.sum_int32<G>(g => (int32)map_to_int(g)) ).value;
 		int32 validation = 0;
 		while (iters[1].next()) {
-			validation += (int32) map_to_int(iters[1].get());
+			validation = wrap_int32_add( validation, (int32) map_to_int(iters[1].get()) );
 		}
 		assert(result == validation);
 	}
@@ -1194,7 +1194,7 @@ public abstract class SeqTests<G> : Gpseq.TestSuite {
 		int64 result = (!) seq.collect( Collectors.sum_int64<G>(g => (int64)map_to_int(g)) ).value;
 		int64 validation = 0;
 		while (iters[1].next()) {
-			validation += (int64) map_to_int(iters[1].get());
+			validation = wrap_int64_add( validation, (int64) map_to_int(iters[1].get()) );
 		}
 		assert(result == validation);
 	}
@@ -1441,7 +1441,7 @@ public abstract class SeqTests<G> : Gpseq.TestSuite {
 
 		int64 sum = 0;
 		while ( iters[1].next() ) {
-			sum += map_to_int(iters[1].get());
+			sum = wrap_int64_add(sum, map_to_int(iters[1].get()));
 		}
 		assert(result[0] == sum);
 		assert(result[1] == __length);
@@ -1487,7 +1487,7 @@ public abstract class SeqTests<G> : Gpseq.TestSuite {
 
 		int64 sum = 0;
 		while ( iters[1].next() ) {
-			sum += map_to_int(iters[1].get());
+			sum = wrap_int64_add(sum, map_to_int(iters[1].get()));
 		}
 		assert(result.value == sum);
 	}
