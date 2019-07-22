@@ -39,6 +39,7 @@ like Java's streams or C#'s LINQ
 - 64-bit atomic operations
 - Futures and promises
 - Optional objects
+- Overflow safe arithmetic functions for signed integers
 - ...
 
 ## Examples
