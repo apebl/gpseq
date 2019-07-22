@@ -54,33 +54,17 @@ public class TestTaskEnv : TaskEnv {
 	public override int resolve_max_depth (int64 elements, int threads) {
 		if (threads == 1) return 0;
 
-		int n = threads;
-		bool safe = safe_mul(ref n, 8);
-		if (!safe) safe = safe_mul(ref n, 4);
-		if (!safe) n = threads;
+		int n;
+		bool ovf = Overflow.int_mul(threads, 8, out n);
+		if (ovf) ovf = Overflow.int_mul(threads, 4, out n);
+		if (ovf) n = threads;
 
 		int v = 1, i = 0;
 		while (v < n) {
-			safe = safe_add(ref v, v);
+			ovf = Overflow.int_add(v, v, out v);
 			i++;
-			if (!safe) break;
+			if (ovf) break;
 		}
 		return i;
-	}
-
-	private inline bool safe_add (ref int val, int amount) {
-		if (val > int.MAX - amount) {
-			return false;
-		} else {
-			val += amount;
-			return true;
-		}
-	}
-
-	private inline bool safe_mul (ref int val, int amount) {
-		for (int i = 0; i < amount; i++) {
-			if (!safe_add(ref val, val)) return false;
-		}
-		return true;
 	}
 }

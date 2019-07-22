@@ -78,7 +78,9 @@ public class IntSeqTests : SeqTests<int> {
 	}
 
 	protected override int combine (owned int a, owned int b) {
-		return wrap_int_add(a, b);
+		int result;
+		Overflow.int_add(a, b, out result);
+		return result;
 	}
 
 	protected override int identity () {

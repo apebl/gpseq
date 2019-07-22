@@ -22,36 +22,11 @@ using Gee;
 using Gpseq;
 
 namespace TestUtils {
-	public int wrap_int_add (int val, int amount) {
-		uint result = val;
-		result += amount;
-		return (int) result;
-	}
-
-	public long wrap_long_add (long val, long amount) {
-		ulong result = val;
-		result += amount;
-		return (long) result;
-	}
-
-	public int32 wrap_int32_add (int32 val, int32 amount) {
-		uint32 result = val;
-		result += amount;
-		return (int32) result;
-	}
-
-	public int64 wrap_int64_add (int64 val, int64 amount) {
-		uint64 result = val;
-		result += amount;
-		return (int64) result;
-	}
-
 	public int wrap_atomic_int_add (ref int val, int amount) {
 		while (true) {
 			int oldval = val;
-			uint result = oldval;
-			result += amount;
-			int newval = (int) result;
+			int newval;
+			Overflow.int_add(oldval, amount, out newval);
 			if ( AtomicInt.compare_and_exchange(ref val, oldval, newval) ) {
 				return oldval;
 			}

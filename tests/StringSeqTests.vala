@@ -74,8 +74,9 @@ public class StringSeqTests : SeqTests<string> {
 	protected override string combine (owned string a, owned string b) {
 		int i = a == MAGIC_STRING ? 0 : int.parse(a);
 		int i2 = b == MAGIC_STRING ? 0 : int.parse(b);
-		int sum = wrap_int_add(i, i2);
-		return sum.to_string();
+		int result;
+		Overflow.int_add(i, i2, out result);
+		return result.to_string();
 	}
 
 	protected override string identity () {

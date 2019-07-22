@@ -83,7 +83,9 @@ public class ObjSeqTests : SeqTests<Obj> {
 	}
 
 	protected override Obj combine (owned Obj a, owned Obj b) {
-		return new Obj( wrap_int_add(a.val, b.val) );
+		int result;
+		Overflow.int_add(a.val, b.val, out result);
+		return new Obj(result);
 	}
 
 	protected override Obj identity () {

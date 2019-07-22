@@ -83,8 +83,9 @@ public class NullableStringSeqTests : SeqTests<string?> {
 	protected override string? combine (owned string? a, owned string? b) {
 		int i = a == null ? 0 : int.parse(a);
 		int i2 = b == null ? 0 : int.parse(b);
-		int sum = wrap_int_add(i, i2);
-		return sum.to_string();
+		int result;
+		Overflow.int_add(i, i2, out result);
+		return result.to_string();
 	}
 
 	protected override string? identity () {

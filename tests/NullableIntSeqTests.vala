@@ -79,7 +79,9 @@ public class NullableIntSeqTests : SeqTests<int?> {
 	protected override int? combine (owned int? a, owned int? b) {
 		if (a == null) a = (int)0xdeadbeef;
 		if (b == null) b = (int)0xdeadbeef;
-		return wrap_int_add(a, b);
+		int result;
+		Overflow.int_add(a, b, out result);
+		return result;
 	}
 
 	protected override int? identity () {
