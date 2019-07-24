@@ -13,7 +13,6 @@ sources = files(
 	'Collectors.vala',
 	'CombineFunc.vala',
 	'Comparator.vala',
-	'CompareFunc.vala',
 	'ConcatArrayBuffer.vala',
 	'Consumer.vala',
 	'Container.vala',

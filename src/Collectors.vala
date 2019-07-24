@@ -404,10 +404,9 @@ namespace Gpseq {
 		 * function.
 		 * @return the collector implementation
 		 */
-		public Collector<Optional<G>,Object,G> max<G> (owned CompareFunc<G>? compare = null) {
+		public Collector<Optional<G>,Object,G> max<G> (owned CompareDataFunc<G>? compare = null) {
 			if (compare == null) {
-				CompareDataFunc func = Functions.get_compare_func_for(typeof(G));
-				compare = (a, b) => func(a, b);
+				compare = Functions.get_compare_func_for(typeof(G));
 			}
 			return reduce((a, b) => { return compare(a, b) >= 0 ? a : b; });
 		}
@@ -421,10 +420,9 @@ namespace Gpseq {
 		 * function.
 		 * @return the collector implementation
 		 */
-		public Collector<Optional<G>,Object,G> min<G> (owned CompareFunc<G>? compare = null) {
+		public Collector<Optional<G>,Object,G> min<G> (owned CompareDataFunc<G>? compare = null) {
 			if (compare == null) {
-				CompareDataFunc func = Functions.get_compare_func_for(typeof(G));
-				compare = (a, b) => func(a, b);
+				compare = Functions.get_compare_func_for(typeof(G));
 			}
 			return reduce((a, b) => { return compare(a, b) <= 0 ? a : b; });
 		}

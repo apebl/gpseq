@@ -88,11 +88,10 @@ namespace Gpseq {
 		 * not specified, the result of
 		 * {@link Gee.Functions.get_compare_func_for} is used
 		 */
-		public void sort (owned CompareFunc<G>? compare_func = null) throws Error {
+		public void sort (owned CompareDataFunc<G>? compare_func = null) {
 			if (_data.length <= 1) return;
 			if (compare_func == null) {
-				CompareDataFunc func = Functions.get_compare_func_for(typeof(G));
-				compare_func = (a, b) => func(a, b);
+				compare_func = Functions.get_compare_func_for(typeof(G));
 			}
 			TimSort.sort_sub_array<G>(this, compare_func);
 		}

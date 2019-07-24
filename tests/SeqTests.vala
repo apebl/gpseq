@@ -842,7 +842,7 @@ public abstract class SeqTests<G> : Gpseq.TestSuite {
 		Iterator<G>[] iters = create_rand_iter(__length).tee(2);
 		Seq<G> seq = Seq.of_iterator<G>(iters[0], __length, true);
 		if (parallel) seq = seq.parallel();
-		Optional<G> result = seq.max((a, b) => compare(a, b)).value;
+		Optional<G> result = seq.max(compare).value;
 
 		G? validation = null;
 		bool found = false;
@@ -864,7 +864,7 @@ public abstract class SeqTests<G> : Gpseq.TestSuite {
 		Iterator<G>[] iters = create_rand_iter(__length).tee(2);
 		Seq<G> seq = Seq.of_iterator<G>(iters[0], __length, true);
 		if (parallel) seq = seq.parallel();
-		Optional<G> result = seq.min((a, b) => compare(a, b)).value;
+		Optional<G> result = seq.min(compare).value;
 
 		G? validation = null;
 		bool found = false;
@@ -889,7 +889,7 @@ public abstract class SeqTests<G> : Gpseq.TestSuite {
 		Seq<G> seq = Seq.of_generic_array<G>(array);
 		if (parallel) seq = seq.parallel();
 		GenericArray<G> result = iter_to_generic_array<G>(
-			seq.order_by((a, b) => compare(a, b)).iterator(), len);
+			seq.order_by(compare).iterator(), len);
 
 		assert_sorted<G>(result.data, compare);
 		array.sort_with_data(compare);
@@ -946,7 +946,7 @@ public abstract class SeqTests<G> : Gpseq.TestSuite {
 		int result = seq
 			.filter((g) => filter(g))
 			.distinct(hash, equal)
-			.order_by((a, b) => compare(a, b))
+			.order_by(compare)
 			.chop_ordered(__skip, __limit)
 			.map<int>((g) => map_to_int(g))
 			.fold<int>(
@@ -1277,7 +1277,7 @@ public abstract class SeqTests<G> : Gpseq.TestSuite {
 		Seq<G> seq = Seq.of_iterator<G>(iters[0], __length, true);
 		if (parallel) seq = seq.parallel();
 
-		var collector = Collectors.max<G>((a, b) => compare(a, b));
+		var collector = Collectors.max<G>(compare);
 		Optional<G> result;
 		if (ordered) {
 			result = seq.collect_ordered(collector).value;
@@ -1306,7 +1306,7 @@ public abstract class SeqTests<G> : Gpseq.TestSuite {
 		Seq<G> seq = Seq.of_iterator<G>(iters[0], __length, true);
 		if (parallel) seq = seq.parallel();
 
-		var collector = Collectors.min<G>((a, b) => compare(a, b));
+		var collector = Collectors.min<G>(compare);
 		Optional<G> result;
 		if (ordered) {
 			result = seq.collect_ordered(collector).value;

@@ -75,11 +75,7 @@ namespace Gpseq {
 
 			int size = _array.size;
 			if (size <= threshold || 0 <= max_depth <= depth) {
-				try {
-					_comparator.sort_sub_array(_array);
-				} catch (Error err) {
-					shared_result.error = (owned) err;
-				}
+				_comparator.sort_sub_array(_array);
 			} else {
 				int mid = size >> 1;
 				SubArray<G> left_array = _array.sub_array(0, mid);
@@ -172,22 +168,11 @@ namespace Gpseq {
 				if (len_l == 0) {
 					promise.set_value(null);
 				} else if (len_l + len_r <= threshold || 0 <= max_depth <= depth) {
-					try {
-						sequential_merge(left, right, _output);
-					} catch (Error err) {
-						shared_result.error = (owned) err;
-					}
+					sequential_merge(left, right, _output);
 					promise.set_value(null);
 				} else {
 					int q = (len_l-1) >> 1;
-					int q2;
-					try {
-						q2 = binary_search(left[q], right);
-					} catch (Error err) {
-						shared_result.error = (owned) err;
-						promise.set_value(null);
-						return;
-					}
+					int q2 = binary_search(left[q], right);
 					int q3 = q + q2;
 					_output[q3] = left[q];
 
@@ -205,7 +190,7 @@ namespace Gpseq {
 				}
 			}
 
-			private void sequential_merge (SubArray<G> left, SubArray<G> right, SubArray<G> output) throws Error {
+			private void sequential_merge (SubArray<G> left, SubArray<G> right, SubArray<G> output) {
 				int l = 0; // left index
 				int r = 0; // right index
 				int o = 0; // output index
@@ -227,7 +212,7 @@ namespace Gpseq {
 				}
 			}
 
-			private int binary_search (G find, SubArray<G> array) throws Error {
+			private int binary_search (G find, SubArray<G> array) {
 				int lo = 0;
 				int hi = array.size;
 				while (lo < hi) {

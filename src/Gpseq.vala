@@ -52,7 +52,7 @@ namespace Gpseq {
 	 * succeeds, or with an exception if the sort fails because an error is
 	 * thrown from the compare function
 	 */
-	public Future<void*> parallel_sort<G> (G[] array, owned CompareFunc<G>? compare = null) {
+	public Future<void*> parallel_sort<G> (G[] array, owned CompareDataFunc<G>? compare = null) {
 		int len = array.length;
 		if (len <= 1) return Future.of<void*>(null);
 

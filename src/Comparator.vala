@@ -25,7 +25,7 @@ namespace Gpseq {
 	 * An utility object for sort.
 	 */
 	internal class Comparator<G> : Object {
-		private CompareFunc<G> _compare_func;
+		private CompareDataFunc<G> _compare_func;
 
 		/**
 		 * Creates a new comparator instance.
@@ -33,12 +33,11 @@ namespace Gpseq {
 		 * {@link Gee.Functions.get_compare_func_for} is used to get a proper
 		 * function
 		 */
-		public Comparator (owned CompareFunc<G>? compare_func = null) {
+		public Comparator (owned CompareDataFunc<G>? compare_func = null) {
 			if (compare_func != null) {
 				_compare_func = (owned) compare_func;
 			} else {
-				CompareDataFunc func = Functions.get_compare_func_for(val_type);
-				_compare_func = (a, b) => func(a, b);
+				_compare_func = Functions.get_compare_func_for(val_type);
 			}
 		}
 
@@ -48,15 +47,15 @@ namespace Gpseq {
 			}
 		}
 
-		private CompareFunc<G> clone_func () {
+		private CompareDataFunc<G> clone_func () {
 			return (a, b) => { return _compare_func(a, b); };
 		}
 
-		public int compare (G a, G b) throws Error {
+		public int compare (G a, G b) {
 			return _compare_func(a, b);
 		}
 
-		public void sort_sub_array (SubArray<G> array) throws Error {
+		public void sort_sub_array (SubArray<G> array) {
 			array.sort( clone_func() );
 		}
 	}
