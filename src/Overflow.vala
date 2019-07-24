@@ -23,9 +23,9 @@ namespace Gpseq.Overflow {
 	 * Performs an operation that adds //a// and //b// and returns the result,
 	 * with checking whether the operation overflowed.
 	 *
-	 * If the operation not overflowed, sets @result to the result of the
-	 * operation and returns false. If the operation overflowed, set @result to
-	 * the operation result wrapped around and returns true.
+	 * If the operation not overflowed, sets //result// to the result of the
+	 * operation and returns false. If the operation overflowed, set //result//
+	 * to the operation result wrapped around and returns true.
 	 *
 	 * @param a an integer
 	 * @param b an integer
@@ -39,9 +39,9 @@ namespace Gpseq.Overflow {
 	 * Performs an operation that subtracts //b// from //a// and returns the
 	 * result, with checking whether the operation overflowed.
 	 *
-	 * If the operation not overflowed, sets @result to the result of the
-	 * operation and returns false. If the operation overflowed, set @result to
-	 * the operation result wrapped around and returns true.
+	 * If the operation not overflowed, sets //result// to the result of the
+	 * operation and returns false. If the operation overflowed, set //result//
+	 * to the operation result wrapped around and returns true.
 	 *
 	 * @param a an integer
 	 * @param b an integer
@@ -55,9 +55,9 @@ namespace Gpseq.Overflow {
 	 * Performs an operation that multiplies //a// and //b// and returns the
 	 * result, with checking whether the operation overflowed.
 	 *
-	 * If the operation not overflowed, sets @result to the result of the
-	 * operation and returns false. If the operation overflowed, set @result to
-	 * the operation result wrapped around and returns true.
+	 * If the operation not overflowed, sets //result// to the result of the
+	 * operation and returns false. If the operation overflowed, set //result//
+	 * to the operation result wrapped around and returns true.
 	 *
 	 * @param a an integer
 	 * @param b an integer
@@ -71,9 +71,9 @@ namespace Gpseq.Overflow {
 	 * Performs an operation that adds //a// and //b// and returns the result,
 	 * with checking whether the operation overflowed.
 	 *
-	 * If the operation not overflowed, sets @result to the result of the
-	 * operation and returns false. If the operation overflowed, set @result to
-	 * the operation result wrapped around and returns true.
+	 * If the operation not overflowed, sets //result// to the result of the
+	 * operation and returns false. If the operation overflowed, set //result//
+	 * to the operation result wrapped around and returns true.
 	 *
 	 * @param a an integer
 	 * @param b an integer
@@ -87,9 +87,9 @@ namespace Gpseq.Overflow {
 	 * Performs an operation that subtracts //b// from //a// and returns the
 	 * result, with checking whether the operation overflowed.
 	 *
-	 * If the operation not overflowed, sets @result to the result of the
-	 * operation and returns false. If the operation overflowed, set @result to
-	 * the operation result wrapped around and returns true.
+	 * If the operation not overflowed, sets //result// to the result of the
+	 * operation and returns false. If the operation overflowed, set //result//
+	 * to the operation result wrapped around and returns true.
 	 *
 	 * @param a an integer
 	 * @param b an integer
@@ -103,9 +103,9 @@ namespace Gpseq.Overflow {
 	 * Performs an operation that multiplies //a// and //b// and returns the
 	 * result, with checking whether the operation overflowed.
 	 *
-	 * If the operation not overflowed, sets @result to the result of the
-	 * operation and returns false. If the operation overflowed, set @result to
-	 * the operation result wrapped around and returns true.
+	 * If the operation not overflowed, sets //result// to the result of the
+	 * operation and returns false. If the operation overflowed, set //result//
+	 * to the operation result wrapped around and returns true.
 	 *
 	 * @param a an integer
 	 * @param b an integer
@@ -119,9 +119,9 @@ namespace Gpseq.Overflow {
 	 * Performs an operation that adds //a// and //b// and returns the result,
 	 * with checking whether the operation overflowed.
 	 *
-	 * If the operation not overflowed, sets @result to the result of the
-	 * operation and returns false. If the operation overflowed, set @result to
-	 * the operation result wrapped around and returns true.
+	 * If the operation not overflowed, sets //result// to the result of the
+	 * operation and returns false. If the operation overflowed, set //result//
+	 * to the operation result wrapped around and returns true.
 	 *
 	 * @param a an integer
 	 * @param b an integer
@@ -135,9 +135,9 @@ namespace Gpseq.Overflow {
 	 * Performs an operation that subtracts //b// from //a// and returns the
 	 * result, with checking whether the operation overflowed.
 	 *
-	 * If the operation not overflowed, sets @result to the result of the
-	 * operation and returns false. If the operation overflowed, set @result to
-	 * the operation result wrapped around and returns true.
+	 * If the operation not overflowed, sets //result// to the result of the
+	 * operation and returns false. If the operation overflowed, set //result//
+	 * to the operation result wrapped around and returns true.
 	 *
 	 * @param a an integer
 	 * @param b an integer
@@ -151,9 +151,9 @@ namespace Gpseq.Overflow {
 	 * Performs an operation that multiplies //a// and //b// and returns the
 	 * result, with checking whether the operation overflowed.
 	 *
-	 * If the operation not overflowed, sets @result to the result of the
-	 * operation and returns false. If the operation overflowed, set @result to
-	 * the operation result wrapped around and returns true.
+	 * If the operation not overflowed, sets //result// to the result of the
+	 * operation and returns false. If the operation overflowed, set //result//
+	 * to the operation result wrapped around and returns true.
 	 *
 	 * @param a an integer
 	 * @param b an integer
@@ -167,9 +167,9 @@ namespace Gpseq.Overflow {
 	 * Performs an operation that adds //a// and //b// and returns the result,
 	 * with checking whether the operation overflowed.
 	 *
-	 * If the operation not overflowed, sets @result to the result of the
-	 * operation and returns false. If the operation overflowed, set @result to
-	 * the operation result wrapped around and returns true.
+	 * If the operation not overflowed, sets //result// to the result of the
+	 * operation and returns false. If the operation overflowed, set //result//
+	 * to the operation result wrapped around and returns true.
 	 *
 	 * @param a an integer
 	 * @param b an integer
@@ -183,9 +183,9 @@ namespace Gpseq.Overflow {
 	 * Performs an operation that subtracts //b// from //a// and returns the
 	 * result, with checking whether the operation overflowed.
 	 *
-	 * If the operation not overflowed, sets @result to the result of the
-	 * operation and returns false. If the operation overflowed, set @result to
-	 * the operation result wrapped around and returns true.
+	 * If the operation not overflowed, sets //result// to the result of the
+	 * operation and returns false. If the operation overflowed, set //result//
+	 * to the operation result wrapped around and returns true.
 	 *
 	 * @param a an integer
 	 * @param b an integer
@@ -199,9 +199,9 @@ namespace Gpseq.Overflow {
 	 * Performs an operation that multiplies //a// and //b// and returns the
 	 * result, with checking whether the operation overflowed.
 	 *
-	 * If the operation not overflowed, sets @result to the result of the
-	 * operation and returns false. If the operation overflowed, set @result to
-	 * the operation result wrapped around and returns true.
+	 * If the operation not overflowed, sets //result// to the result of the
+	 * operation and returns false. If the operation overflowed, set //result//
+	 * to the operation result wrapped around and returns true.
 	 *
 	 * @param a an integer
 	 * @param b an integer
