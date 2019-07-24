@@ -31,6 +31,7 @@ dependencies = [
 vala_args = [
 	'--target-glib=' + glib_reqs,
 	'--enable-experimental',
+	'--abi-stability',
 	'--verbose'
 ]
 
