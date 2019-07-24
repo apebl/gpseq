@@ -39,7 +39,7 @@ void main () {
 		foreach (string hash in commits) {
 			Commit commit = new Commit(hash);
 			string type = commit.commit_type;
-			if (type.length == 0 || type in TYPES) {
+			if (type.length == 0 || type in TYPES || commit.is_breaking_change()) {
 				string abbrev = commit.abbrev_hash;
 				string url = @"$REPOSITORY/commit/$(commit.hash)";
 				string breaks = commit.is_breaking_change() ? "**BREAKING CHANGE!** " : "";
