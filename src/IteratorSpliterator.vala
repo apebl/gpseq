@@ -28,17 +28,7 @@ namespace Gpseq {
 		private const int BATCH_INCR_UNIT = 1024; // 1 << 10
 		private const long TRY_MAX_BATCH_SIZE = 16777216; // 1 << 24
 
-		private static int max_batch_size;
-		private static int get_max_batch_size () {
-			/* no synchronization required for this method;
-			 * the method always returns the same value on the same device
-			 */
-			if (max_batch_size == 0) {
-				long min = long.min(MAX_ARRAY_LENGTH, TRY_MAX_BATCH_SIZE);
-				max_batch_size = (int) min;
-			}
-			return max_batch_size;
-		}
+		private static int max_batch_size = (int) long.min(MAX_ARRAY_LENGTH, TRY_MAX_BATCH_SIZE);
 
 		private Iterator<G> _iterator;
 		private int64 _estimated_size;
@@ -78,11 +68,11 @@ namespace Gpseq {
 					n = half <= MAX_ARRAY_LENGTH ? (int)half : MAX_ARRAY_LENGTH;
 				} else {
 					if (_batch > int.MAX - BATCH_INCR_UNIT) {
-						n = get_max_batch_size();
+						n = max_batch_size;
 					} else {
 						n = _batch + BATCH_INCR_UNIT;
-						if (n > get_max_batch_size()) {
-							n = get_max_batch_size();
+						if (n > max_batch_size) {
+							n = max_batch_size;
 						}
 					}
 				}

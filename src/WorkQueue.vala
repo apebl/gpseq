@@ -24,26 +24,16 @@ namespace Gpseq {
 	 */
 	internal class WorkQueue : Object {
 		/**
+		 * The initial size of queue arrays.
+		 *
 		 * must be >= 2 (because of bitwise AND)
 		 */
 		private static int initial_queue_log_capacity;
 		private const int TRY_INITIAL_QUEUE_LOG_CAPACITY = 10;
 
 		/**
-		 * Gets the initial size of queue arrays.
-		 * @return the initial size of queue arrays
-		 */
-		private static int get_initial_queue_log_capacity () {
-			/* no synchronization required for this method;
-			 * the method always returns the same value on the same device
-			 */
-			if (initial_queue_log_capacity == 0) {
-				initial_queue_log_capacity = int.min(TRY_INITIAL_QUEUE_LOG_CAPACITY, get_max_queue_log_capacity());
-			}
-			return initial_queue_log_capacity;
-		}
-
-		/**
+		 * The maximum size of queue arrays.
+		 *
 		 * Must be //>= 2 && <= (bit size of int - 1 - width of array entry)// to ensure lack of
 		 * wraparound of index calculations.
 		 */
@@ -54,22 +44,14 @@ namespace Gpseq {
 		 */
 		private const int QUEUE_LOG_CAPACITY_MARGIN = 1;
 
-		/**
-		 * Gets the maximum size of queue arrays.
-		 * @return the maximum size of queue arrays
-		 */
-		private static int get_max_queue_log_capacity () {
-			/* no synchronization required for this method;
-			 * the method always returns the same value on the same device
-			 */
-			if (max_queue_log_capacity == 0) {
-				double psize = (double) sizeof(void*); // size of gpointer
-				int isize = ((int) sizeof(int)) * 8 - 1; // at least 15 in C lang
-				int log_psize = (int) (Math.log(psize) * 1.4426950408889634074); // log2(psize)
-				int result = isize - log_psize - QUEUE_LOG_CAPACITY_MARGIN;
-				max_queue_log_capacity = int.max(result, 2);
-			}
-			return max_queue_log_capacity;
+		static construct {
+			double psize = (double) sizeof(void*);
+			int isize = (int) (sizeof(int) * 8 - 1); // at least 15 in C
+			// log2() is not defined in C89
+			// log2(psize) = log(psize) * M_LOG2E
+			int log_psize = (int) (Math.log(psize) * 1.4426950408889634074);
+			max_queue_log_capacity = int.max(isize - log_psize - QUEUE_LOG_CAPACITY_MARGIN, 2);
+			initial_queue_log_capacity = int.min(TRY_INITIAL_QUEUE_LOG_CAPACITY, max_queue_log_capacity);
 		}
 
 		private CircularArray<Task> _array;
@@ -77,7 +59,7 @@ namespace Gpseq {
 		private int _tail;
 
 		public WorkQueue () {
-			_array = new CircularArray<Task>( get_initial_queue_log_capacity() );
+			_array = new CircularArray<Task>(initial_queue_log_capacity);
 		}
 
 		public bool is_empty {
@@ -101,10 +83,10 @@ namespace Gpseq {
 
 		private void grow_array (CircularArray<Task> current, int tail, int head) {
 			int new_log_len = current.log_length + 1;
-			if (new_log_len > get_max_queue_log_capacity()) {
+			if (new_log_len > max_queue_log_capacity) {
 				error( "Queue capacity exceeded: %d > %d",
 						(1 << new_log_len),
-						(1 << get_max_queue_log_capacity()) );
+						(1 << max_queue_log_capacity) );
 			}
 
 			CircularArray<Task> new_array = new CircularArray<Task>(new_log_len);
