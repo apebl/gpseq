@@ -65,7 +65,7 @@ namespace Gpseq {
 			if (max_queue_log_capacity == 0) {
 				double psize = (double) sizeof(void*); // size of gpointer
 				int isize = ((int) sizeof(int)) * 8 - 1; // at least 15 in C lang
-				int log_psize = (int) Math.log2(psize);
+				int log_psize = (int) (Math.log(psize) * 1.4426950408889634074); // log2(psize)
 				int result = isize - log_psize - QUEUE_LOG_CAPACITY_MARGIN;
 				max_queue_log_capacity = int.max(result, 2);
 			}
