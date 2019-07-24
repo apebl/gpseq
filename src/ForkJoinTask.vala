@@ -244,7 +244,8 @@ namespace Gpseq {
 				owned set {
 					if ( AtomicInt.compare_and_exchange(ref _prestate, INIT, READY) ) {
 						_value = (owned) value;
-						assert( AtomicInt.compare_and_exchange(ref _state, INIT, READY) );
+						bool cas_result = AtomicInt.compare_and_exchange(ref _state, INIT, READY);
+						assert(cas_result);
 					}
 				}
 			}
@@ -257,7 +258,8 @@ namespace Gpseq {
 				owned set {
 					if ( AtomicInt.compare_and_exchange(ref _prestate, INIT, ERROR) ) {
 						_error = (owned) value;
-						assert( AtomicInt.compare_and_exchange(ref _state, INIT, ERROR) );
+						bool cas_result = AtomicInt.compare_and_exchange(ref _state, INIT, ERROR);
+						assert(cas_result);
 					}
 				}
 			}

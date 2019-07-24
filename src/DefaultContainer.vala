@@ -45,7 +45,7 @@ namespace Gpseq {
 				return _spliterator;
 			}
 			set {
-				assert_nonnull(value);
+				assert(value != null);
 				_spliterator = value;
 			}
 		}
@@ -65,7 +65,7 @@ namespace Gpseq {
 				return _consumer;
 			}
 			set {
-				assert_nonnull(value);
+				assert(value != null);
 				_consumer = value;
 			}
 		}

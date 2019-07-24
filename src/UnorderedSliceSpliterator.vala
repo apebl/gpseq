@@ -38,7 +38,9 @@ namespace Gpseq {
 		public UnorderedSliceSpliterator (Spliterator<G> spliterator, int64 skip, int64 limit)
 			requires (skip >= 0)
 		{
-			assert(limit < 0 || skip <= int64.MAX - limit);
+			if (limit >= 0 && skip > int64.MAX - limit) {
+				error("skip + limit exceeds int64.MAX");
+			}
 			_spliterator = spliterator;
 			_unlimited = limit < 0;
 			_skip_threshold = _unlimited ? 0 : limit;

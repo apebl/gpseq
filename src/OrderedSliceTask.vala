@@ -50,6 +50,9 @@ namespace Gpseq {
 				int64 threshold, int max_depth, Executor executor)
 		{
 			base(spliterator, parent, threshold, max_depth, executor);
+			if (limit >= 0 && skip > int64.MAX - limit) {
+				error("skip + limit exceeds int64.MAX");
+			}
 			assert(limit < 0 || skip <= int64.MAX - limit);
 			_skip = skip;
 			_limit = limit;
