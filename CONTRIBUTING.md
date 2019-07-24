@@ -14,8 +14,8 @@ The first line is the header that should not be longer than 50 characters. And
 you must wrap the body at 72 characters. The body can have multiple paragraphs.
 
 The body can have the text `BREAKING CHANGE:` at the beginning of a line to
-introduce a breaking API/ABI change. A BREAKING CHANGE can be part of the types
-feat, fix, refactor, perf, or deps.
+introduce a breaking API/ABI change. A BREAKING CHANGE can be part of commits
+of any type.
 
 The commit of which header or body have `#<issue-number>` is linked to the
 issues. You can also close issues automatically using issue closing pattern --
