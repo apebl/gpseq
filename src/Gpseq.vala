@@ -21,6 +21,8 @@
 namespace Gpseq {
 	internal const int MAX_ARRAY_LENGTH = int.MAX;
 
+	private const int64 SORT_THRESHOLD = 32768; // 1 << 15
+
 	/**
 	 * Sorts the given array by comparing with the specified compare function,
 	 * in parallel. The sort is stable.
@@ -54,21 +56,25 @@ namespace Gpseq {
 	 */
 	public Future<void*> parallel_sort<G> (G[] array, owned CompareDataFunc<G>? compare = null) {
 		int len = array.length;
-		if (len <= 1) return Future.of<void*>(null);
+		if (len <= SORT_THRESHOLD) {
+			SubArray<G> sub = new SubArray<G>(array);
+			sub.sort((owned) compare);
+			return Future.of<void*>(null);
+		} else {
+			SubArray<G> sub = new SubArray<G>(array);
+			G[] temp = new G[len];
+			Comparator<G> cmp = new Comparator<G>((owned) compare);
 
-		SubArray<G> sub = new SubArray<G>(array);
-		G[] temp = new G[len];
-		Comparator<G> cmp = new Comparator<G>((owned) compare);
+			TaskEnv env = TaskEnv.get_default_task_env();
+			Executor exe = env.executor;
+			int num_threads = exe.parallels;
+			int64 threshold = env.resolve_threshold(len, num_threads);
+			int max_depth = env.resolve_max_depth(len, num_threads);
 
-		TaskEnv env = TaskEnv.get_default_task_env();
-		Executor exe = env.executor;
-		int num_threads = exe.parallels;
-		int64 threshold = env.resolve_threshold(len, num_threads);
-		int max_depth = env.resolve_max_depth(len, num_threads);
-
-		SortTask<G> task = new SortTask<G>(sub, (owned)temp, cmp, null, threshold, max_depth, exe);
-		task.fork();
-		return task.future;
+			SortTask<G> task = new SortTask<G>(sub, (owned)temp, cmp, null, threshold, max_depth, exe);
+			task.fork();
+			return task.future;
+		}
 	}
 
 	/**
