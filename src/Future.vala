@@ -54,7 +54,7 @@ namespace Gpseq {
 		 * If the future is completed with an exception, the getting value
 		 * fails with {@link GLib.error}.
 		 */
-		public virtual G value {
+		public G value {
 			get {
 				try {
 					return wait();
@@ -121,7 +121,7 @@ namespace Gpseq {
 		 * @param func a function applied to value
 		 * @return the new future
 		 */
-		public virtual Future<A> flat_map<A> (owned FlatMapFunc<A,G> func) {
+		public Future<A> flat_map<A> (owned FlatMapFunc<A,G> func) {
 			return transform<A>(future => {
 				try {
 					return func( future.wait() );
@@ -143,7 +143,7 @@ namespace Gpseq {
 		 * @param func a function applied to value
 		 * @return the mapped future
 		 */
-		public virtual Future<A> map<A> (owned MapFunc<A,G> func) {
+		public Future<A> map<A> (owned MapFunc<A,G> func) {
 			return transform<A>(future => {
 				var promise = new Promise<A>();
 				try {
@@ -168,7 +168,7 @@ namespace Gpseq {
 		 * @param func a function applied to value
 		 * @return the mapped future
 		 */
-		public virtual Future<A> light_map<A> (owned LightMapFunc<A,G> func) {
+		public Future<A> light_map<A> (owned LightMapFunc<A,G> func) {
 			return new LightMapFuture<A,G>(this, (owned) func);
 		}
 
@@ -182,7 +182,7 @@ namespace Gpseq {
 		 * @param func a function applied to values
 		 * @return the combined future
 		 */
-		public virtual Future<B> zip<A,B> (owned ZipFunc<G,A,B> zip_func, Future<A> second) {
+		public Future<B> zip<A,B> (owned ZipFunc<G,A,B> zip_func, Future<A> second) {
 			return transform<B>(future => {
 				return second.transform<B>(future2 => {
 					var promise = new Promise<B>();
@@ -204,7 +204,7 @@ namespace Gpseq {
 		 * @param func a function called in future
 		 * @return the future
 		 */
-		public virtual Future<G> then (owned GLib.Func<Future<G>> func) {
+		public Future<G> then (owned GLib.Func<Future<G>> func) {
 			return transform<G>(future => {
 				func(future);
 				return future;
@@ -221,7 +221,7 @@ namespace Gpseq {
 		 * @param func a function called in future
 		 * @return the future
 		 */
-		public virtual Future<G> and_then (owned Func<G> func) {
+		public Future<G> and_then (owned Func<G> func) {
 			return transform<G>(future => {
 				if (future.exception == null) {
 					try {

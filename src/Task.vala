@@ -41,7 +41,7 @@ namespace Gpseq {
 		 *
 		 * @throws Error an error occurred in the {@link future}
 		 */
-		public virtual void invoke () throws Error {
+		public void invoke () throws Error {
 			compute();
 			Error? err = future.exception;
 			if (err != null) throw err;

@@ -39,7 +39,7 @@ namespace Gpseq {
 		/**
 		 * The type of the elements in this spliterator.
 		 */
-		public virtual Type element_type {
+		public Type element_type {
 			get {
 				return typeof(G);
 			}
