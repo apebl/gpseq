@@ -103,6 +103,15 @@ Seq.of_generic_array<int>(arr)
 // 0 1 2 3 4
 ```
 
+```vala
+Seq.iterate<int>(9999, i => i >= 0, i => --i)
+	.order_by()
+	.limit(5)
+	.foreach(g => print("%d ", g))
+	.and_then(g => print("\n"));
+// 0 1 2 3 4
+```
+
 ### Work-stealing task scheduling
 
 ```vala
