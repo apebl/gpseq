@@ -218,10 +218,10 @@ namespace Gpseq {
 
 		public class SharedResult<G> {
 			private const int INIT = 0;
-			private const int READY = 1;
-			private const int ERROR = 2;
+			private const int PENDING = 1;
+			private const int READY = 2;
+			private const int ERROR = 3;
 
-			private int _prestate;
 			private int _state;
 			private G? _value;
 			private Error? _error;
@@ -232,7 +232,7 @@ namespace Gpseq {
 			 */
 			public bool ready {
 				get {
-					return INIT != AtomicInt.get(ref _state);
+					return PENDING < AtomicInt.get(ref _state);
 				}
 			}
 
@@ -242,9 +242,9 @@ namespace Gpseq {
 					return _value;
 				}
 				owned set {
-					if ( AtomicInt.compare_and_exchange(ref _prestate, INIT, READY) ) {
+					if ( AtomicInt.compare_and_exchange(ref _state, INIT, PENDING) ) {
 						_value = (owned) value;
-						bool cas_result = AtomicInt.compare_and_exchange(ref _state, INIT, READY);
+						bool cas_result = AtomicInt.compare_and_exchange(ref _state, PENDING, READY);
 						assert(cas_result);
 					}
 				}
@@ -252,13 +252,13 @@ namespace Gpseq {
 
 			public Error? error {
 				get {
-					assert( INIT != AtomicInt.get(ref _state) );
+					assert( PENDING < AtomicInt.get(ref _state) );
 					return _error;
 				}
 				owned set {
-					if ( AtomicInt.compare_and_exchange(ref _prestate, INIT, ERROR) ) {
+					if ( AtomicInt.compare_and_exchange(ref _state, INIT, PENDING) ) {
 						_error = (owned) value;
-						bool cas_result = AtomicInt.compare_and_exchange(ref _state, INIT, ERROR);
+						bool cas_result = AtomicInt.compare_and_exchange(ref _state, PENDING, ERROR);
 						assert(cas_result);
 					}
 				}
@@ -273,7 +273,7 @@ namespace Gpseq {
 			 */
 			public void bake_promise (Promise<G> promise) {
 				int state = AtomicInt.get(ref _state);
-				assert(state != INIT);
+				assert(PENDING < state);
 				if (state == READY) {
 					promise.set_value((owned) _value);
 				} else {
