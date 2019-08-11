@@ -79,7 +79,6 @@ namespace Gpseq {
 
 		private Thread<void*>? _thread = null; // also used to lock
 		private unowned WorkerPool _pool;
-		private int _id; // index in pool
 		private string _name;
 		private WorkQueue _work_queue;
 		private QueueBalancer _balancer;
@@ -91,8 +90,7 @@ namespace Gpseq {
 		 */
 		public WorkerThread (WorkerPool pool) {
 			_pool = pool;
-			_id = pool.next_thread_id();
-			_name = pool.thread_name(_id);
+			_name = pool.thread_name( pool.next_thread_id() );
 			_work_queue = new WorkQueue();
 			_balancer = new DefaultQueueBalancer();
 		}
@@ -119,15 +117,6 @@ namespace Gpseq {
 		public WorkerPool pool {
 			get {
 				return _pool;
-			}
-		}
-
-		/**
-		 * The id of this thread in the pool.
-		 */
-		public int id {
-			get {
-				return _id;
 			}
 		}
 
