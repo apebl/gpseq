@@ -34,12 +34,6 @@ namespace Gpseq {
 			_rand = new Rand();
 		}
 
-		public void tick (WorkerThread thread, bool join) {
-		}
-
-		public void computed (WorkerThread thread, bool join) {
-		}
-
 		public void no_tasks (WorkerThread thread, bool join) {
 			Thread.yield();
 		}

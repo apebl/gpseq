@@ -207,12 +207,9 @@ namespace Gpseq {
 		internal void task_join (Task task) throws Error {
 			while (true) {
 				if (task.future.ready) return;
-				balancer.tick(this, true);
-
 				Task? pop = work_queue.poll_tail();
 				if (pop != null) {
 					pop.invoke(); // can throw an Error
-					balancer.computed(this, true);
 					if (pop == task) return;
 				} else {
 					balancer.no_tasks(this, true);

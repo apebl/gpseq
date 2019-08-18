@@ -26,35 +26,11 @@ namespace Gpseq {
 	 * balancers can declare and use member variables to store data per thread.
 	 *
 	 * All methods are called in the owner {@link WorkerThread} thread.
-	 *
-	 * loop flow:
-	 *
-	 *  i. {@link tick} : every loop start
-	 *  i. try obtaining a task in the queue of the current thread
-	 *    * if obtained, the thread computes it. and => {@link computed}
-	 *      * at this step, if join == true, the loop ends
-	 *    * if not obtained (no tasks exist in the queue)
-	 *      i. {@link no_tasks}
-	 *      i. at this step, if join == false, the thread may be deactivated by pool
-	 *      i. {@link scan}
 	 */
 	internal interface QueueBalancer : Object {
 		/**
-		 * Will be called at every loop start.
-		 * @param thread the worker thread
-		 * @param join whether or not current loop is joining loop of a task
-		 */
-		public abstract void tick (WorkerThread thread, bool join);
-
-		/**
-		 * Will be called after the thread obtained a task and has computed it.
-		 * @param thread the worker thread
-		 * @param join whether or not current loop is joining loop of a task
-		 */
-		public abstract void computed (WorkerThread thread, bool join);
-
-		/**
 		 * Will be called after the thread failed to obtain a task.
+		 *
 		 * @param thread the worker thread
 		 * @param join whether or not current loop is joining loop of a task
 		 */

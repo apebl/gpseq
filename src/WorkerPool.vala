@@ -213,11 +213,9 @@ namespace Gpseq {
 			int barrens = 0;
 			while (true) {
 				if (is_terminating_started) return;
-				bal.tick(thread, false);
 				Task? pop = thread.work_queue.poll_tail();
 				if (pop != null) {
 					pop.compute();
-					bal.computed(thread, false);
 					barrens = 0;
 				} else {
 					bal.no_tasks(thread, false);
