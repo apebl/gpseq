@@ -40,8 +40,6 @@ namespace Gpseq {
 			}
 		}
 
-		private const int MAX_THREAD_IDLE_ITERATIONS = 4;
-
 		private static int _next_pool_number; // AtomicInt
 		private static int next_pool_number () {
 			while (true) {
@@ -199,35 +197,10 @@ namespace Gpseq {
 		 * Deactivates the given thread.
 		 * @param t a thread to deactivate
 		 */
-		private void block_idle (WorkerThread t) {
+		internal void block_idle (WorkerThread t) {
 			_lock.lock();
 			_cond.wait(_lock);
 			_lock.unlock();
-		}
-
-		/**
-		 * Top-level loop for worker threads
-		 */
-		internal void work (WorkerThread thread) {
-			QueueBalancer bal = thread.balancer;
-			int barrens = 0;
-			while (true) {
-				if (is_terminating_started) return;
-				Task? pop = thread.work_queue.poll_tail();
-				if (pop != null) {
-					pop.compute();
-					barrens = 0;
-				} else {
-					bal.no_tasks(thread);
-					barrens++;
-					if (barrens > MAX_THREAD_IDLE_ITERATIONS) {
-						block_idle(thread);
-						if (is_terminating_started) return;
-						barrens = 0;
-					}
-					bal.scan(thread);
-				}
-			}
 		}
 
 		/**

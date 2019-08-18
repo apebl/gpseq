@@ -25,6 +25,8 @@ namespace Gpseq {
 	 * A worker thread.
 	 */
 	public class WorkerThread : Object {
+		private const int MAX_THREAD_IDLE_ITERATIONS = 4;
+
 		/**
 		 * A table storing worker threads.
 		 */
@@ -202,6 +204,31 @@ namespace Gpseq {
 		}
 
 		/**
+		 * Top-level loop for worker threads
+		 */
+		internal void work () {
+			QueueBalancer bal = _balancer;
+			int barrens = 0;
+			while (true) {
+				if (_pool.is_terminating_started) return;
+				Task? pop = _work_queue.poll_tail();
+				if (pop != null) {
+					pop.compute();
+					barrens = 0;
+				} else {
+					bal.no_tasks(this);
+					barrens++;
+					if (barrens > MAX_THREAD_IDLE_ITERATIONS) {
+						_pool.block_idle(this);
+						if (_pool.is_terminating_started) return;
+						barrens = 0;
+					}
+					bal.scan(this);
+				}
+			}
+		}
+
+		/**
 		 * Loop for task join.
 		 */
 		internal void task_join (Task task) throws Error {
@@ -231,7 +258,7 @@ namespace Gpseq {
 		 * Thread loop function.
 		 */
 		private void* run () {
-			_pool.work(this);
+			work();
 			lock (_thread) {
 				_terminated = true;
 				_pool.dec_terminating();
