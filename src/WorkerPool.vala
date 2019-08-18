@@ -218,14 +218,14 @@ namespace Gpseq {
 					pop.compute();
 					barrens = 0;
 				} else {
-					bal.no_tasks(thread, false);
+					bal.no_tasks(thread);
 					barrens++;
 					if (barrens > MAX_THREAD_IDLE_ITERATIONS) {
 						block_idle(thread);
 						if (is_terminating_started) return;
 						barrens = 0;
 					}
-					bal.scan(thread, false);
+					bal.scan(thread);
 				}
 			}
 		}

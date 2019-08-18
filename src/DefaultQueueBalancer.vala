@@ -34,11 +34,11 @@ namespace Gpseq {
 			_rand = new Rand();
 		}
 
-		public void no_tasks (WorkerThread thread, bool join) {
+		public void no_tasks (WorkerThread thread) {
 			Thread.yield();
 		}
 
-		public void scan (WorkerThread thread, bool join) {
+		public void scan (WorkerThread thread) {
 			if (!try_steal(thread)) try_drain_submissions(thread);
 		}
 

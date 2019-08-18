@@ -212,8 +212,8 @@ namespace Gpseq {
 					pop.invoke(); // can throw an Error
 					if (pop == task) return;
 				} else {
-					balancer.no_tasks(this, true);
-					balancer.scan(this, true);
+					balancer.no_tasks(this);
+					balancer.scan(this);
 				}
 			}
 		}

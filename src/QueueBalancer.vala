@@ -32,9 +32,8 @@ namespace Gpseq {
 		 * Will be called after the thread failed to obtain a task.
 		 *
 		 * @param thread the worker thread
-		 * @param join whether or not current loop is joining loop of a task
 		 */
-		public abstract void no_tasks (WorkerThread thread, bool join);
+		public abstract void no_tasks (WorkerThread thread);
 
 		/**
 		 * Finds and takes tasks from other threads' work queue and the
@@ -44,8 +43,7 @@ namespace Gpseq {
 		 * task exists in other threads' work queue or the submission queue.
 		 *
 		 * @param thread the worker thread
-		 * @param join whether or not current loop is joining loop of a task
 		 */
-		public abstract void scan (WorkerThread thread, bool join);
+		public abstract void scan (WorkerThread thread);
 	}
 }
