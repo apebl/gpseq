@@ -9,13 +9,13 @@ Gpseq is a parallelism library for Vala and GObject.
 using Gpseq;
 
 void main () {
-	string[] array = {"dog", "cat", "pig", "boar", "bear"};
-	Seq.of_array<string>(array)
-		.parallel()
-		.filter(g => g.length == 3)
-		.map<string>(g => g.up())
-		.foreach(g => print("%s\n", g))
-		.wait();
+    string[] array = {"dog", "cat", "pig", "boar", "bear"};
+    Seq.of_array<string>(array)
+        .parallel()
+        .filter(g => g.length == 3)
+        .map<string>(g => g.up())
+        .foreach(g => print("%s\n", g))
+        .wait();
 }
 
 // (possibly unordered) output:
@@ -51,15 +51,15 @@ using Gpseq;
 using Gpseq.Collectors;
 
 void main () {
-	var list = Seq.iterate<int>(0, i => i < 100, i => ++i)
-		.parallel()
-		.filter(i => i%2 == 0)
-		.limit(5)
-		.collect( to_list<int>() )
-		.value; // Gpseq.Future.value
+    var list = Seq.iterate<int>(0, i => i < 100, i => ++i)
+        .parallel()
+        .filter(i => i%2 == 0)
+        .limit(5)
+        .collect( to_list<int>() )
+        .value; // Gpseq.Future.value
 
-	// Sequential (non-parallel) operations do not have to wait()
-	Seq.of_list<int>(list).foreach(g => print("%d ", g));
+    // Sequential (non-parallel) operations do not have to wait()
+    Seq.of_list<int>(list).foreach(g => print("%d ", g));
 }
 
 // output:
@@ -70,15 +70,15 @@ void main () {
 
 ```vala
 try {
-	Seq.iterate<int>(0, i => i < 100, i => ++i)
-		.parallel()
-		.foreach(i => {
-			if (i == 42) {
-				throw new OptionalError.NOT_PRESENT("%d? Oops!", i);
-			}
-		}).wait(); // Gpseq.Future.wait() throws Error
+    Seq.iterate<int>(0, i => i < 100, i => ++i)
+        .parallel()
+        .foreach(i => {
+            if (i == 42) {
+                throw new OptionalError.NOT_PRESENT("%d? Oops!", i);
+            }
+        }).wait(); // Gpseq.Future.wait() throws Error
 } catch (Error err) {
-	error(err.message);
+    error(err.message);
 }
 
 // ERROR: 42? Oops!
@@ -90,25 +90,25 @@ try {
 var arr = new GenericArray<int>();
 Seq.iterate<int>(9999, i => i >= 0, i => --i).foreach(i => arr.add(i));
 Seq.of_generic_array<int>(arr)
-	.limit(5)
-	.foreach(g => print("%d ", g))
-	.and_then(g => print("\n"));
+    .limit(5)
+    .foreach(g => print("%d ", g))
+    .and_then(g => print("\n"));
 // 9999 9998 9997 9996 9995
 
 parallel_sort<int>(arr.data).wait();
 Seq.of_generic_array<int>(arr)
-	.limit(5)
-	.foreach(g => print("%d ", g))
-	.and_then(g => print("\n"));
+    .limit(5)
+    .foreach(g => print("%d ", g))
+    .and_then(g => print("\n"));
 // 0 1 2 3 4
 ```
 
 ```vala
 Seq.iterate<int>(9999, i => i >= 0, i => --i)
-	.order_by()
-	.limit(5)
-	.foreach(g => print("%d ", g))
-	.and_then(g => print("\n"));
+    .order_by()
+    .limit(5)
+    .foreach(g => print("%d ", g))
+    .and_then(g => print("\n"));
 // 0 1 2 3 4
 ```
 
@@ -118,8 +118,8 @@ Seq.iterate<int>(9999, i => i >= 0, i => --i)
 using Gpseq;
 
 void main () {
-	Future<string> future = task<string>(() => "What's up?");
-	print("%s\n", future.value); // What's up?
+    Future<string> future = task<string>(() => "What's up?");
+    print("%s\n", future.value); // What's up?
 }
 ```
 
@@ -127,19 +127,19 @@ void main () {
 using Gpseq;
 
 void main () {
-	int sum = 0;
-	Future<void*> future = Future.of<void*>(null);
+    int sum = 0;
+    Future<void*> future = Future.of<void*>(null);
 
-	for (int i = 0; i < 100; i++) {
-		var f = task<void*>(() => {
-			AtomicInt.inc(ref sum);
-			return null;
-		});
-		future = future.flat_map(val => f);
-	}
+    for (int i = 0; i < 100; i++) {
+        var f = task<void*>(() => {
+            AtomicInt.inc(ref sum);
+            return null;
+        });
+        future = future.flat_map(val => f);
+    }
 
-	future.wait();
-	print("%d\n", sum); // 100
+    future.wait();
+    print("%d\n", sum); // 100
 }
 ```
 
@@ -158,11 +158,11 @@ const ulong SEC = 1000000;
 
 Future<void*> future = Future.of<void*>(null);
 for (int i = 0; i < 1000; i++) {
-	var f = task<void*>(() => {
-		Thread.usleep(1 * SEC);
-		return null;
-	});
-	future = future.flat_map<void*>(g => f);
+    var f = task<void*>(() => {
+        Thread.usleep(1 * SEC);
+        return null;
+    });
+    future = future.flat_map<void*>(g => f);
 }
 future.wait();
 
@@ -177,13 +177,13 @@ const ulong SEC = 1000000;
 
 Future<void*> future = Future.of<void*>(null);
 for (int i = 0; i < 1000; i++) {
-	var f = task<void*>(() => {
-		blocking(() => {
-			Thread.usleep(1 * SEC);
-		});
-		return null;
-	});
-	future = future.flat_map<void*>(g => f);
+    var f = task<void*>(() => {
+        blocking(() => {
+            Thread.usleep(1 * SEC);
+        });
+        return null;
+    });
+    future = future.flat_map<void*>(g => f);
 }
 future.wait();
 
