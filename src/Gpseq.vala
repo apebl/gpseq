@@ -97,6 +97,68 @@ namespace Gpseq {
 	}
 
 	/**
+	 * Runs the given blocking task.
+	 *
+	 * If the current thread is not a {@link WorkerThread}, this method just
+	 * runs the task without any further work. Otherwise, this method tries to
+	 * create (or optain from pool, depending on the internal implementation) a
+	 * new thread.
+	 *
+	 * -> If succeed, the new thread takes the context of this thread and
+	 * runs the remaining tasks in the context. This thread runs the
+	 * blocking task and is marked as //blocked// until the task ends.
+	 * After it ends, this thread is unblocked and takes the context back,
+	 * and the new thread is terminated (or returned to the pool).
+	 *
+	 * -> If failed, e.g. the maximum number of threads exceeded, this
+	 * method just runs the function without any further work.
+	 *
+	 * @param func a task function
+	 *
+	 * @throws Error the error thrown by the function
+	 *
+	 * @see Gpseq.blocking_get
+	 * @see WorkerThread.blocking
+	 */
+	public void blocking (VoidTaskFunc func) throws Error {
+		blocking_get<void*>(() => {
+			func();
+			return null;
+		});
+	}
+
+	/**
+	 * Runs the given blocking task and returns the result.
+	 *
+	 * If the current thread is not a {@link WorkerThread}, this method just
+	 * runs the task without any further work. Otherwise, this method tries to
+	 * create (or optain from pool, depending on the internal implementation) a
+	 * new thread.
+	 *
+	 * -> If succeed, the new thread takes the context of this thread and
+	 * runs the remaining tasks in the context. This thread runs the
+	 * blocking task and is marked as //blocked// until the task ends.
+	 * After it ends, this thread is unblocked and takes the context back,
+	 * and the new thread is terminated (or returned to the pool).
+	 *
+	 * -> If failed, e.g. the maximum number of threads exceeded, this
+	 * method just runs the function without any further work.
+	 *
+	 * @param func a task function
+	 * @return the result produced by the function
+	 *
+	 * @throws Error the error thrown by the function
+	 *
+	 * @see Gpseq.blocking
+	 * @see WorkerThread.blocking
+	 */
+	public G blocking_get<G> (TaskFunc<G> func) throws Error {
+		WorkerThread? thread = WorkerThread.self();
+		if (thread == null) return func();
+		return thread.blocking<G>(func);
+	}
+
+	/**
 	 * Gets the current value of //atomic//.
 	 *
 	 * This call acts as a full compiler and hardware

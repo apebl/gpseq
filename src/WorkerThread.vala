@@ -25,6 +25,8 @@ namespace Gpseq {
 	 * A worker thread.
 	 */
 	public class WorkerThread : Object {
+		private const int MAX_THREAD_IDLE_ITERATIONS = 4;
+
 		/**
 		 * A table storing worker threads.
 		 */
@@ -32,6 +34,7 @@ namespace Gpseq {
 
 		/**
 		 * Gets the worker thread corresponding to the given thread.
+		 *
 		 * @return the worker thread corresponding to the given Thread, or
 		 * null if not found
 		 */
@@ -46,6 +49,7 @@ namespace Gpseq {
 
 		/**
 		 * Gets the worker thread corresponding to the current thread.
+		 *
 		 * @return the worker thread corresponding to the current thread, or
 		 * null if the current thread is not a worker thread
 		 */
@@ -77,28 +81,73 @@ namespace Gpseq {
 			}
 		}
 
+		private static void move_context (WorkerThread from, WorkerThread to) {
+			lock (from._context) {
+				lock (to._context) {
+					assert(from._context != null);
+					to._context = from._context;
+					from._context = null;
+				}
+			}
+		}
+
+		private unowned WorkerThread? _parent = null;
+		private bool _blocked;
+
 		private Thread<void*>? _thread = null; // also used to lock
 		private unowned WorkerPool _pool;
-		private int _id; // index in pool
+		private WorkerContext _context;
 		private string _name;
-		private WorkQueue _work_queue;
-		private QueueBalancer _balancer;
 		private bool _terminated;
 
 		/**
 		 * Creates a new worker thread.
+		 *
 		 * @param pool a worker pool
 		 */
 		public WorkerThread (WorkerPool pool) {
 			_pool = pool;
-			_id = pool.next_thread_id();
-			_name = pool.thread_name(_id);
-			_work_queue = new WorkQueue();
-			_balancer = new DefaultQueueBalancer();
+			_name = pool.thread_name( pool.next_thread_id() );
+		}
+
+		/**
+		 * Creates a new slave worker thread.
+		 *
+		 * @param parent the parent
+		 */
+		internal WorkerThread.slave (WorkerThread parent) {
+			this(parent.pool);
+			_parent = parent;
+			move_context(parent, this);
 		}
 
 		~WorkerThread () {
 			unset_thread(_thread);
+		}
+
+		/**
+		 * The parent of this thread.
+		 */
+		internal WorkerThread? parent {
+			get {
+				return _parent;
+			}
+		}
+
+		/**
+		 * Whether or not this thread is currently blocked.
+		 */
+		internal bool is_blocked {
+			get {
+				lock (_context) {
+					return _blocked;
+				}
+			}
+			set {
+				lock (_context) {
+					_blocked = value;
+				}
+			}
 		}
 
 		/**
@@ -123,11 +172,18 @@ namespace Gpseq {
 		}
 
 		/**
-		 * The id of this thread in the pool.
+		 * The worker context currently linked with this thread.
 		 */
-		public int id {
+		internal WorkerContext? context {
 			get {
-				return _id;
+				lock (_context) {
+					return _context;
+				}
+			}
+			set {
+				lock (_context) {
+					_context = value;
+				}
 			}
 		}
 
@@ -137,24 +193,6 @@ namespace Gpseq {
 		public string name {
 			get {
 				return _name;
-			}
-		}
-
-		/**
-		 * The work queue of this thread.
-		 */
-		internal WorkQueue work_queue {
-			get {
-				return _work_queue;
-			}
-		}
-
-		/**
-		 * The queue balancer of this thread.
-		 */
-		internal QueueBalancer balancer {
-			get {
-				return _balancer;
 			}
 		}
 
@@ -181,7 +219,7 @@ namespace Gpseq {
 		}
 
 		/**
-		 * Whether or not this thread is alive. a thread is alive if it has been
+		 * Whether or not this thread is alive. A thread is alive if it has been
 		 * started and has not yet terminated.
 		 */
 		public bool is_alive {
@@ -205,35 +243,8 @@ namespace Gpseq {
 		}
 
 		/**
-		 * Queues the given task into the work queue of this thread.
-		 * @param task a task to queue.
-		 */
-		public void push_task (Task task) {
-			_work_queue.offer_tail(task);
-		}
-
-		/**
-		 * Loop for task join.
-		 */
-		internal void task_join (Task task) throws Error {
-			while (true) {
-				if (task.future.ready) return;
-				balancer.tick(this, true);
-
-				Task? pop = work_queue.poll_tail();
-				if (pop != null) {
-					pop.invoke(); // can throw an Error
-					balancer.computed(this, true);
-					if (pop == task) return;
-				} else {
-					balancer.no_tasks(this, true);
-					balancer.scan(this, true);
-				}
-			}
-		}
-
-		/**
 		 * Waits until this thread finishes.
+		 *
 		 * @see GLib.Thread.join
 		 */
 		public void join () {
@@ -242,15 +253,141 @@ namespace Gpseq {
 		}
 
 		/**
+		 * Runs the given blocking task and returns the result.
+		 *
+		 * This method tries to create (or optain from pool, depending on the
+		 * internal implementation) a new thread.
+		 *
+		 * -> If succeed, the new thread takes the context of this thread and
+		 * runs the remaining tasks in the context. This thread runs the
+		 * blocking task and is marked as //blocked// until the task ends.
+		 * After it ends, this thread is unblocked and takes the context back,
+		 * and the new thread is terminated (or returned to the pool).
+		 *
+		 * -> If failed, e.g. the maximum number of threads exceeded, this
+		 * method just runs the function without any further work.
+		 *
+		 * This method must be called in //this// thread.
+		 *
+		 * @param func a task function
+		 * @return the result produced by the function
+		 *
+		 * @throws Error the error thrown by the function
+		 *
+		 * @see Gpseq.blocking
+		 * @see Gpseq.blocking_get
+		 */
+		public G blocking<G> (TaskFunc<G> func) throws Error {
+			lock (_context) {
+				if (_context == null) {
+					return func();
+				}
+			}
+
+			if ( !_pool.try_new_slave() ) {
+				return func();
+			}
+
+			WorkerThread slave;
+			lock (_context) {
+				_blocked = true;
+				slave = new WorkerThread.slave(this);
+				_pool.add_slave(slave);
+			}
+			slave.start();
+			try {
+				return func();
+			} catch (Error err) {
+				throw err;
+			} finally {
+				lock (_context) {
+					_blocked = false;
+				}
+			}
+		}
+
+		/**
+		 * Top-level loop for worker threads
+		 */
+		internal void work () {
+			int barrens = 0;
+			while (true) {
+				if (_pool.is_terminating_started) return;
+
+				WorkerContext? ctx;
+				lock (_context) { ctx = _context; }
+				if ( ctx == null || check_parent_released() ) {
+					return;
+				}
+
+				Task? pop = ctx.work_queue.poll_tail();
+				if (pop != null) {
+					pop.compute();
+					barrens = 0;
+				} else {
+					QueueBalancer bal = ctx.balancer;
+					bal.no_tasks(ctx);
+					barrens++;
+					if (barrens > MAX_THREAD_IDLE_ITERATIONS) {
+						if (_parent == null) {
+							_pool.block_idle(this);
+							if (_pool.is_terminating_started) return;
+						}
+						barrens = 0;
+					}
+					bal.scan(ctx);
+				}
+			}
+		}
+
+		/**
+		 * Loop for task join.
+		 */
+		internal void task_join (Task task) throws Error {
+			while (true) {
+				if (task.future.ready) return;
+
+				WorkerContext? ctx;
+				lock (_context) { ctx = _context; }
+				if ( ctx == null || check_parent_released() ) {
+					Thread.yield();
+					continue;
+				}
+
+				Task? pop = ctx.work_queue.poll_tail();
+				if (pop != null) {
+					pop.invoke();
+					if (pop == task) return;
+				} else {
+					QueueBalancer bal = ctx.balancer;
+					bal.no_tasks(ctx);
+					bal.scan(ctx);
+				}
+			}
+		}
+
+		/**
 		 * Thread loop function.
 		 */
 		private void* run () {
-			_pool.work(this);
+			work();
 			lock (_thread) {
 				_terminated = true;
-				_pool.dec_terminating();
 			}
+			_pool.thread_terminated(this);
 			return null;
+		}
+
+		private inline bool check_parent_released () {
+			if (_parent != null) {
+				lock (_parent._context) {
+					if (!_parent._blocked) {
+						move_context(this, _parent);
+						return true;
+					}
+				}
+			}
+			return false;
 		}
 	}
 }

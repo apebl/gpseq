@@ -1,4 +1,4 @@
-/* Executor.vala
+/* VoidTaskFunc.vala
  *
  * Copyright (C) 2019  Космос Преда́ние (kosmospredanie@yandex.ru)
  *
@@ -19,20 +19,5 @@
  */
 
 namespace Gpseq {
-	/**
-	 * An object that executes tasks. the execution is performed sequentially
-	 * or in parallel, depending on the executor implementation.
-	 */
-	public interface Executor : Object {
-		/**
-		 * Submits a task.
-		 * @param task a task to execute
-		 */
-		public abstract void submit (Task task);
-
-		/**
-		 * The parallelism level.
-		 */
-		public abstract int parallels { get; }
-	}
+	public delegate void VoidTaskFunc () throws Error;
 }

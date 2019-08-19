@@ -22,54 +22,28 @@ namespace Gpseq {
 	/**
 	 * An object that performs load balancing of work queues.
 	 *
-	 * A {@link WorkerThread} have its own {@link QueueBalancer}. so, the
-	 * balancers can declare and use member variables to store data per thread.
+	 * A {@link WorkerContext} have its own {@link QueueBalancer}. so, the
+	 * balancers can declare and use member variables to store data per context.
 	 *
-	 * All methods are called in the owner {@link WorkerThread} thread.
-	 *
-	 * loop flow:
-	 *
-	 *  i. {@link tick} : every loop start
-	 *  i. try obtaining a task in the queue of the current thread
-	 *    * if obtained, the thread computes it. and => {@link computed}
-	 *      * at this step, if join == true, the loop ends
-	 *    * if not obtained (no tasks exist in the queue)
-	 *      i. {@link no_tasks}
-	 *      i. at this step, if join == false, the thread may be deactivated by pool
-	 *      i. {@link scan}
+	 * All methods are called in the owner thread.
 	 */
 	internal interface QueueBalancer : Object {
 		/**
-		 * Will be called at every loop start.
-		 * @param thread the worker thread
-		 * @param join whether or not current loop is joining loop of a task
-		 */
-		public abstract void tick (WorkerThread thread, bool join);
-
-		/**
-		 * Will be called after the thread obtained a task and has computed it.
-		 * @param thread the worker thread
-		 * @param join whether or not current loop is joining loop of a task
-		 */
-		public abstract void computed (WorkerThread thread, bool join);
-
-		/**
 		 * Will be called after the thread failed to obtain a task.
-		 * @param thread the worker thread
-		 * @param join whether or not current loop is joining loop of a task
+		 *
+		 * @param context the worker context
 		 */
-		public abstract void no_tasks (WorkerThread thread, bool join);
+		public abstract void no_tasks (WorkerContext context);
 
 		/**
-		 * Finds and takes tasks from other threads' work queue and the
+		 * Finds and takes tasks from other contexts' work queue and the
 		 * submission queue.
 		 *
 		 * This method must take at least one task, if possible -- at least one
-		 * task exists in other threads' work queue or the submission queue.
+		 * task exists in other contexts' work queue or the submission queue.
 		 *
-		 * @param thread the worker thread
-		 * @param join whether or not current loop is joining loop of a task
+		 * @param context the worker context
 		 */
-		public abstract void scan (WorkerThread thread, bool join);
+		public abstract void scan (WorkerContext context);
 	}
 }

@@ -25,10 +25,14 @@ namespace Gpseq {
 	 * A thread pool for executing tasks in parallel.
 	 */
 	public class WorkerPool : Object, Executor {
+		private const int DEFAULT_MAX_THREADS = 8192;
+
 		private static ThreadFactory? default_factory = null;
+
 		/**
 		 * Gets the default thread factory. the factory is constructed when this
 		 * method is called initially.
+		 *
 		 * @return the default thread factory
 		 */
 		public static ThreadFactory get_default_factory () {
@@ -39,8 +43,6 @@ namespace Gpseq {
 				return (!)default_factory;
 			}
 		}
-
-		private const int MAX_THREAD_IDLE_ITERATIONS = 4;
 
 		private static int _next_pool_number; // AtomicInt
 		private static int next_pool_number () {
@@ -55,8 +57,13 @@ namespace Gpseq {
 
 		private WorkQueue _submission_queue; // also used to lock
 
+		private int _max_threads;
+		private int _num_threads; // masters + slaves
 		private ThreadFactory _factory;
-		private Gee.List<WorkerThread> _threads;
+		private Gee.List<WorkerContext> _contexts;
+		private Gee.List<WorkerThread> _threads; // master threads
+		private Gee.List<WorkerThread> _slaves;
+
 		private string _thread_name_prefix;
 		private int _next_thread_id; // AtomicInt
 		private Mutex _lock = Mutex();
@@ -89,8 +96,11 @@ namespace Gpseq {
 		public WorkerPool (int parallels, ThreadFactory factory)
 				requires (0 < parallels)
 		{
+			_max_threads = int.max(parallels, DEFAULT_MAX_THREADS);
 			_factory = factory;
+			_contexts = new ArrayList<WorkerContext>();
 			_threads = new ArrayList<WorkerThread>();
+			_slaves = new ArrayList<WorkerThread>();
 			_submission_queue = new WorkQueue();
 
 			var sb = new StringBuilder("GpseqWorkerPool-");
@@ -107,8 +117,12 @@ namespace Gpseq {
 		}
 
 		private void init_threads (int n) {
+			_num_threads = n;
 			for (int i = 0; i < n; i++) {
+				WorkerContext ctx = new WorkerContext(this);
 				WorkerThread t = new_thread();
+				t.context = ctx;
+				_contexts.add(ctx);
 				_threads.add(t);
 			}
 			foreach (WorkerThread t in _threads) {
@@ -120,21 +134,34 @@ namespace Gpseq {
 			return _factory.create_thread(this);
 		}
 
-		/**
-		 * The number of threads.
-		 *
-		 * A thread may be deactivated if idle, and activated when a new task
-		 * is submitted.
-		 */
 		public int parallels {
 			get { return _threads.size; }
 		}
 
 		/**
-		 * A read-only view of the threads in this pool.
+		 * The maximum number of threads that this pool can use.
+		 *
+		 * The actual limit may be less than this value, due to resource limits.
+		 *
+		 * This value is always >= {@link parallels}.
 		 */
-		public Gee.List<WorkerThread> threads {
-			owned get { return _threads.read_only_view; }
+		public int max_threads {
+			get {
+				return AtomicInt.get(ref _max_threads);
+			}
+			set {
+				assert(value >= parallels);
+				AtomicInt.set(ref _max_threads, value);
+			}
+		}
+
+		/**
+		 * The current number of threads.
+		 */
+		public int num_threads {
+			get {
+				return AtomicInt.get(ref _num_threads);
+			}
 		}
 
 		/**
@@ -142,6 +169,13 @@ namespace Gpseq {
 		 */
 		public ThreadFactory factory {
 			get { return _factory; }
+		}
+
+		/**
+		 * A read-only view of the contexts in this pool.
+		 */
+		internal Gee.List<WorkerContext> contexts {
+			owned get { return _contexts.read_only_view; }
 		}
 
 		/**
@@ -168,8 +202,14 @@ namespace Gpseq {
 		public void submit (Task task) {
 			if (is_terminating_started) return;
 			WorkerThread? thread = WorkerThread.self();
+			WorkerContext? ctx;
 			if (thread != null && thread.pool == this) {
-				thread.push_task(task);
+				ctx = thread.context;
+				if (ctx != null) {
+					ctx.work_queue.offer_tail(task);
+				} else {
+					add_submission(task);
+				}
 			} else {
 				add_submission(task);
 			}
@@ -178,6 +218,7 @@ namespace Gpseq {
 
 		/**
 		 * Submits a task to the submission queue of this pool.
+		 *
 		 * @param task a task to submit
 		 */
 		private void add_submission (Task task) {
@@ -197,39 +238,13 @@ namespace Gpseq {
 
 		/**
 		 * Deactivates the given thread.
+		 *
 		 * @param t a thread to deactivate
 		 */
-		private void block_idle (WorkerThread t) {
+		internal void block_idle (WorkerThread t) {
 			_lock.lock();
 			_cond.wait(_lock);
 			_lock.unlock();
-		}
-
-		/**
-		 * Top-level loop for worker threads
-		 */
-		internal void work (WorkerThread thread) {
-			QueueBalancer bal = thread.balancer;
-			int barrens = 0;
-			while (true) {
-				if (is_terminating_started) return;
-				bal.tick(thread, false);
-				Task? pop = thread.work_queue.poll_tail();
-				if (pop != null) {
-					pop.compute();
-					bal.computed(thread, false);
-					barrens = 0;
-				} else {
-					bal.no_tasks(thread, false);
-					barrens++;
-					if (barrens > MAX_THREAD_IDLE_ITERATIONS) {
-						block_idle(thread);
-						if (is_terminating_started) return;
-						barrens = 0;
-					}
-					bal.scan(thread, false);
-				}
-			}
 		}
 
 		/**
@@ -249,8 +264,18 @@ namespace Gpseq {
 			}
 		}
 
-		internal void dec_terminating () {
-			AtomicInt.add(ref _terminating, -1);
+		internal void thread_terminated (WorkerThread thread) {
+			AtomicInt.add(ref _num_threads, -1);
+			lock (_slaves) {
+				_slaves.remove(thread);
+			}
+			while (true) {
+				int terminating = AtomicInt.get(ref _terminating);
+				if (terminating <= 0) break;
+				if ( AtomicInt.compare_and_exchange(ref _terminating, terminating, terminating-1) ) {
+					break;
+				}
+			}
 		}
 
 		/**
@@ -292,7 +317,8 @@ namespace Gpseq {
 		 * terminated.
 		 */
 		public void terminate () {
-			if (AtomicInt.compare_and_exchange(ref _terminating, -1, _threads.size)) {
+			int num = AtomicInt.get(ref _num_threads);
+			if ( AtomicInt.compare_and_exchange(ref _terminating, -1, num) ) {
 				_lock.lock();
 				_cond.broadcast();
 				_lock.unlock();
@@ -322,6 +348,7 @@ namespace Gpseq {
 		/**
 		 * Blocks until either all threads have completed termination or
 		 * //end_time// has passed.
+		 *
 		 * @param end_time the monotonic time to wait until
 		 * @see terminate
 		 * @see wait_termination
@@ -329,6 +356,22 @@ namespace Gpseq {
 		public void wait_termination_until (int64 end_time) {
 			while (!is_terminated && end_time > get_monotonic_time()) {
 				Thread.yield();
+			}
+		}
+
+		internal bool try_new_slave () {
+			while (true) {
+				int num = AtomicInt.get(ref _num_threads);
+				if (num >= max_threads) return false;
+				if ( AtomicInt.compare_and_exchange(ref _num_threads, num, num+1) ) {
+					return true;
+				}
+			}
+		}
+
+		internal void add_slave (WorkerThread thread) {
+			lock (_slaves) {
+				_slaves.add(thread);
 			}
 		}
 
