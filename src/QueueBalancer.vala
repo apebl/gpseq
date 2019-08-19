@@ -22,28 +22,28 @@ namespace Gpseq {
 	/**
 	 * An object that performs load balancing of work queues.
 	 *
-	 * A {@link WorkerThread} have its own {@link QueueBalancer}. so, the
-	 * balancers can declare and use member variables to store data per thread.
+	 * A {@link WorkerContext} have its own {@link QueueBalancer}. so, the
+	 * balancers can declare and use member variables to store data per context.
 	 *
-	 * All methods are called in the owner {@link WorkerThread} thread.
+	 * All methods are called in the owner thread.
 	 */
 	internal interface QueueBalancer : Object {
 		/**
 		 * Will be called after the thread failed to obtain a task.
 		 *
-		 * @param thread the worker thread
+		 * @param context the worker context
 		 */
-		public abstract void no_tasks (WorkerThread thread);
+		public abstract void no_tasks (WorkerContext context);
 
 		/**
-		 * Finds and takes tasks from other threads' work queue and the
+		 * Finds and takes tasks from other contexts' work queue and the
 		 * submission queue.
 		 *
 		 * This method must take at least one task, if possible -- at least one
-		 * task exists in other threads' work queue or the submission queue.
+		 * task exists in other contexts' work queue or the submission queue.
 		 *
-		 * @param thread the worker thread
+		 * @param context the worker context
 		 */
-		public abstract void scan (WorkerThread thread);
+		public abstract void scan (WorkerContext context);
 	}
 }

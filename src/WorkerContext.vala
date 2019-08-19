@@ -1,4 +1,4 @@
-/* Executor.vala
+/* WorkerContext.vala
  *
  * Copyright (C) 2019  Космос Преда́ние (kosmospredanie@yandex.ru)
  *
@@ -18,21 +18,42 @@
  * along with Gpseq.  If not, see <http://www.gnu.org/licenses/>.
  */
 
+using Gee;
+
 namespace Gpseq {
-	/**
-	 * An object that executes tasks. the execution is performed sequentially
-	 * or in parallel, depending on the executor implementation.
-	 */
-	public interface Executor : Object {
-		/**
-		 * Submits a task.
-		 * @param task a task to execute
-		 */
-		public abstract void submit (Task task);
+	internal class WorkerContext : Object {
+		private unowned WorkerPool _pool;
+		private WorkQueue _work_queue;
+		private QueueBalancer _balancer;
+
+		public WorkerContext (WorkerPool pool) {
+			_pool = pool;
+			_work_queue = new WorkQueue();
+			_balancer = new DefaultQueueBalancer();
+		}
+
+		public WorkerPool pool {
+			get {
+				return _pool;
+			}
+		}
 
 		/**
-		 * The parallelism level.
+		 * The work queue of this context.
 		 */
-		public abstract int parallels { get; }
+		internal WorkQueue work_queue {
+			get {
+				return _work_queue;
+			}
+		}
+
+		/**
+		 * The queue balancer of this context.
+		 */
+		internal QueueBalancer balancer {
+			get {
+				return _balancer;
+			}
+		}
 	}
 }

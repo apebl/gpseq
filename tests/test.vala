@@ -40,4 +40,5 @@ void register_tests () {
 	new StringSeqTests().register();
 	new NullableStringSeqTests().register();
 	new ObjSeqTests().register();
+	new BlockingTests().register();
 }
