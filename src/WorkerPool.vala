@@ -62,7 +62,7 @@ namespace Gpseq {
 		private ThreadFactory _factory;
 		private Gee.List<WorkerContext> _contexts;
 		private Gee.List<WorkerThread> _threads; // master threads
-		private Gee.List<WorkerThread> _slaves;
+		private Gee.Set<WorkerThread> _slaves;
 
 		private string _thread_name_prefix;
 		private int _next_thread_id; // AtomicInt
@@ -107,7 +107,7 @@ namespace Gpseq {
 			_factory = factory;
 			_contexts = new ArrayList<WorkerContext>();
 			_threads = new ArrayList<WorkerThread>();
-			_slaves = new ArrayList<WorkerThread>();
+			_slaves = new HashSet<WorkerThread>();
 			_submission_queue = new WorkQueue();
 
 			var sb = new StringBuilder("GpseqWorkerPool-");
@@ -396,7 +396,8 @@ namespace Gpseq {
 
 		internal void add_slave (WorkerThread thread) {
 			lock (_slaves) {
-				_slaves.add(thread);
+				bool changed = _slaves.add(thread);
+				assert(changed);
 			}
 		}
 
