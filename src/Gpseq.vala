@@ -120,6 +120,7 @@ namespace Gpseq {
 	 * @see Gpseq.blocking_get
 	 * @see WorkerThread.blocking
 	 */
+	[Version (since="0.2.0-alpha")]
 	public void blocking (VoidTaskFunc func) throws Error {
 		blocking_get<void*>(() => {
 			func();
@@ -152,6 +153,7 @@ namespace Gpseq {
 	 * @see Gpseq.blocking
 	 * @see WorkerThread.blocking
 	 */
+	[Version (since="0.2.0-alpha")]
 	public G blocking_get<G> (TaskFunc<G> func) throws Error {
 		WorkerThread? thread = WorkerThread.self();
 		if (thread == null) return func();

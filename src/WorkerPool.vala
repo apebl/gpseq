@@ -161,6 +161,7 @@ namespace Gpseq {
 		 *
 		 * This value is always >= {@link parallels}.
 		 */
+		[Version (since="0.2.0-alpha")]
 		public int max_threads {
 			get {
 				return AtomicInt.get(ref _max_threads);
@@ -174,6 +175,7 @@ namespace Gpseq {
 		/**
 		 * The current number of threads.
 		 */
+		[Version (since="0.2.0-alpha")]
 		public int num_threads {
 			get {
 				return AtomicInt.get(ref _num_threads);

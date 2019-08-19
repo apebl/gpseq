@@ -64,6 +64,7 @@ namespace Gpseq {
 		 * @see push
 		 * @see pop
 		 */
+		[Version (since="0.2.0-alpha")]
 		public static TaskEnv get_common_task_env () {
 			lock (stack) {
 				if (stack == null) {
@@ -80,6 +81,7 @@ namespace Gpseq {
 		 * @see pop
 		 * @see get_common_task_env
 		 */
+		[Version (since="0.2.0-alpha")]
 		public static void push (TaskEnv task_env) {
 			lock (stack) {
 				if (stack == null) {
@@ -95,6 +97,7 @@ namespace Gpseq {
 		 * @see push
 		 * @see get_common_task_env
 		 */
+		[Version (since="0.2.0-alpha")]
 		public static void pop () {
 			lock (stack) {
 				if (stack == null) {
@@ -121,6 +124,7 @@ namespace Gpseq {
 		 * @see push
 		 * @see pop
 		 */
+		[Version (since="0.2.0-alpha")]
 		public static void apply (TaskEnv task_env, VoidFunc func) {
 			push(task_env);
 			func();

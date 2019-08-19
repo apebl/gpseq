@@ -281,6 +281,7 @@ namespace Gpseq {
 		 * @see Gpseq.blocking
 		 * @see Gpseq.blocking_get
 		 */
+		[Version (since="0.2.0-alpha")]
 		public G blocking<G> (TaskFunc<G> func) throws Error {
 			lock (_context) {
 				if (_context == null) {
