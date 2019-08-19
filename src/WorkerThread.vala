@@ -232,11 +232,15 @@ namespace Gpseq {
 
 		/**
 		 * Starts this thread.
+		 *
+		 * @throws Error if a system thread can not be created, due to resource
+		 * limits, etc.
 		 */
-		public void start () {
+		public void start () throws Error {
 			lock (_thread) {
 				lock (threads) {
-					_thread = new Thread<void*>(_name, run);
+					var thread = new Thread<void*>.try(_name, run);
+					_thread = thread;
 					set_thread(_thread, this);
 				}
 			}
@@ -288,13 +292,21 @@ namespace Gpseq {
 				return func();
 			}
 
-			WorkerThread slave;
+			WorkerThread? slave;
 			lock (_context) {
 				_blocked = true;
 				slave = new WorkerThread.slave(this);
-				_pool.add_slave(slave);
 			}
-			slave.start();
+
+			_pool.add_slave((!)slave);
+			try {
+				((!)slave).start();
+			} catch (Error err) {
+				_pool.new_slave_failed((!)slave);
+				move_context((!)slave, this);
+			}
+			slave = null;
+
 			try {
 				return func();
 			} catch (Error err) {

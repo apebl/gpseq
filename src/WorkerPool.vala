@@ -78,8 +78,11 @@ namespace Gpseq {
 
 		/**
 		 * Creates a new worker pool, with default settings.
+		 *
+		 * @throws Error if threads can not be created, due to resource limits,
+		 * etc.
 		 */
-		public WorkerPool.with_defaults ()
+		public WorkerPool.with_defaults () throws Error
 		{
 			// try 2x processors
 			uint processors = GLib.get_num_processors();
@@ -90,10 +93,14 @@ namespace Gpseq {
 
 		/**
 		 * Creates a new worker pool.
+		 *
 		 * @param parallels the number of threads
 		 * @param factory a thread factory to create new threads
+		 *
+		 * @throws Error if threads can not be created, due to resource limits,
+		 * etc.
 		 */
-		public WorkerPool (int parallels, ThreadFactory factory)
+		public WorkerPool (int parallels, ThreadFactory factory) throws Error
 				requires (0 < parallels)
 		{
 			_max_threads = int.max(parallels, DEFAULT_MAX_THREADS);
@@ -116,7 +123,7 @@ namespace Gpseq {
 			}
 		}
 
-		private void init_threads (int n) {
+		private void init_threads (int n) throws Error {
 			_num_threads = n;
 			for (int i = 0; i < n; i++) {
 				WorkerContext ctx = new WorkerContext(this);
@@ -125,8 +132,17 @@ namespace Gpseq {
 				_contexts.add(ctx);
 				_threads.add(t);
 			}
-			foreach (WorkerThread t in _threads) {
-				t.start();
+
+			int success = 0;
+			try {
+				foreach (WorkerThread t in _threads) {
+					t.start();
+					success++;
+				}
+			} catch (Error err) {
+				terminate_n(success);
+				wait_termination();
+				throw err;
 			}
 		}
 
@@ -318,6 +334,15 @@ namespace Gpseq {
 		 */
 		public void terminate () {
 			int num = AtomicInt.get(ref _num_threads);
+			terminate_n(num);
+		}
+
+		/**
+		 * Starts terminating N threads.
+		 *
+		 * @param num the number of threads to terminate
+		 */
+		private void terminate_n (int num) {
 			if ( AtomicInt.compare_and_exchange(ref _terminating, -1, num) ) {
 				_lock.lock();
 				_cond.broadcast();
@@ -372,6 +397,13 @@ namespace Gpseq {
 		internal void add_slave (WorkerThread thread) {
 			lock (_slaves) {
 				_slaves.add(thread);
+			}
+		}
+
+		internal void new_slave_failed (WorkerThread thread) {
+			AtomicInt.add(ref _num_threads, -1);
+			lock (_slaves) {
+				_slaves.remove(thread);
 			}
 		}
 
