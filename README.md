@@ -31,7 +31,7 @@ and [gtkdoc (C API)](https://gitlab.com/kosmospredanie/gpseq/-/jobs/artifacts/ma
 
 ## Features
 
-- Work-stealing task scheduling
+- *Work-stealing* and *managed blocking* task scheduling
 - Fork-join parallelism
 - Functional programming for data processing with parallel execution support --
 like Java's streams or C#'s LINQ
@@ -141,6 +141,53 @@ void main () {
 	future.wait();
 	print("%d\n", sum); // 100
 }
+```
+
+### Managed blocking
+
+Managed blocking is a way to run blocking tasks, keeping sufficient parallelism.
+
+It uses an additional thread to process the remaining tasks while the current
+thread is blocked. It is similar to the behavior of the scheduler of Go
+language.
+
+Without managed blocking:
+
+```vala
+const ulong SEC = 1000000;
+
+Future<void*> future = Future.of<void*>(null);
+for (int i = 0; i < 1000; i++) {
+	var f = task<void*>(() => {
+		Thread.usleep(1 * SEC);
+		return null;
+	});
+	future = future.flat_map<void*>(g => f);
+}
+future.wait();
+
+// very much time consuming, because only a limited number of threads in the
+// thread pool process the tasks.
+```
+
+With managed blocking:
+
+```vala
+const ulong SEC = 1000000;
+
+Future<void*> future = Future.of<void*>(null);
+for (int i = 0; i < 1000; i++) {
+	var f = task<void*>(() => {
+		blocking(() => {
+			Thread.usleep(1 * SEC);
+		});
+		return null;
+	});
+	future = future.flat_map<void*>(g => f);
+}
+future.wait();
+
+// takes about 1 second only.
 ```
 
 ## License
