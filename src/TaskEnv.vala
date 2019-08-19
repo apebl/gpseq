@@ -24,6 +24,7 @@ namespace Gpseq {
 	 */
 	public abstract class TaskEnv : Object {
 		private static TaskEnv? default_task_env;
+		private static Gee.ArrayQueue<TaskEnv> stack;
 
 		/**
 		 * Gets the default task environment.
@@ -50,6 +51,80 @@ namespace Gpseq {
 			lock (default_task_env) {
 				default_task_env = task_env;
 			}
+		}
+
+		/**
+		 * Gets the common task environment.
+		 *
+		 * If //task env stack// is not empty, returns the top of the stack. If
+		 * empty, returns the default task environment.
+		 *
+		 * @return the common task environment
+		 * @see get_default_task_env
+		 * @see push
+		 * @see pop
+		 */
+		public static TaskEnv get_common_task_env () {
+			lock (stack) {
+				if (stack == null) {
+					stack = new Gee.ArrayQueue<TaskEnv>();
+				}
+				return stack.is_empty ? get_default_task_env() : stack.peek_head();
+			}
+		}
+
+		/**
+		 * Pushs the given task environment into //task env stack//.
+		 *
+		 * @param task_env a task environment
+		 * @see pop
+		 * @see get_common_task_env
+		 */
+		public static void push (TaskEnv task_env) {
+			lock (stack) {
+				if (stack == null) {
+					stack = new Gee.ArrayQueue<TaskEnv>();
+				}
+				stack.offer_head(task_env);
+			}
+		}
+
+		/**
+		 * Remove an element from the top of //task env stack//.
+		 *
+		 * @see push
+		 * @see get_common_task_env
+		 */
+		public static void pop () {
+			lock (stack) {
+				if (stack == null) {
+					stack = new Gee.ArrayQueue<TaskEnv>();
+				}
+				assert(!stack.is_empty);
+				stack.poll_head();
+			}
+		}
+
+		/**
+		 * Runs the function with the given task environment as the common task
+		 * environment.
+		 *
+		 * This is equivalent to:
+		 *
+		 * {{{
+		 * TaskEnv.push(task_env);
+		 * func();
+		 * TaskEnv.pop();
+		 * }}}
+		 *
+		 * @see get_common_task_env
+		 * @see push
+		 * @see pop
+		 */
+		public static void apply (TaskEnv task_env, VoidFunc func) {
+			push(task_env);
+			func();
+			pop();
 		}
 
 		/**

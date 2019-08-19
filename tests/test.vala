@@ -24,7 +24,7 @@ TaskEnv initial_task_env;
 
 void main (string[] args) {
 	Test.init(ref args);
-	initial_task_env = TaskEnv.get_default_task_env();
+	initial_task_env = TaskEnv.get_common_task_env();
 	register_tests();
 	Test.run();
 }

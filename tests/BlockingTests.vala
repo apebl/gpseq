@@ -30,7 +30,7 @@ public class BlockingTests : Gpseq.TestSuite {
 	}
 
 	public override void set_up () {
-		TaskEnv env = TaskEnv.get_default_task_env();
+		TaskEnv env = TaskEnv.get_common_task_env();
 		WorkerPool pool = (WorkerPool) env.executor;
 		pool.max_threads = int.max(pool.parallels, MAX_THREADS);
 	}

@@ -65,7 +65,7 @@ namespace Gpseq {
 			G[] temp = new G[len];
 			Comparator<G> cmp = new Comparator<G>((owned) compare);
 
-			TaskEnv env = TaskEnv.get_default_task_env();
+			TaskEnv env = TaskEnv.get_common_task_env();
 			Executor exe = env.executor;
 			int num_threads = exe.parallels;
 			int64 threshold = env.resolve_threshold(len, num_threads);
@@ -80,8 +80,8 @@ namespace Gpseq {
 	/**
 	 * Schedules the given function to execute asynchronously.
 	 *
-	 * The {@link Executor} of {@link TaskEnv.get_default_task_env} will
-	 * execute the function. By default, it is a {@link WorkerPool} which uses
+	 * The {@link Executor} of {@link TaskEnv.get_common_task_env} will execute
+	 * the function. By default, it is a {@link WorkerPool} which uses
 	 * work-stealing algorithm.
 	 *
 	 * @param func a task function to execute
@@ -92,7 +92,7 @@ namespace Gpseq {
 	 */
 	public Future<G> task<G> (owned TaskFunc<G> func) {
 		var task = new FuncTask<G>((owned) func);
-		TaskEnv.get_default_task_env().executor.submit(task);
+		TaskEnv.get_common_task_env().executor.submit(task);
 		return task.future;
 	}
 

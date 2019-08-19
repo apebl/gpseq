@@ -140,7 +140,7 @@ namespace Gpseq {
 		 *
 		 * @param array a gpointer array
 		 * @param env a task environment. If not specified,
-		 * {@link TaskEnv.get_default_task_env} is used.
+		 * {@link TaskEnv.get_common_task_env} is used.
 		 * @return the result seq
 		 */
 		public static Seq<G> of_array<G> (G[] array, TaskEnv? env = null) {
@@ -164,7 +164,7 @@ namespace Gpseq {
 		 *
 		 * @param array a gpointer array
 		 * @param env a task environment. If not specified,
-		 * {@link TaskEnv.get_default_task_env} is used.
+		 * {@link TaskEnv.get_common_task_env} is used.
 		 * @return the result seq
 		 */
 		public static Seq<G> of_owned_array<G> (owned G[] array, TaskEnv? env = null) {
@@ -187,7 +187,7 @@ namespace Gpseq {
 		 *
 		 * @param array a generic array
 		 * @param env a task environment. If not specified,
-		 * {@link TaskEnv.get_default_task_env} is used.
+		 * {@link TaskEnv.get_common_task_env} is used.
 		 * @return the result seq
 		 */
 		public static Seq<G> of_generic_array<G> (GenericArray<G> array, TaskEnv? env = null) {
@@ -211,7 +211,7 @@ namespace Gpseq {
 		 * @param size_known whether or not the estimated_size is an accurate
 		 * size
 		 * @param env a task environment. If not specified,
-		 * {@link TaskEnv.get_default_task_env} is used.
+		 * {@link TaskEnv.get_common_task_env} is used.
 		 * @return the result seq
 		 */
 		public static Seq<G> of_iterator<G> (Iterator<G> iterator,
@@ -233,7 +233,7 @@ namespace Gpseq {
 		 *
 		 * @param collection a collection
 		 * @param env a task environment. If not specified,
-		 * {@link TaskEnv.get_default_task_env} is used.
+		 * {@link TaskEnv.get_common_task_env} is used.
 		 * @return the result seq
 		 */
 		public static Seq<G> of_collection<G> (Collection<G> collection, TaskEnv? env = null) {
@@ -256,7 +256,7 @@ namespace Gpseq {
 		 *
 		 * @param list a list
 		 * @param env a task environment. If not specified,
-		 * {@link TaskEnv.get_default_task_env} is used.
+		 * {@link TaskEnv.get_common_task_env} is used.
 		 * @return the result seq
 		 */
 		public static Seq<G> of_list<G> (Gee.List<G> list, TaskEnv? env = null) {
@@ -270,7 +270,7 @@ namespace Gpseq {
 		 *
 		 * @param supplier a supplier
 		 * @param env a task environment. If not specified,
-		 * {@link TaskEnv.get_default_task_env} is used.
+		 * {@link TaskEnv.get_common_task_env} is used.
 		 * @return the result seq
 		 */
 		public static Seq<G> of_supplier<G> (Supplier<G> supplier, TaskEnv? env = null) {
@@ -284,7 +284,7 @@ namespace Gpseq {
 		 *
 		 * @param func a supply function
 		 * @param env a task environment. If not specified,
-		 * {@link TaskEnv.get_default_task_env} is used.
+		 * {@link TaskEnv.get_common_task_env} is used.
 		 * @return the result seq
 		 */
 		public static Seq<G> of_supply_func<G> (owned SupplyFunc<G> func, TaskEnv? env = null) {
@@ -311,7 +311,7 @@ namespace Gpseq {
 		 * @param next a mapping function to produce a new element by applying
 		 * to the previous element
 		 * @param env a task environment. If not specified,
-		 * {@link TaskEnv.get_default_task_env} is used.
+		 * {@link TaskEnv.get_common_task_env} is used.
 		 * @return the result seq
 		 */
 		public static Seq<G> iterate<G> (owned G seed,
@@ -341,11 +341,11 @@ namespace Gpseq {
 		 *
 		 * @param spliterator a spliterator used by the seq
 		 * @param env a task environment. If not specified,
-		 * {@link TaskEnv.get_default_task_env} is used.
+		 * {@link TaskEnv.get_common_task_env} is used.
 		 */
 		public Seq (Spliterator<G> spliterator, TaskEnv? env = null) {
 			_container = new DefaultContainer<G>(spliterator, null, new Consumer<G>());
-			_task_env = env != null ? env : TaskEnv.get_default_task_env();
+			_task_env = env != null ? env : TaskEnv.get_common_task_env();
 		}
 
 		private Seq.from_other (Seq<G> seq, Container<G,void*> container) {
