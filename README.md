@@ -104,11 +104,13 @@ Seq.of_generic_array<int>(arr)
 ```
 
 ```vala
-Seq.iterate<int>(9999, i => i >= 0, i => --i)
+var list = Seq.iterate<int>(9999, i => i >= 0, i => --i)
+    .parallel()
     .order_by()
-    .limit(5)
-    .foreach(g => print("%d ", g))
-    .and_then(g => print("\n"));
+    .collect( Collectors.to_list<int>() )
+    .value;
+
+Seq.of_list<int>(list).limit(5).foreach(g => print("%d ", g));
 // 0 1 2 3 4
 ```
 
