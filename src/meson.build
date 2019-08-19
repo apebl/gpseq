@@ -73,6 +73,7 @@ sources = files(
 	'ThreadFactory.vala',
 	'TimSort.vala',
 	'UnorderedSliceSpliterator.vala',
+	'VoidFunc.vala',
 	'VoidTaskFunc.vala',
 	'WorkQueue.vala',
 	'WorkerContext.vala',
