@@ -3,7 +3,7 @@
 [![pipeline status](https://gitlab.com/kosmospredanie/gpseq/badges/master/pipeline.svg?style=flat-square)](https://gitlab.com/kosmospredanie/gpseq/commits/master)
 [![coverage report](https://gitlab.com/kosmospredanie/gpseq/badges/master/coverage.svg?style=flat-square)](https://gitlab.com/kosmospredanie/gpseq/-/jobs/artifacts/master/file/coverage/index.html?job=test)
 
-Gpseq is a GObject utility library providing parallel data processing.
+Gpseq is a parallelism library for Vala and GObject.
 
 ```vala
 using Gpseq;

@@ -4,7 +4,7 @@ project('gpseq', 'vala', 'c',
 	meson_version: '>=0.49.0',
 	default_options: ['c_std=c89'])
 
-project_desc = 'A GObject utility library providing parallel data processing'
+project_desc = 'A parallelism library for Vala and GObject'
 
 libname = 'gpseq-1.0'
 Libname = 'Gpseq-1.0'

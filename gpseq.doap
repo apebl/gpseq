@@ -11,7 +11,7 @@ xmlns:foaf="http://xmlns.com/foaf/0.1/">
 	<download-page rdf:resource="https://gitlab.com/kosmospredanie/gpseq/tags" />
 	<bug-database rdf:resource="https://gitlab.com/kosmospredanie/gpseq/issues" />
 
-	<shortdesc xml:lang="en">A GObject utility library providing parallel data processing</shortdesc>
+	<shortdesc xml:lang="en">A parallelism library for Vala and GObject</shortdesc>
 
 	<maintainer>
 		<foaf:Person>
