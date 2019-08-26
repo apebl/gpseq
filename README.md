@@ -24,173 +24,27 @@ void main () {
 // PIG
 ```
 
-Read [wiki](https://gitlab.com/kosmospredanie/gpseq/wikis),
-[snippets](https://gitlab.com/kosmospredanie/gpseq/snippets),
-[valadoc](https://gitlab.com/kosmospredanie/gpseq/-/jobs/artifacts/master/file/valadoc/index.html?job=build),
-and [gtkdoc (C API)](https://gitlab.com/kosmospredanie/gpseq/-/jobs/artifacts/master/file/gtkdoc/html/index.html?job=build).
-
 ## Features
 
-- *Work-stealing* and *managed blocking* task scheduling
-- Fork-join parallelism
-- Functional programming for data processing with parallel execution support --
-like Java's streams or C#'s LINQ
+- [*Work-stealing*](https://en.wikipedia.org/wiki/Work_stealing) and *managed
+blocking* task scheduling: Similar behavior to Go scheduler
+- Functional programming for data processing with parallel execution support:
+An equivalent to Java's
+[streams](https://docs.oracle.com/en/java/javase/11/docs/api/java.base/java/util/stream/Stream.html)
+- [Fork-join](https://en.wikipedia.org/wiki/Fork–join_model) parallelism
 - Parallel sorting
+- [Futures and promises](https://en.wikipedia.org/wiki/Futures_and_promises)
 - 64-bit atomic operations
-- Futures and promises
-- Optional objects
 - Overflow safe arithmetic functions for signed integers
 - ...
 
-## Examples
+## Documentation
 
-### iterate, collectors, and sequential operations
+Read [wiki](https://gitlab.com/kosmospredanie/gpseq/wikis),
+[valadoc](https://gitlab.com/kosmospredanie/gpseq/-/jobs/artifacts/master/file/valadoc/index.html?job=build),
+and [gtkdoc (C API)](https://gitlab.com/kosmospredanie/gpseq/-/jobs/artifacts/master/file/gtkdoc/html/index.html?job=build).
 
-```vala
-using Gpseq;
-using Gpseq.Collectors;
-
-void main () {
-    var list = Seq.iterate<int>(0, i => i < 100, i => ++i)
-        .parallel()
-        .filter(i => i%2 == 0)
-        .limit(5)
-        .collect( to_list<int>() )
-        .value; // Gpseq.Future.value
-
-    // Sequential (non-parallel) operations do not have to wait()
-    Seq.of_list<int>(list).foreach(g => print("%d ", g));
-}
-
-// output:
-// 0 2 4 6 8
-```
-
-### Error handling
-
-```vala
-try {
-    Seq.iterate<int>(0, i => i < 100, i => ++i)
-        .parallel()
-        .foreach(i => {
-            if (i == 42) {
-                throw new OptionalError.NOT_PRESENT("%d? Oops!", i);
-            }
-        }).wait(); // Gpseq.Future.wait() throws Error
-} catch (Error err) {
-    error(err.message);
-}
-
-// ERROR: 42? Oops!
-```
-
-### Parallel array sorting
-
-```vala
-var arr = new GenericArray<int>();
-Seq.iterate<int>(9999, i => i >= 0, i => --i).foreach(i => arr.add(i));
-Seq.of_generic_array<int>(arr)
-    .limit(5)
-    .foreach(g => print("%d ", g))
-    .and_then(g => print("\n"));
-// 9999 9998 9997 9996 9995
-
-parallel_sort<int>(arr.data).wait();
-Seq.of_generic_array<int>(arr)
-    .limit(5)
-    .foreach(g => print("%d ", g))
-    .and_then(g => print("\n"));
-// 0 1 2 3 4
-```
-
-```vala
-var list = Seq.iterate<int>(9999, i => i >= 0, i => --i)
-    .parallel()
-    .order_by()
-    .collect( Collectors.to_list<int>() )
-    .value;
-
-Seq.of_list<int>(list).limit(5).foreach(g => print("%d ", g));
-// 0 1 2 3 4
-```
-
-### Work-stealing task scheduling
-
-```vala
-using Gpseq;
-
-void main () {
-    Future<string> future = task<string>(() => "What's up?");
-    print("%s\n", future.value); // What's up?
-}
-```
-
-```vala
-using Gpseq;
-
-void main () {
-    int sum = 0;
-    Future<void*> future = Future.of<void*>(null);
-
-    for (int i = 0; i < 100; i++) {
-        var f = task<void*>(() => {
-            AtomicInt.inc(ref sum);
-            return null;
-        });
-        future = future.flat_map(val => f);
-    }
-
-    future.wait();
-    print("%d\n", sum); // 100
-}
-```
-
-### Managed blocking
-
-Managed blocking is a way to run blocking tasks, keeping sufficient parallelism.
-
-It uses an additional thread to process the remaining tasks while the current
-thread is blocked. It is similar to the behavior of the scheduler of Go
-language.
-
-Without managed blocking:
-
-```vala
-const ulong SEC = 1000000;
-
-Future<void*> future = Future.of<void*>(null);
-for (int i = 0; i < 1000; i++) {
-    var f = task<void*>(() => {
-        Thread.usleep(1 * SEC);
-        return null;
-    });
-    future = future.flat_map<void*>(g => f);
-}
-future.wait();
-
-// very much time consuming, because only a limited number of threads in the
-// thread pool process the tasks.
-```
-
-With managed blocking:
-
-```vala
-const ulong SEC = 1000000;
-
-Future<void*> future = Future.of<void*>(null);
-for (int i = 0; i < 1000; i++) {
-    var f = task<void*>(() => {
-        blocking(() => {
-            Thread.usleep(1 * SEC);
-        });
-        return null;
-    });
-    future = future.flat_map<void*>(g => f);
-}
-future.wait();
-
-// takes about 1 second only.
-```
+There is a developer's guide in the wiki.
 
 ## License
 
