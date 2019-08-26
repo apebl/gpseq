@@ -56,9 +56,9 @@ namespace Gpseq {
 	 * Terminal operations may traverse the source to produce a result or a
 	 * side-effect. Almost all of terminal operations are //eager//. They
 	 * complete their traversal of the input and processing of the pipeline
-	 * before returning. The only exceptions are {@link Seq.iterator} and
-	 * {@link Seq.spliterator}. They are provided for client-controlled
-	 * traversals. After the terminal operation is performed, the seq is closed
+	 * before the future completed. The only exceptions are {@link Seq.iterator}
+	 * and {@link Seq.spliterator}. They are provided for client-controlled
+	 * traversals. After a terminal operation is performed, the seq is closed
 	 * and can no longer be used.
 	 *
 	 * === Short-circuiting ===
