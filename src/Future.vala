@@ -164,6 +164,33 @@ namespace Gpseq {
 		}
 
 		/**
+		 * If this future is completed with an exception, maps the exception to
+		 * another exception by applying the given function to the exception in
+		 * future, otherwise the result future just uses the value of this
+		 * future.
+		 *
+		 * If this future is completed with an exception or the function throws
+		 * an exception, the result future is completed with the exception.
+		 *
+		 * @param func a function applied to exception
+		 * @return the mapped future
+		 */
+		[Version (since="0.2.0-beta")]
+		public Future<G> map_err (owned MapErrorFunc func) {
+			return transform<G>(future => {
+				var promise = new Promise<G>();
+				try {
+					G newval = future.wait();
+					promise.set_value((owned) newval);
+				} catch (Error err) {
+					Error newerr = func((owned) err);
+					promise.set_exception((owned) newerr);
+				}
+				return promise.future;
+			});
+		}
+
+		/**
 		 * Maps a future value to another value by applying the given function
 		 * to the value in future.
 		 *
