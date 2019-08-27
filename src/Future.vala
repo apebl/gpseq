@@ -41,6 +41,13 @@ namespace Gpseq {
 			return promise.future;
 		}
 
+		[Version (since="0.2.0-beta")]
+		public static Future<G> err<G> (owned Error exception) {
+			var promise = new Promise<G>();
+			promise.set_exception((owned) exception);
+			return promise.future;
+		}
+
 		/**
 		 * Whether or not the future had already been completed with a value or
 		 * an exception.
