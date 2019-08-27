@@ -35,12 +35,22 @@ namespace Gpseq {
 		public delegate unowned A LightMapFunc<A,G> (G value) throws Error;
 		public delegate C ZipFunc<A,B,C> (A a, B b) throws Error;
 
+		/**
+		 * Creates a future completed with the given value.
+		 *
+		 * @return the future completed with the given value
+		 */
 		public static Future<G> of<G> (owned G value) {
 			var promise = new Promise<G>();
 			promise.set_value((owned) value);
 			return promise.future;
 		}
 
+		/**
+		 * Creates a future completed with the given exception.
+		 *
+		 * @return the future completed with the given exception
+		 */
 		[Version (since="0.2.0-beta")]
 		public static Future<G> err<G> (owned Error exception) {
 			var promise = new Promise<G>();
