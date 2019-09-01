@@ -2,9 +2,14 @@
 
 ## Build requirements
 
+Required:
+
 - valac >= 0.39.6
 - meson >= 0.49
 - ninja (or other meson backend to use)
+
+Optional:
+
 - g-ir-compiler and *.gir of the dependencies (optional; to build typelib)
 - valadoc (optional; to build documentation)
 - gtk-doc-tools (optional; to build gtkdoc)
@@ -18,7 +23,7 @@
 ## Build
 
 ```sh
-cd <project-root>
+cd gpseq
 meson _build --buildtype=release
 ninja -C _build
 ```
@@ -39,18 +44,18 @@ meson test -C _build -t 20 --print-errorlogs --verbose
 
 ### Install
 
-Run `ninja install -C _build` after meson build.
+Run (sudo) `ninja -C _build install` after meson build.
 
-To uninstall: `ninja uninstall -C _build`
+To uninstall: (sudo) `ninja -C _build uninstall`
 
 You can specify the installation prefix by adding a `--prefix` option to meson
 build:
 
 ```sh
 meson _build --buildtype=release --prefix=/usr
-ninja install -C _build
+sudo ninja -C _build install
 ```
 
 ### Build options
 
-See meson_options.txt.
+See [meson_options.txt](meson_options.txt).
