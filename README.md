@@ -46,6 +46,10 @@ and [gtkdoc (C API)](https://gitlab.com/kosmospredanie/gpseq/-/jobs/artifacts/ma
 
 There is a developer's guide in the wiki.
 
+## Install
+
+See the [installation guide](INSTALL.md).
+
 ## License
 
 Gpseq is free software: you can redistribute it and/or modify it under
