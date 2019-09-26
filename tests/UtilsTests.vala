@@ -36,6 +36,7 @@ public class UtilsTests : Gpseq.TestSuite {
 		add_test("parallel_sort<unowned string>:few", test_parallel_sort_unowned_strings_few);
 		add_test("parallel_sort:check-stable", test_parallel_sort_stable);
 		add_test("task", test_task);
+		add_test("join", test_join);
 		add_test("overflow:int", test_overflow_int);
 		add_test("overflow:long", test_overflow_long);
 		add_test("overflow:int32", test_overflow_int32);
@@ -213,6 +214,23 @@ public class UtilsTests : Gpseq.TestSuite {
 		var future = Gpseq.task<int>(() => 726);
 		assert(future.value == 726);
 		assert(future.exception == null);
+	}
+
+	private void test_join () {
+		assert( fibonacci(10) == 55 );
+	}
+
+	private int fibonacci (int n) {
+		if (n <= 1) {
+			return n;
+		} else {
+			try {
+				var (left, right) = join<int?>( () => fibonacci(n-1), () => fibonacci(n-2) );
+				return left + right;
+			} catch (Error err) {
+				error(err.message);
+			}
+		}
 	}
 
 	private void test_overflow_int () {

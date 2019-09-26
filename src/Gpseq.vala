@@ -160,6 +160,56 @@ namespace Gpseq {
 	}
 
 	/**
+	 * Runs the subtasks and returns the results.
+	 *
+	 * Submits the left task to the executor first, runs the right task in
+	 * the current thread, and waits for them to complete.
+	 *
+	 * This method uses the executor of the common task env.
+	 *
+	 * {{{
+	 * int fibonacci (int n) {
+	 *     if (n <= 1) {
+	 *         return n;
+	 *     } else {
+	 *         // Note. Not 'int' but 'int?' (boxed value type)
+	 *         var (left, right) = join<int?>( () => fibonacci(n-1),
+	 *                                         () => fibonacci(n-2) );
+	 *         return left + right;
+	 *     }
+	 * }
+	 * }}}
+	 *
+	 * @param left the left task
+	 * @param right the right task
+	 * @return (left-result, right-result) An array containing the two results.
+	 *
+	 * @throws Error the error thrown by the subtasks
+	 *
+	 * @see ForkJoinTask
+	 * @see SpliteratorTask
+	 * @see TaskEnv.get_common_task_env
+	 */
+	[Version (since="0.3.0")]
+	public G[] join<G> (owned TaskFunc<G> left, owned TaskFunc<G> right) throws Error {
+		var executor = TaskEnv.get_common_task_env().executor;
+		var left_task = new FuncTask<G>((owned) left);
+		executor.submit(left_task);
+		var right_task = new FuncTask<G>((owned) right);
+		right_task.invoke();
+		G right_result = right_task.future.value;
+		G left_result;
+		WorkerThread? t = WorkerThread.self();
+		if (t == null) {
+			left_result = left_task.future.wait();
+		} else {
+			t.task_join(left_task);
+			left_result = left_task.future.value;
+		}
+		return { left_result, right_result };
+	}
+
+	/**
 	 * Gets the current value of //atomic//.
 	 *
 	 * This call acts as a full compiler and hardware
