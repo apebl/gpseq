@@ -33,7 +33,7 @@ public abstract class SeqTests<G> : Gpseq.TestSuite {
 	private int64 __limit;
 	private int64 __oversize;
 
-	public SeqTests (string name) {
+	protected SeqTests (string name) {
 		base(name);
 		register_tests();
 	}

@@ -44,7 +44,7 @@ namespace Gpseq {
 		 * @param max_depth max task split depth. unlimited if negative
 		 * @param executor an executor that will invoke the task
 		 */
-		public ForkJoinTask (
+		protected ForkJoinTask (
 				ForkJoinTask<G>? parent,
 				int64 threshold, int max_depth, Executor executor)
 			requires (threshold > 0)
