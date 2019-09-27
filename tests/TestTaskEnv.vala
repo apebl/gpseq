@@ -34,7 +34,11 @@ public class TestTaskEnv : TaskEnv {
 	private Executor _executor;
 
 	private TestTaskEnv () {
-		_executor = new WorkerPool.with_defaults();
+		try {
+			_executor = new WorkerPool.with_defaults();
+		} catch (Error err) {
+			error(err.message);
+		}
 	}
 
 	public override Executor executor {
