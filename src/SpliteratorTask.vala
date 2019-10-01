@@ -38,7 +38,7 @@ namespace Gpseq {
 		 * @param max_depth max task split depth. unlimited if negative
 		 * @param executor an executor that will invoke the task
 		 */
-		public SpliteratorTask (
+		protected SpliteratorTask (
 				Spliterator<G> spliterator, SpliteratorTask<R,G>? parent,
 				int64 threshold, int max_depth, Executor executor)
 		{

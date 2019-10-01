@@ -55,6 +55,7 @@ formatting, etc.)
 - deps: Updating dependencies
 - revert: Reverting a previous commit
 - build: Changes that affect the build system
+- ci: Changes to CI configuration
 - test: Adding missing tests or correcting existing tests
 - release: Changes to release new version (version string changes, etc.)
 - chore: Other changes with no production code change

@@ -24,7 +24,7 @@ namespace Gpseq {
 		private GLib.TestSuite _suite;
 		private Adaptor[] _adaptors = {};
 
-		public TestSuite (owned string name) {
+		protected TestSuite (owned string name) {
 			_name = (owned) name;
 			_suite = new GLib.TestSuite(_name);
 		}
