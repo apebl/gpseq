@@ -1,5 +1,5 @@
 project('gpseq', 'vala', 'c',
-	version: '0.2.1',
+	version: '0.2.2',
 	license: 'LGPL3',
 	meson_version: '>=0.49.0',
 	default_options: ['c_std=c89'])
