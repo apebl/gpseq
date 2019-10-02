@@ -46,7 +46,6 @@ public class FutureTests : Gpseq.TestSuite {
 		promise = new Promise<int>();
 		future = promise.future;
 		assert(!future.ready);
-		assert(future.exception == null);
 		promise.set_exception( new OptionalError.NOT_PRESENT("An error") );
 		assert(future.ready);
 		assert(future.exception != null);
@@ -105,11 +104,11 @@ public class FutureTests : Gpseq.TestSuite {
 	private void test_transform () {
 		var promise = new Promise<int>();
 		var future = promise.future.transform<string>(f => {
-			assert(f.ready && f.exception == null);
+			assert(f.future().ready && f.exception == null);
 			return Future.of<string>( f.value.to_string() );
 		});
 		promise.set_value(726);
-		assert(future.ready);
+		assert(future.future().ready);
 		assert(future.value == "726");
 		assert(future.exception == null);
 	}
@@ -122,7 +121,7 @@ public class FutureTests : Gpseq.TestSuite {
 		}, promise2.future);
 		promise.set_value(726);
 		promise2.set_value(10);
-		assert(future.ready);
+		assert(future.future().ready);
 		assert(future.value == 7260);
 		assert(future.exception == null);
 
@@ -133,7 +132,7 @@ public class FutureTests : Gpseq.TestSuite {
 		}, promise2.future);
 		promise.set_exception( new OptionalError.NOT_PRESENT("An error") );
 		promise2.set_value(10);
-		assert(future.ready);
+		assert(future.future().ready);
 		assert(future.exception != null);
 	}
 }

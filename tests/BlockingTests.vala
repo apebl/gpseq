@@ -44,7 +44,7 @@ public class BlockingTests : Gpseq.TestSuite {
 				});
 				return null;
 			});
-			future = future.flat_map<void*>(g => f);
+			future = (Future<void*>) future.flat_map<void*>(g => f);
 		}
 		try {
 			assert( future.wait_until(get_monotonic_time() + 2*SECONDS) );

@@ -59,7 +59,7 @@ namespace Gpseq {
 			_future.set_exception((owned) exception);
 		}
 
-		private class Future<G> : Object, Gpseq.Future<G> {
+		private class Future<G> : Gpseq.Future<G> {
 			private Mutex _mutex;
 			private Cond _cond;
 			private State _state;
@@ -74,7 +74,7 @@ namespace Gpseq {
 				_callbacks = new CallbackFuncObject[0];
 			}
 
-			public bool ready {
+			public override bool ready {
 				get {
 					_mutex.lock();
 					bool result = _state != State.INIT;
@@ -83,13 +83,7 @@ namespace Gpseq {
 				}
 			}
 
-			public Error? exception {
-				get {
-					return _exception;
-				}
-			}
-
-			public unowned G wait () throws Error {
+			public override unowned G wait () throws Error {
 				_mutex.lock();
 				switch (_state) {
 				case State.READY:
@@ -110,7 +104,7 @@ namespace Gpseq {
 				}
 			}
 
-			public bool wait_until (int64 end_time, out unowned G? value = null) throws Error {
+			public override bool wait_until (int64 end_time, out unowned G? value = null) throws Error {
 				_mutex.lock();
 				switch (_state) {
 				case State.READY:
@@ -136,21 +130,27 @@ namespace Gpseq {
 				}
 			}
 
-			public Gpseq.Future<A> transform<A> (owned Gpseq.Future.TransformFunc<A,G> func) {
+			public override Result<A> transform<A> (owned Result.TransformFunc<A,G> func) {
 				_mutex.lock();
 				switch (_state) {
 				case State.READY:
 				case State.EXCEPTION:
 					_mutex.unlock();
-					Gpseq.Future<A> result = func(this);
+					Result<A> result = func(this);
+					if ( !(result is Future) ) {
+						result = Gpseq.Future.done<A>(result);
+					}
 					return result;
 				case State.INIT:
 					var promise = new Promise<A>();
 					_callbacks += CallbackFuncObject(() => {
-						Gpseq.Future<A> result = func(this);
+						Result<A> result = func(this);
+						if ( !(result is Future) ) {
+							result = Gpseq.Future.done<A>(result);
+						}
 						result.then(future => {
 							try {
-								promise.set_value( result.wait() );
+								promise.set_value( ((Future<A>)result).wait() );
 							} catch (Error err) {
 								promise.set_exception((owned) err);
 							}

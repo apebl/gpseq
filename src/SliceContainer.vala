@@ -57,7 +57,7 @@ namespace Gpseq {
 		public override Future<void*> start (Seq seq) {
 			var future = parent != null ? parent.start(seq) : Future.of<void*>(null);
 			set_parent(null);
-			return future.flat_map<void*>(value => {
+			return (Future<void*>) future.flat_map<void*>(value => {
 				return set_up(seq);
 			});
 		}
@@ -79,7 +79,7 @@ namespace Gpseq {
 						_skip, _limit, spliterator, null,
 						threshold, max_depth, seq.task_env.executor);
 				task.fork();
-				return task.future.map<void*>(value => {
+				return (Future<void*>) task.future.map<void*>(value => {
 					ArrayBuffer<G> result = value;
 					spliterator = new ArrayBufferSpliterator<G>(result, 0, result.size);
 					_started = true;

@@ -23,18 +23,11 @@ namespace Gpseq {
 	 * A value which might not yet be available, but will be available at some
 	 * point.
 	 *
-	 * Futures must be thread-safe.
+	 * Futures are thread-safe.
 	 *
 	 * @see Promise
 	 */
-	[GenericAccessors]
-	public interface Future<G> : Object {
-		public delegate Future<A> TransformFunc<A,G> (Future<G> future);
-		public delegate Future<A> FlatMapFunc<A,G> (G value);
-		public delegate A MapFunc<A,G> (G value) throws Error;
-		public delegate unowned A LightMapFunc<A,G> (G value) throws Error;
-		public delegate C ZipFunc<A,B,C> (A a, B b) throws Error;
-
+	public abstract class Future<G> : Object, Gee.Hashable<Result<G>>, Result<G> {
 		/**
 		 * Creates a future completed with the given value.
 		 *
@@ -49,6 +42,7 @@ namespace Gpseq {
 		/**
 		 * Creates a future completed with the given exception.
 		 *
+		 * @param exception an error
 		 * @return the future completed with the given exception
 		 */
 		[Version (since="0.2.0-beta")]
@@ -59,39 +53,55 @@ namespace Gpseq {
 		}
 
 		/**
+		 * Creates a future completed with the given result.
+		 *
+		 * @param result a result
+		 * @return the future
+		 */
+		[Version (since="0.3.0")]
+		public static Future<G> done<G> (Result<G> result) {
+			if (result.exception == null) {
+				return of<G>(result.value);
+			} else {
+				return err<G>(result.exception);
+			}
+		}
+
+		/**
 		 * Whether or not the future had already been completed with a value or
 		 * an exception.
 		 */
 		public abstract bool ready { get; }
 
-		/**
-		 * The value of the future. If value is not ready, getting value will
-		 * block until value is ready.
-		 *
-		 * If the future is completed with an exception, the getting value
-		 * fails with {@link GLib.error}.
-		 */
-		public G value {
-			get {
-				try {
-					return wait();
-				} catch (Error err) {
-					error("%s", err.message);
-				}
-			}
+		[Version (since="0.3.0")]
+		public Future<G> future () {
+			return this;
 		}
 
 		/**
-		 * The exception of the future, or null if the future is not yet
-		 * completed or successfully completed with a value.
-		 */
-		public abstract Error? exception { get; }
-
-		/**
-		 * Waits until the future is completed.
+		 * Waits until the future is completed and gets ths result.
+		 *
+		 * It is an alias for {@link wait}.
+		 *
+		 * @return the value associated with the future if the future is
+		 * completed with a value
 		 *
 		 * @throws Error if the future is completed with an exception, the
-		 * error will be thrown
+		 * exception will be thrown
+		 */
+		[Version (since="0.3.0")]
+		public new unowned G get () throws Error {
+			return wait();
+		}
+
+		/**
+		 * Waits until the future is completed and gets ths result.
+		 *
+		 * @return the value associated with the future if the future is
+		 * completed with a value
+		 *
+		 * @throws Error if the future is completed with an exception, the
+		 * exception will be thrown
 		 */
 		public abstract unowned G wait () throws Error;
 
@@ -105,7 +115,7 @@ namespace Gpseq {
 		 * otherwise
 		 *
 		 * @throws Error if the future is completed with an exception, the
-		 * error will be thrown
+		 * exception will be thrown
 		 */
 		public abstract bool wait_until (int64 end_time, out unowned G? value = null) throws Error;
 
@@ -113,35 +123,38 @@ namespace Gpseq {
 		 * Creates a new future by applying the given function to this future,
 		 * in future -- when this future is completed.
 		 *
-		 * The result future object of the function may or may not be directly
-		 * used. Depending on the internal implementation, A new future object
-		 * will be created with the value or exception of the result future and
-		 * returned, instead of returning the result future directly.
+		 * The returned object of the function may or may not be directly used.
+		 * Depending on the internal implementation, A new future object will
+		 * be created with the value or exception of it and returned, instead
+		 * of returning it directly.
 		 *
-		 * @param func a function applied to this future
-		 * @return the new future
+		 * If the function returns not a Future but a Result, the result is
+		 * mapped to a future.
+		 *
+		 * @param func a function applied to this result
+		 * @return [Future<A>] the new future
 		 */
-		public abstract Future<A> transform<A> (owned TransformFunc<A,G> func);
+		public abstract Result<A> transform<A> (owned Result.TransformFunc<A,G> func);
 
 		/**
-		 * Maps a future value to another future by applying the given function
-		 * to the value in future.
+		 * Maps the value to another future by applying the given function to
+		 * the value, in future.
 		 *
 		 * If this future is completed with an exception, the result future is
 		 * completed with the exception.
 		 *
-		 * The result future object of the function may or may not be directly
-		 * used. Depending on the internal implementation, A new future object
-		 * will be created with the value or exception of the result future and
-		 * returned, instead of returning the result future directly.
+		 * The returned object of the function may or may not be directly used.
+		 * Depending on the internal implementation, A new future object will
+		 * be created with the value or exception of it and returned, instead
+		 * of returning it directly.
 		 *
 		 * @param func a function applied to value
-		 * @return the new future
+		 * @return [Future<A>] the new future
 		 */
-		public Future<A> flat_map<A> (owned FlatMapFunc<A,G> func) {
+		public Result<A> flat_map<A> (owned Result.FlatMapFunc<A,G> func) {
 			return transform<A>(future => {
 				try {
-					return func( future.wait() );
+					return func( ((Future<G>)future).wait() );
 				} catch (Error err) {
 					var promise = new Promise<A>();
 					promise.set_exception((owned) err);
@@ -151,20 +164,20 @@ namespace Gpseq {
 		}
 
 		/**
-		 * Maps a future value to another value by applying the given function
-		 * to the value in future.
+		 * Maps the value to another value by applying the given function to
+		 * the value, in future.
 		 *
-		 * If this future is completed with an exception or the function throws
-		 * an exception, the result future is completed with the exception.
+		 * If this future is completed with or the function throws an exception,
+		 * the result future is completed with the exception.
 		 *
 		 * @param func a function applied to value
-		 * @return the mapped future
+		 * @return [Future<A>] the mapped future
 		 */
-		public Future<A> map<A> (owned MapFunc<A,G> func) {
+		public Result<A> map<A> (owned Result.MapFunc<A,G> func) {
 			return transform<A>(future => {
 				var promise = new Promise<A>();
 				try {
-					A newval = func( future.wait() );
+					A newval = func( ((Future<G>)future).wait() );
 					promise.set_value((owned) newval);
 				} catch (Error err) {
 					promise.set_exception((owned) err);
@@ -179,18 +192,15 @@ namespace Gpseq {
 		 * future, otherwise the result future just uses the value of this
 		 * future.
 		 *
-		 * If this future is completed with an exception or the function throws
-		 * an exception, the result future is completed with the exception.
-		 *
 		 * @param func a function applied to exception
-		 * @return the mapped future
+		 * @return [Future<G>] the mapped future
 		 */
 		[Version (since="0.2.0-beta")]
-		public Future<G> map_err (owned MapErrorFunc func) {
+		public Result<G> map_err (owned Result.MapErrorFunc func) {
 			return transform<G>(future => {
 				var promise = new Promise<G>();
 				try {
-					G newval = future.wait();
+					G newval = ((Future<G>)future).wait();
 					promise.set_value((owned) newval);
 				} catch (Error err) {
 					Error newerr = func((owned) err);
@@ -201,21 +211,20 @@ namespace Gpseq {
 		}
 
 		/**
-		 * Combines values of two futures using the given function which
-		 * returns the combined value in future.
+		 * Combines the values of two futures using the given function.
 		 *
-		 * If this future is completed with an exception or the function throws
-		 * an exception, the result future is completed with the exception.
+		 * If this future is completed with or the function throws an exception,
+		 * the result future is completed with the exception.
 		 *
 		 * @param func a function applied to values
-		 * @return the combined future
+		 * @return [Future<B>] the combined future
 		 */
-		public Future<B> zip<A,B> (owned ZipFunc<G,A,B> zip_func, Future<A> second) {
+		public Result<B> zip<A,B> (owned Result.ZipFunc<G,A,B> zip_func, Result<A> second) {
 			return transform<B>(future => {
 				return second.transform<B>(future2 => {
 					var promise = new Promise<B>();
 					try {
-						B newval = zip_func( future.wait(), future2.wait() );
+						B newval = zip_func( ((Future<G>)future).wait(), ((Future<A>)future2).wait() );
 						promise.set_value((owned) newval);
 					} catch (Error err) {
 						promise.set_exception((owned) err);
@@ -230,9 +239,9 @@ namespace Gpseq {
 		 * completed with a value or an exception.
 		 *
 		 * @param func a function called in future
-		 * @return the future
+		 * @return [Future<G>] the future
 		 */
-		public Future<G> then (owned GLib.Func<Future<G>> func) {
+		public Result<G> then (owned GLib.Func<Result<G>> func) {
 			return transform<G>(future => {
 				func(future);
 				return future;
@@ -240,16 +249,16 @@ namespace Gpseq {
 		}
 
 		/**
-		 * Runs the function with the future value in future -- when this
-		 * future is completed with a value.
+		 * Runs the function with the value in future -- when this future is
+		 * completed with a value.
 		 *
-		 * If this future is completed with an exception or the function throws
-		 * an exception, the result future is completed with the exception.
+		 * If this future is completed with or the function throws an exception,
+		 * the result future is completed with the exception.
 		 *
 		 * @param func a function called in future
-		 * @return the future
+		 * @return [Future<G>] the future
 		 */
-		public Future<G> and_then (owned Func<G> func) {
+		public Result<G> and_then (owned Func<G> func) {
 			return transform<G>(future => {
 				if (future.exception == null) {
 					try {
@@ -264,6 +273,32 @@ namespace Gpseq {
 					return future;
 				}
 			});
+		}
+
+		[Version (since="0.3.0")]
+		public bool equal_to (Result<G> object) {
+			var exp = exception;
+			var objexp = object.exception;
+			if (exp == null && objexp == null) {
+				Gee.EqualDataFunc func = Gee.Functions.get_equal_func_for(typeof(G));
+				return func(value, object.value);
+			} else if (exp != null && objexp != null) {
+				return exp.domain == objexp.domain
+					&& exp.code == objexp.code;
+			} else {
+				return false;
+			}
+		}
+
+		[Version (since="0.3.0")]
+		public uint hash () {
+			var exp = exception;
+			Gee.HashDataFunc func = Gee.Functions.get_hash_func_for(typeof(G));
+			uint result = 1;
+			result = 31*result + func(value);
+			result = 31*result + exp.code;
+			result = 31*result + exp.domain;
+			return result;
 		}
 	}
 }

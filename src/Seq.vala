@@ -497,7 +497,7 @@ namespace Gpseq {
 				Future<void*> future = _container.start(this);
 				Container<G,void*> container = (!)_container;
 				close();
-				return future.map<int64?>(value => {
+				return (Future<int64?>) future.map<int64?>(value => {
 					int64 result = 0;
 					if (container.is_size_known && container.estimated_size >= 0) {
 						result = container.estimated_size;
@@ -555,7 +555,7 @@ namespace Gpseq {
 			Container<G,void*> container = (!)_container;
 			close();
 			if (_is_parallel) {
-				return future.flat_map<bool?>(value => {
+				return (Future<bool?>) future.flat_map<bool?>(value => {
 					int64 len = container.estimated_size;
 					int64 threshold = _task_env.resolve_threshold(len, _task_env.executor.parallels);
 					int max_depth = _task_env.resolve_max_depth(len, _task_env.executor.parallels);
@@ -567,7 +567,7 @@ namespace Gpseq {
 					return task.future;
 				});
 			} else {
-				return future.map<bool?>(value => {
+				return (Future<bool?>) future.map<bool?>(value => {
 					return container.each_chunk(chunk => {
 						for (int i = 0; i < chunk.length; i++) {
 							if (!pred(chunk[i])) {
@@ -596,7 +596,7 @@ namespace Gpseq {
 			Container<G,void*> container = (!)_container;
 			close();
 			if (_is_parallel) {
-				return future.flat_map<bool?>(value => {
+				return (Future<bool?>) future.flat_map<bool?>(value => {
 					int64 len = container.estimated_size;
 					int64 threshold = _task_env.resolve_threshold(len, _task_env.executor.parallels);
 					int max_depth = _task_env.resolve_max_depth(len, _task_env.executor.parallels);
@@ -608,7 +608,7 @@ namespace Gpseq {
 					return task.future;
 				});
 			} else {
-				return future.map<bool?>(value => {
+				return (Future<bool?>) future.map<bool?>(value => {
 					return !container.each_chunk(chunk => {
 						for (int i = 0; i < chunk.length; i++) {
 							if (pred(chunk[i])) {
@@ -653,7 +653,7 @@ namespace Gpseq {
 			if (_is_parallel) {
 				Container<G,void*> container = (!)_container;
 				close();
-				return future.flat_map<Optional<G>>(value => {
+				return (Future<Optional<G>>) future.flat_map<Optional<G>>(value => {
 					int64 len = container.estimated_size;
 					int64 threshold = _task_env.resolve_threshold(len, _task_env.executor.parallels);
 					int max_depth = _task_env.resolve_max_depth(len, _task_env.executor.parallels);
@@ -688,7 +688,7 @@ namespace Gpseq {
 			Container<G,void*> container = (!)_container;
 			close();
 			if (_is_parallel) {
-				return future.flat_map<Optional<G>>(value => {
+				return (Future<Optional<G>>) future.flat_map<Optional<G>>(value => {
 					int64 len = container.estimated_size;
 					int64 threshold = _task_env.resolve_threshold(len, _task_env.executor.parallels);
 					int max_depth = _task_env.resolve_max_depth(len, _task_env.executor.parallels);
@@ -700,7 +700,7 @@ namespace Gpseq {
 					return task.future;
 				});
 			} else {
-				return future.map<Optional<G>>(value => {
+				return (Future<Optional<G>>) future.map<Optional<G>>(value => {
 					G? result = null;
 					bool found = false;
 					container.each_chunk(chunk => {
@@ -906,7 +906,7 @@ namespace Gpseq {
 			Container<G,void*> container = (!)_container;
 			close();
 			if (_is_parallel) {
-				return future.flat_map<A>(value => {
+				return (Future<A>) future.flat_map<A>(value => {
 					int64 len = container.estimated_size;
 					int64 threshold = _task_env.resolve_threshold(len, _task_env.executor.parallels);
 					int max_depth = _task_env.resolve_max_depth(len, _task_env.executor.parallels);
@@ -918,7 +918,7 @@ namespace Gpseq {
 					return task.future;
 				});
 			} else {
-				return future.map<A>(value => {
+				return (Future<A>) future.map<A>(value => {
 					A result = identity;
 					container.each(g => {
 						result = accumulator(g, result);
@@ -960,7 +960,7 @@ namespace Gpseq {
 			Container<G,void*> container = (!)_container;
 			close();
 			if (_is_parallel) {
-				return future.flat_map<Optional<G>>(value => {
+				return (Future<Optional<G>>) future.flat_map<Optional<G>>(value => {
 					int64 len = container.estimated_size;
 					int64 threshold = _task_env.resolve_threshold(len, _task_env.executor.parallels);
 					int max_depth = _task_env.resolve_max_depth(len, _task_env.executor.parallels);
@@ -971,7 +971,7 @@ namespace Gpseq {
 					return task.future;
 				});
 			} else {
-				return future.map<Optional<G>>(value => {
+				return (Future<Optional<G>>) future.map<Optional<G>>(value => {
 					bool found = false;
 					G? result = null;
 					container.each(g => {
@@ -1036,7 +1036,7 @@ namespace Gpseq {
 			if (compare == null) {
 				compare = Functions.get_compare_func_for(element_type);
 			}
-			return reduce((a, b) => {
+			return (Future<Optional<G>>) reduce((a, b) => {
 				return compare(a, b) >= 0 ? a : b;
 			}).then(future => { // for keeping block data
 				compare = null;
@@ -1059,7 +1059,7 @@ namespace Gpseq {
 			if (compare == null) {
 				compare = Functions.get_compare_func_for(element_type);
 			}
-			return reduce((a, b) => {
+			return (Future<Optional<G>>) reduce((a, b) => {
 				return compare(a, b) <= 0 ? a : b;
 			}).then(future => { // for keeping block data
 				compare = null;
@@ -1105,7 +1105,7 @@ namespace Gpseq {
 			Container<G,void*> container = (!)_container;
 			close();
 			if (_is_parallel) {
-				return future.flat_map<void*>(value => {
+				return (Future<void*>) future.flat_map<void*>(value => {
 					int64 len = container.estimated_size;
 					int64 threshold = _task_env.resolve_threshold(len, _task_env.executor.parallels);
 					int max_depth = _task_env.resolve_max_depth(len, _task_env.executor.parallels);
@@ -1116,7 +1116,7 @@ namespace Gpseq {
 					return task.future;
 				});
 			} else {
-				return future.map<void*>(value => {
+				return (Future<void*>) future.map<void*>(value => {
 					container.each(f);
 					return null;
 				});
@@ -1146,9 +1146,9 @@ namespace Gpseq {
 						close();
 						var promise = new Promise<R>();
 						promise.set_exception((owned) err);
-						return promise.future;
+						return (Future<R>) promise.future;
 					}
-					return this.foreach(g => {
+					return (Future<R>) this.foreach(g => {
 						collector.accumulate(g, accumulator);
 					}).map<R>(value => {
 						return collector.finish(accumulator);
@@ -1185,7 +1185,7 @@ namespace Gpseq {
 					Future<void*> future = _container.start(this);
 					Container<G,void*> container = (!)_container;
 					close();
-					return future.flat_map<A>(value => {
+					return (Future<R>) future.flat_map<A>(value => {
 						int64 len = container.estimated_size;
 						int64 threshold = _task_env.resolve_threshold(len, _task_env.executor.parallels);
 						int max_depth = _task_env.resolve_max_depth(len, _task_env.executor.parallels);
@@ -1202,7 +1202,7 @@ namespace Gpseq {
 				Future<void*> future = _container.start(this);
 				Container<G,void*> container = (!)_container;
 				close();
-				return future.map<R>(value => {
+				return (Future<R>) future.map<R>(value => {
 					A accumulator = collector.create_accumulator();
 					container.each(g => {
 						collector.accumulate(g, accumulator);
