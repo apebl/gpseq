@@ -201,22 +201,6 @@ namespace Gpseq {
 		}
 
 		/**
-		 * Maps a future value to another value by applying the given function
-		 * to the value in future.
-		 *
-		 * If this future is completed with an exception or the function throws
-		 * an exception, the result future is completed with the exception.
-		 *
-		 * The function may be re-evaluated at any time.
-		 *
-		 * @param func a function applied to value
-		 * @return the mapped future
-		 */
-		public Future<A> light_map<A> (owned LightMapFunc<A,G> func) {
-			return new LightMapFuture<A,G>(this, (owned) func);
-		}
-
-		/**
 		 * Combines values of two futures using the given function which
 		 * returns the combined value in future.
 		 *

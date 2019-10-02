@@ -39,7 +39,6 @@ sources = files(
 	'Gpseq.vala',
 	'IterateIterator.vala',
 	'IteratorSpliterator.vala',
-	'LightMapFuture.vala',
 	'ListSpliterator.vala',
 	'MapErrorFunc.vala',
 	'MapFunc.vala',
