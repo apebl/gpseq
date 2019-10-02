@@ -101,8 +101,9 @@ namespace Gpseq {
 					_mutex.unlock();
 					throw result;
 				case State.INIT:
-					_cond.wait(_mutex);
-					assert(_state != State.INIT);
+					while (_state == State.INIT) {
+						_cond.wait(_mutex);
+					}
 					_mutex.unlock();
 					return wait();
 				default:
@@ -123,11 +124,12 @@ namespace Gpseq {
 					_mutex.unlock();
 					throw result;
 				case State.INIT:
-					_cond.wait_until(_mutex, end_time);
-					if (_state == State.INIT) {
-						value = null;
-						_mutex.unlock();
-						return false;
+					while (_state == State.INIT) {
+						if ( !_cond.wait_until(_mutex, end_time) ) {
+							value = null;
+							_mutex.unlock();
+							return false;
+						}
 					}
 					_mutex.unlock();
 					return wait_until(end_time, out value);
