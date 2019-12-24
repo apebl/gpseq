@@ -47,7 +47,7 @@ namespace Gpseq {
 			_suite.add(test_case);
 		}
 
-		public void add_subprocess (string test_name, owned TestFunc test) {
+		public void add_subprocess (string test_name, owned GLib.TestFunc test) {
 			Test.add_func("/" + _name + "/" + test_name, test);
 		}
 
