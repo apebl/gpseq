@@ -1,6 +1,6 @@
 #!/bin/bash
 
-# An utility script to grab source files
+# A utility script to grab source files
 #
 # example:
 # grabber.sh src/*.vala

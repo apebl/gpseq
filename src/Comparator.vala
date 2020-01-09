@@ -22,7 +22,7 @@ using Gee;
 
 namespace Gpseq {
 	/**
-	 * An utility object for sort.
+	 * A utility object for sort.
 	 */
 	internal class Comparator<G> : Object {
 		private CompareDataFunc<G> _compare_func;
