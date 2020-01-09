@@ -29,8 +29,8 @@ namespace Gpseq {
 
 		private int64 _skip; // never changed
 		private int64 _limit; // never changed
-		private AtomicInt64Ref _size;
-		private AtomicBoolRef _completed;
+		private AtomicInt64Val _size;
+		private AtomicBoolVal _completed;
 
 		/**
 		 * Creates a new ordered slice task.
@@ -56,8 +56,8 @@ namespace Gpseq {
 			assert(limit < 0 || skip <= int64.MAX - limit);
 			_skip = skip;
 			_limit = limit;
-			_size = new AtomicInt64Ref(0);
-			_completed = new AtomicBoolRef(false);
+			_size = new AtomicInt64Val(0);
+			_completed = new AtomicBoolVal(false);
 		}
 
 		protected override ArrayBuffer<G> empty_result {

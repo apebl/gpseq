@@ -22,8 +22,8 @@ namespace Gpseq {
 	/**
 	 * A int64 value that guarantees atomic update
 	 */
-	internal class AtomicInt64Ref : Object {
-		private int64 _val;
+	internal class AtomicInt64Ref {
+		public int64 _val;
 
 		public AtomicInt64Ref (int64 val = 0) {
 			_val = val;

@@ -34,7 +34,7 @@ namespace Gpseq {
 
 		private Promise<G> _promise;
 		private SharedResult<G> _shared_result;
-		private AtomicBoolRef _cancelled;
+		private AtomicBoolVal _cancelled;
 
 		/**
 		 * Creates a fork-join task.
@@ -55,7 +55,7 @@ namespace Gpseq {
 			_executor = executor;
 			_promise = new Promise<G>();
 			_shared_result = parent == null ? new SharedResult<G>() : parent._shared_result;
-			_cancelled = new AtomicBoolRef();
+			_cancelled = new AtomicBoolVal();
 		}
 
 		/**

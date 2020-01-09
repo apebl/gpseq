@@ -1,4 +1,4 @@
-/* AtomicObjectRef.vala
+/* AtomicInt64Val.vala
  *
  * Copyright (C) 2019  Космос Преда́ние (kosmospredanie@yandex.ru)
  *
@@ -20,34 +20,27 @@
 
 namespace Gpseq {
 	/**
-	 * An object value that guarantees atomic update
+	 * A int64 value that guarantees atomic update
 	 */
-	internal class AtomicObjectRef : Object {
-		private Object? _val;
+	[Compact]
+	internal class AtomicInt64Val {
+		public int64 _val;
 
-		public AtomicObjectRef (Object? val) {
+		public AtomicInt64Val (int64 val = 0) {
 			_val = val;
 		}
 
-		public Object? val {
+		public int64 val {
 			get {
-				return (Object?) AtomicPointer.get(&_val);
+				return atomic_int64_get(ref _val);
 			}
 			set {
-				while (true) {
-					Object? oldval = _val;
-					if (compare_and_exchange(oldval, value)) break;
-				}
+				atomic_int64_set(ref _val, value);
 			}
 		}
 
-		public bool compare_and_exchange (Object? oldval, Object? newval) {
-			if (AtomicPointer.compare_and_exchange(&_val, oldval, newval)) {
-				if (newval != null) newval.ref();
-				if (oldval != null) oldval.unref();
-				return true;
-			}
-			return false;
+		public bool compare_and_exchange (int64 oldval, int64 newval) {
+			return atomic_int64_compare_and_exchange(ref _val, oldval, newval);
 		}
 	}
 }

@@ -1,4 +1,4 @@
-/* AtomicBoolRef.vala
+/* AtomicBoolVal.vala
  *
  * Copyright (C) 2019  Космос Преда́ние (kosmospredanie@yandex.ru)
  *
@@ -22,13 +22,14 @@ namespace Gpseq {
 	/**
 	 * A bool value that guarantees atomic update
 	 */
-	internal class AtomicBoolRef : Object {
-		private const int FALSE = 0;
-		private const int TRUE = 1;
+	[Compact]
+	internal class AtomicBoolVal {
+		public const int FALSE = 0;
+		public const int TRUE = 1;
 
-		private int _val;
+		public int _val;
 
-		public AtomicBoolRef (bool val = false) {
+		public AtomicBoolVal (bool val = false) {
 			_val = val ? TRUE : FALSE;
 		}
 
@@ -39,6 +40,10 @@ namespace Gpseq {
 			set {
 				AtomicInt.set(ref _val, value ? TRUE : FALSE);
 			}
+		}
+
+		public bool compare_and_exchange (bool oldval, bool newval) {
+			return AtomicInt.compare_and_exchange(ref _val, oldval ? TRUE : FALSE, newval ? TRUE : FALSE);
 		}
 	}
 }
