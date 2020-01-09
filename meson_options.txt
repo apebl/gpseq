@@ -18,3 +18,8 @@ option('have_atomic_int64_lock_free',
 	type: 'boolean',
 	value: true,
 	description: 'The 64-bit atomic operations must be implemented using real hardware atomic operations')
+
+option('cache_line_size',
+	type: 'integer',
+	value: 0,
+	description: 'The cache line size of the target platform (0 = automatically determined)')

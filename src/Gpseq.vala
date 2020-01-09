@@ -377,4 +377,8 @@ namespace Gpseq {
 	private extern uint atomic_uint_add ([CCode (type="volatile gint *")] ref uint atomic, [CCode (type="gint")] uint val);
 	[CCode (cname="g_atomic_int_or", cheader_filename = "glib.h")]
 	private extern uint atomic_uint_or ([CCode (type="volatile guint *")] ref uint atomic, uint val);
+
+	[Version (since="0.3.0")]
+	[CCode (cname="GpseqCacheLinePad", has_type_id=false)]
+	public extern struct CacheLinePad {}
 }

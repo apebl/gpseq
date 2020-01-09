@@ -1,5 +1,6 @@
 sources = files(
 	'atomic.c',
+	'cache.c',
 	'overflow.c',
 	'ArrayBuffer.vala',
 	'ArrayBufferSpliterator.vala',
@@ -111,6 +112,10 @@ c_args = []
 
 if get_option('have_atomic_int64_lock_free')
 	c_args += '-DGPSEQ_ATOMIC_INT64_LOCK_FREE'
+endif
+
+if get_option('cache_line_size') > 0
+	c_args += '-DGPSEQ_CACHE_LINE_SIZE=@0@'.format(get_option('cache_line_size'))
 endif
 
 gpseq_lib = library(libname, sources,
