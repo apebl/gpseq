@@ -362,4 +362,19 @@ namespace Gpseq {
 	 **/
 	[CCode (cname="gpseq_atomic_int64_xor")]
 	public extern uint64 atomic_int64_xor ([CCode (type="volatile guint64 *")] ref uint64 atomic, uint64 val);
+
+	[CCode (cname="g_atomic_int_get", type="gint", cheader_filename = "glib.h")]
+	private extern uint atomic_uint_get ([CCode (type="volatile gint *")] ref uint atomic);
+	[CCode (cname="g_atomic_int_set", cheader_filename = "glib.h")]
+	private extern void atomic_uint_set ([CCode (type="volatile gint *")] ref uint atomic, [CCode (type="gint")] uint newval);
+	[CCode (cname="g_atomic_int_inc", cheader_filename = "glib.h")]
+	private extern void atomic_uint_inc ([CCode (type="volatile gint *")] ref uint atomic);
+	[CCode (cname="g_atomic_int_compare_and_exchange", cheader_filename = "glib.h")]
+	private extern bool atomic_uint_compare_and_exchange (
+			[CCode (type="volatile gint *")] ref uint atomic,
+			[CCode (type="gint")] uint oldval, [CCode (type="gint")] uint newval);
+	[CCode (cname="g_atomic_int_add", type="gint", cheader_filename = "glib.h")]
+	private extern uint atomic_uint_add ([CCode (type="volatile gint *")] ref uint atomic, [CCode (type="gint")] uint val);
+	[CCode (cname="g_atomic_int_or", cheader_filename = "glib.h")]
+	private extern uint atomic_uint_or ([CCode (type="volatile guint *")] ref uint atomic, uint val);
 }
