@@ -48,6 +48,7 @@ Must be one of the following:
 - feat: A new feature
 - fix: A bug fix
 - refactor: Refactoring production code
+- internal: Internal code refactoring that do not affect external behavior
 - perf: A code change that improves performance
 - docs: Documentation only changes
 - style: Changes that do not affect the meaning of the code (white-space,
