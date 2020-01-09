@@ -20,7 +20,7 @@
 
 namespace Gpseq {
 	/**
-	 * A result object that contains a value or an error.
+	 * A result object that holds a value or an error.
 	 *
 	 * @see Future
 	 * @see Optional
@@ -36,7 +36,7 @@ namespace Gpseq {
 		public delegate C ZipFunc<A,B,C> (A a, B b) throws Error;
 
 		/**
-		 * Creates a result contains the given value.
+		 * Creates a result holds the given value.
 		 *
 		 * @return the result
 		 */
@@ -45,7 +45,7 @@ namespace Gpseq {
 		}
 
 		/**
-		 * Creates a result contains the given error.
+		 * Creates a result holds the given error.
 		 *
 		 * @param exception an error
 		 * @return the result
@@ -118,10 +118,10 @@ namespace Gpseq {
 		 * ''{@link Future} implementation:'' Waits until the future is
 		 * completed. It is an alias for {@link Future.wait}.
 		 *
-		 * @return the value if this result contains a value
+		 * @return the value if this result holds a value
 		 *
-		 * @throws Error if this result contains an exception, the exception
-		 * will be thrown
+		 * @throws Error if this result holds an exception, the exception will
+		 * be thrown
 		 */
 		public abstract unowned G get () throws Error;
 
@@ -150,8 +150,8 @@ namespace Gpseq {
 		 * Maps the value to another result by applying the given function to
 		 * the value.
 		 *
-		 * If this result contains an exception, the returned result contains
-		 * the exception too.
+		 * If this result holds an exception, the returned result holds the
+		 * exception too.
 		 *
 		 * The returned object of the function may or may not be directly used.
 		 * Depending on the internal implementation, A new result object will
@@ -175,8 +175,8 @@ namespace Gpseq {
 		 * Maps the value to another value by applying the given function to
 		 * the value.
 		 *
-		 * If this result contains or the function throws an exception, the
-		 * returned result contains the exception.
+		 * If this result holds or the function throws an exception, the
+		 * returned result holds the exception.
 		 *
 		 * @param func a function applied to value
 		 * @return the mapped result
@@ -196,9 +196,9 @@ namespace Gpseq {
 		}
 
 		/**
-		 * If this result contains an exception, maps the exception to another
+		 * If this result holds an exception, maps the exception to another
 		 * exception by applying the given function to the exception, otherwise
-		 * the returned result contains the value of this result.
+		 * the returned result holds the value of this result.
 		 *
 		 * @param func a function applied to exception
 		 * @return the mapped result
@@ -216,8 +216,8 @@ namespace Gpseq {
 		/**
 		 * Combines the values of two results using the given function.
 		 *
-		 * If two results contain or the function throws an exception, the
-		 * returned result contains the exception.
+		 * If two results hold or the function throws an exception, the
+		 * returned result holds the exception.
 		 *
 		 * @param func a function applied to values
 		 * @return the combined result
@@ -252,10 +252,10 @@ namespace Gpseq {
 		}
 
 		/**
-		 * Runs the function with the value if this result contains a value.
+		 * Runs the function with the value if this result holds a value.
 		 *
-		 * If this result contains or the function throws an exception, the
-		 * returned result contains the exception.
+		 * If this result holds or the function throws an exception, the
+		 * returned result holds the exception.
 		 *
 		 * @param func a function called
 		 * @return the result
