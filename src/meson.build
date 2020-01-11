@@ -85,6 +85,7 @@ sources = files(
 	'UnorderedSliceSpliterator.vala',
 	'VoidFunc.vala',
 	'VoidTaskFunc.vala',
+	'WaitGroup.vala',
 	'WorkQueue.vala',
 	'WorkerContext.vala',
 	'WorkerPool.vala',

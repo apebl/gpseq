@@ -24,6 +24,7 @@ using TestUtils;
 
 public class UtilsTests : Gpseq.TestSuite {
 	private const int MANY_SORT_LENGTH = 32768;
+	private const ulong SECONDS = 1000000; // microseconds in one second
 
 	public UtilsTests () {
 		base("gpseq-utils");
@@ -41,6 +42,7 @@ public class UtilsTests : Gpseq.TestSuite {
 		add_test("overflow:long", test_overflow_long);
 		add_test("overflow:int32", test_overflow_int32);
 		add_test("overflow:int64", test_overflow_int64);
+		add_test("wait-group", test_wait_group);
 	}
 
 	private void test_parallel_sort_ints_few () {
@@ -327,5 +329,17 @@ public class UtilsTests : Gpseq.TestSuite {
 		assert( int64_mul(int64.MAX, -int64.MAX, out val) );
 		assert( int64_mul(-int64.MAX, int64.MAX, out val) );
 		assert( int64_mul(-int64.MAX, -int64.MAX, out val) );
+	}
+
+	private void test_wait_group () {
+		WaitGroup wg = new WaitGroup();
+		new Thread<void*>("wait-group-test", () => {
+			Thread.usleep(1 * SECONDS);
+			wg.done();
+			return null;
+		});
+		wg.add(1);
+		bool success = wg.wait_until( get_monotonic_time() + (int64)(2 * SECONDS) );
+		assert(success);
 	}
 }
