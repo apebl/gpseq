@@ -23,7 +23,7 @@ using Gpseq;
 public abstract class ChannelTests<G> : Gpseq.TestSuite {
 	private const ulong SECONDS = 1000000; // microseconds in one second
 	private const uint64 TIMEOUT = 2 * SECONDS;
-	private const int THREADS = 128;
+	private const int THREADS = 32;
 	private const int ITER_PER_THREAD = 100;
 
 	private int _capacity;
