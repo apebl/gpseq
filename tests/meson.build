@@ -1,6 +1,8 @@
 test_sources = files(
 	'AtomicTests.vala',
 	'BlockingTests.vala',
+	'BufferedChannelTests.vala',
+	'ChannelTests.vala',
 	'FutureTests.vala',
 	'IntSeqTests.vala',
 	'NullableIntSeqTests.vala',
@@ -14,6 +16,8 @@ test_sources = files(
 	'TestTaskEnv.vala',
 	'TestUtils.vala',
 	'TestUtilsTests.vala',
+	'UnboundedChannelTests.vala',
+	'UnbufferedChannelTests.vala',
 	'UtilsTests.vala',
 	'test.vala'
 )

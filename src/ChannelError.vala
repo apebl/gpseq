@@ -1,4 +1,4 @@
-/* test.vala
+/* ChannelError.vala
  *
  * Copyright (C) 2019  Космос Преда́ние (kosmospredanie@yandex.ru)
  *
@@ -18,31 +18,10 @@
  * along with Gpseq.  If not, see <http://www.gnu.org/licenses/>.
  */
 
-using Gpseq;
-
-TaskEnv initial_task_env;
-
-void main (string[] args) {
-	Test.init(ref args);
-	initial_task_env = TaskEnv.get_common_task_env();
-	register_tests();
-	Test.run();
-}
-
-void register_tests () {
-	new TestUtilsTests().register();
-	new AtomicTests().register();
-	new ResultTests().register();
-	new FutureTests().register();
-	new SubArrayTests().register();
-	new UtilsTests().register();
-	new IntSeqTests().register();
-	new NullableIntSeqTests().register();
-	new StringSeqTests().register();
-	new NullableStringSeqTests().register();
-	new ObjSeqTests().register();
-	new BlockingTests().register();
-	BufferedChannelTests.register_all();
-	UnboundedChannelTests.register_all();
-	UnbufferedChannelTests.register_all();
+namespace Gpseq {
+	public errordomain ChannelError {
+		CLOSED,
+		TIMEOUT,
+		TRY_FAILED
+	}
 }
