@@ -15,7 +15,7 @@ xmlns:foaf="http://xmlns.com/foaf/0.1/">
 
 	<maintainer>
 		<foaf:Person>
-			<foaf:name>Космос Преда́ние</foaf:name>
+			<foaf:name>Космическое П.</foaf:name>
 			<foaf:mbox rdf:resource="mailto:kosmospredanie@yandex.ru" />
 		</foaf:Person>
 	</maintainer>
