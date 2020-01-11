@@ -29,8 +29,8 @@ void main () {
 - [*Work-stealing*](https://en.wikipedia.org/wiki/Work_stealing) and *managed
 blocking* task scheduling: Similar behavior to Go scheduler
 - Functional programming for data processing with parallel execution support:
-An equivalent to Java's
-[streams](https://docs.oracle.com/en/java/javase/11/docs/api/java.base/java/util/stream/Stream.html)
+An equivalent to Java's [streams](https://docs.oracle.com/en/java/javase/11/docs/api/java.base/java/util/stream/Stream.html)
+- Unbuffered, buffered, and unbounded MPMC [channels](https://en.wikipedia.org/wiki/Channel_(programming))
 - [Fork-join](https://en.wikipedia.org/wiki/Fork–join_model) parallelism
 - Parallel sorting
 - [Futures and promises](https://en.wikipedia.org/wiki/Futures_and_promises)
