@@ -228,7 +228,8 @@ namespace Gpseq {
 		 * If two results hold or the function throws an exception, the
 		 * returned result holds the exception.
 		 *
-		 * @param func a function applied to values
+		 * @param zip_func a function applied to values
+		 * @param second another result
 		 * @return the combined result
 		 */
 		public virtual Result<B> zip<A,B> (owned ZipFunc<G,A,B> zip_func, Result<A> second) {

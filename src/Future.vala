@@ -211,12 +211,13 @@ namespace Gpseq {
 		}
 
 		/**
-		 * Combines the values of two futures using the given function.
+		 * Combines the values of two results using the given function.
 		 *
-		 * If this future is completed with or the function throws an exception,
-		 * the result future is completed with the exception.
+		 * If two results hold or the function throws an exception, the
+		 * returned future holds the exception.
 		 *
-		 * @param func a function applied to values
+		 * @param zip_func a function applied to values
+		 * @param second another result
 		 * @return [Future<B>] the combined future
 		 */
 		public Result<B> zip<A,B> (owned Result.ZipFunc<G,A,B> zip_func, Result<A> second) {
