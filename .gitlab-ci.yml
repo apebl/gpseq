@@ -37,7 +37,7 @@ test:
       - coverage
   script:
     - meson _build -Db_coverage=true
-    - meson test -C _build -t 20 --print-errorlogs --verbose
+    - meson test -C _build -t 100 --print-errorlogs --verbose
     - cd _build/src
     - lcov -d . -o lcov.info -c
     - lcov -d . -o lcov.info -r lcov.info "*/_build/*"
