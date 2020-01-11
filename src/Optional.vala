@@ -1,6 +1,6 @@
 /* Optional.vala
  *
- * Copyright (C) 2019  Космос Преда́ние (kosmospredanie@yandex.ru)
+ * Copyright (C) 2019-2020  Космическое П. (kosmospredanie@yandex.ru)
  *
  * This file is part of Gpseq.
  *

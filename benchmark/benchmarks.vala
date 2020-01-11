@@ -5,7 +5,7 @@
  *  * gobject-2.0
  *  * gio-2.0
  *
- * Written in 2019 by Космос Преда́ние (kosmospredanie@yandex.ru)
+ * Written in 2019 by Космическое П. (kosmospredanie@yandex.ru)
  *
  * To the extent possible under law, the author have dedicated all copyright
  * and related and neighboring rights to this software to the public domain
