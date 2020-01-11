@@ -99,6 +99,15 @@ namespace Gpseq {
 		}
 
 		/**
+		 * Whether or not this result holds an error.
+		 */
+		public bool is_err {
+			get {
+				return exception != null;
+			}
+		}
+
+		/**
 		 * Returns a {@link Future} version of this result.
 		 *
 		 * ''{@link Result} implementation:'' Creates a future completed with
