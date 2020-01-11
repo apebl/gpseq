@@ -10,34 +10,36 @@
 const string REPOSITORY = "https://gitlab.com/kosmospredanie/gpseq";
 const string LOG_FORMAT = "<< COMMIT START\n%H\n%h\n%ct\n%s\n%b\nCOMMIT END >>";
 const string TIME_FORMAT = "%Y-%m-%d";
+const string VERSION_PATTERN = "(\\d+).(\\d+).(\\d+)(-[\\w.-]+)?(\\+[\\w.-]+)? \\(([^)]+)\\)";
+const string TAG_CMD="git --no-pager tag -l --format='%(refname:short) (%(creatordate:unix))' --sort=committerdate";
 const string[] TYPES = {
 	"feat", "fix", "refactor", "perf", "deps", "revert"
 };
 
 void main () {
-	string[] tags = get_tags();
+	Version[] versions = get_versions();
 
 	StringBuilder result = new StringBuilder();
 	result.append("## Changelog\n\n");
 	result.append("This project adheres to Semantic Versioning.\n");
 	result.append("Dates are displayed in UTC and yyyy-mm-dd date format.\n");
 
-	for (int i = 0; i < tags.length; i++) {
-		unowned string tag = tags[i];
-		Commit tag_commit = new Commit();
-		tag_commit.timestamp = gitlog("%ct", tag);
+	for (int i = 0; i < versions.length; ++i) {
+		Version version = versions[i];
+		string name = version.name;
 
-		string time = tag_commit.time;
-		string tag_url = @"$REPOSITORY/tags/$tag";
-		result.append(@"\n### [$tag]($tag_url) ($time)\n");
-		if (i == tags.length-1) break;
+		string time = version.date_str;
+		string tag_url = @"$REPOSITORY/tags/$name";
+		result.append(@"\n### [$name]($tag_url) ($time)\n");
+		if (i == versions.length-1) break;
 
-		unowned string prev_tag = tags[i+1];
-		string cmp_url = @"$REPOSITORY/compare/$prev_tag...$tag";
+		Version prev = find_prev_version(i, versions);
+		string prev_name = prev.name;
+		string cmp_url = @"$REPOSITORY/compare/$prev_name...$name";
 		result.append(@"\n[Full Changelog]($cmp_url)\n\n");
 
-		Commit[] commits = get_commits(@"$prev_tag..$tag");
-		foreach (unowned Commit commit in commits) {
+		Commit[] commits = get_commits(@"$prev_name..$name");
+		foreach (Commit commit in commits) {
 			string type = commit.commit_type;
 			if (type.length == 0 || type in TYPES || commit.is_breaking_change) {
 				string abbrev = commit.abbrev_hash;
@@ -56,10 +58,70 @@ void main () {
 	print("%s", result.str);
 }
 
-string[] get_tags () {
-	string[] tags = cmd("git --no-pager tag --sort=committerdate").split("\n");
-	reverse(tags);
-	return tags;
+Version[] get_versions () {
+	string[] tags = cmd(TAG_CMD).split("\n");
+	Version[] versions = new Version[tags.length];
+	for (int i = 0; i < tags.length; ++i) {
+		versions[i] = parse_version( match(VERSION_PATTERN, tags[i]) );
+	}
+	sort_versions(versions);
+	reverse(versions);
+	return versions;
+}
+
+void sort_versions (Version[] versions) {
+	qsort_with_data<Version>(versions, sizeof(Version), (a, b) => {
+		return compare({
+			a.major-b.major, a.minor-b.minor, a.patch-b.patch,
+			(a.pre != "" && b.pre == "") ? -1 :
+			(a.pre == "" && b.pre == "") ? 0 :
+			(a.pre == "" && b.pre != "") ? 1 :
+			strcmp(a.pre, b.pre)
+		});
+	});
+}
+
+Version parse_version (MatchInfo m) {
+	Version ver = new Version();
+	ver.major = int.parse( m.fetch(1) );
+	ver.minor = int.parse( m.fetch(2) );
+	ver.patch = int.parse( m.fetch(3) );
+	ver.pre = m.fetch(4) ?? "";
+	ver.meta = m.fetch(5) ?? "";
+	ver.date = new DateTime.from_unix_utc( int64.parse(m.fetch(6)) );
+	return ver;
+}
+
+int compare (int[] args) {
+	for (int i = 0; i < args.length; ++i) {
+		if (args[i] != 0) {
+			return args[i].clamp(-1, 1);
+		}
+	}
+	return 0;
+}
+
+void reverse (Version[] array) {
+	int start = 0;
+	int end = array.length - 1;
+	while (start < end) {
+		Version temp = (owned) array[start];
+		array[start] = (owned) array[end];
+		array[end] = (owned) temp;
+		start++;
+		end--;
+	}
+}
+
+Version find_prev_version (int idx, Version[] list) {
+	Version cur = list[idx];
+	for (int i = idx + 1; i < list.length; ++i) {
+		Version ver = list[i];
+		if ( ver.date.compare(cur.date) <= 0 ) {
+			return ver;
+		}
+	}
+	error("Previous version of %s not found", cur.name);
 }
 
 Commit[] get_commits (string range) {
@@ -86,18 +148,6 @@ Commit parse_commit (string text) {
 	commit.subject = (owned) tokens[3];
 	commit.body = (owned) tokens[4];
 	return commit;
-}
-
-void reverse (string[] array) {
-	int start = 0;
-	int end = array.length - 1;
-	while (start < end) {
-		string temp = array[start];
-		array[start] = array[end];
-		array[end] = temp;
-		start++;
-		end--;
-	}
 }
 
 MatchInfo match (string pattern, string str) {
@@ -130,7 +180,6 @@ string cmd (string cmd) {
 	}
 }
 
-[Compact]
 class Commit {
 	public string hash;
 	public string abbrev_hash;
@@ -177,6 +226,27 @@ class Commit {
 				error(e.message);
 			}
 			return list;
+		}
+	}
+}
+
+class Version {
+	public int major;
+	public int minor;
+	public int patch;
+	public string pre;
+	public string meta;
+	public DateTime date;
+
+	public string name {
+		owned get {
+			return @"$major.$minor.$patch$pre$meta";
+		}
+	}
+
+	public string date_str {
+		owned get {
+			return date.format(TIME_FORMAT);
 		}
 	}
 }
