@@ -39,7 +39,7 @@ In order to build documentations, add the `-Ddocs` option.
 After meson build:
 
 ```sh
-meson test -C _build -t 20 --print-errorlogs --verbose
+meson test -C _build -t 100 --print-errorlogs --verbose
 ```
 
 ### Install
