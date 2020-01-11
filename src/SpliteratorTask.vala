@@ -124,9 +124,10 @@ namespace Gpseq {
 		/**
 		 * Gets an empty result.
 		 *
-		 * When the {@link shared_result} is already ready without exceptions,
-		 * this task has been cancelled, or a class that inherits this class
-		 * needs, the empty result is used and set to the promise of this task.
+		 * When the {@link ForkJoinTask.shared_result} is already ready without
+		 * exceptions, this task has been cancelled, or a class that inherits
+		 * this class needs, the empty result is used and set to the promise of
+		 * this task.
 		 */
 		protected abstract R empty_result {
 			owned get;

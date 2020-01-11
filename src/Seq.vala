@@ -109,10 +109,10 @@ namespace Gpseq {
 	 *
 	 * == Notes ==
 	 *
-	 * With nullable primitive types, operations using {@link CompareDataFunc}
-	 * function, such as order_by(), produce an undesirable result if the
-	 * compare function is not specified. You should provide specified compare
-	 * function to get a proper result.
+	 * With nullable primitive types, operations using
+	 * {@link GLib.CompareDataFunc} function, such as order_by(), produce an
+	 * undesirable result if the compare function is not specified. You should
+	 * provide specified compare function to get a proper result.
 	 *
 	 * Some operation might not work properly with unowned types. The best
 	 * approach is never to use unowned types for seq.
