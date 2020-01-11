@@ -37,6 +37,10 @@ namespace Gpseq {
 			_closed = new AtomicBoolVal();
 		}
 
+		~UnboundedChannel () {
+			close();
+		}
+
 		public Optional<int64?> capacity {
 			owned get {
 				return new Optional<int64?>.empty();

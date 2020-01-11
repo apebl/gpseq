@@ -30,6 +30,10 @@ namespace Gpseq {
 			_system = new System<G>();
 		}
 
+		~UnbufferedChannel () {
+			close();
+		}
+
 		public Optional<int64?> capacity {
 			owned get {
 				return new Optional<int64?>.of(0);

@@ -40,6 +40,10 @@ namespace Gpseq {
 			_closed = new AtomicBoolVal();
 		}
 
+		~BufferedChannel () {
+			close();
+		}
+
 		private int find_pot (int64 n) {
 			--n;
 			n |= n >> 1;
