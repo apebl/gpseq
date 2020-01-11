@@ -110,7 +110,7 @@ public class ObjSeqTests : SeqTests<Obj> {
 	protected override int map_to_int (owned Obj g) {
 		return g.val;
 	}
-	
+
 	public class Obj : Object {
 		public int val;
 
