@@ -41,8 +41,7 @@ namespace Gpseq {
 		 *
 		 *  * ChannelError.CLOSED
 		 *
-		 * If the channel has been closed and no more
-		 * data.
+		 * If the channel has been closed and no more data.
 		 *
 		 * @return the result which hold a value if succeeded, or an error if
 		 * failed.
