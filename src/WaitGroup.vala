@@ -19,7 +19,7 @@
  */
 
 namespace Gpseq {
-	[Version (since="0.3.0")]
+	[Version (since="0.3.0-alpha")]
 	public class WaitGroup : Object {
 		private Mutex _mutex;
 		private Cond _cond;

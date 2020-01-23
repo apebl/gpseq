@@ -25,7 +25,7 @@ namespace Gpseq {
 	 * @see Channel
 	 * @see Receiver
 	 */
-	[Version (since="0.3.0")]
+	[Version (since="0.3.0-alpha")]
 	public interface Sender<G> : ChannelBase {
 		/**
 		 * Sends a value into the channel. This method blocks the thread until

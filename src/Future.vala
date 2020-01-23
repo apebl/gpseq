@@ -58,7 +58,7 @@ namespace Gpseq {
 		 * @param result a result
 		 * @return the future
 		 */
-		[Version (since="0.3.0")]
+		[Version (since="0.3.0-alpha")]
 		public static Future<G> done<G> (Result<G> result) {
 			if (result.exception == null) {
 				return of<G>(result.value);
@@ -73,7 +73,7 @@ namespace Gpseq {
 		 */
 		public abstract bool ready { get; }
 
-		[Version (since="0.3.0")]
+		[Version (since="0.3.0-alpha")]
 		public Future<G> future () {
 			return this;
 		}
@@ -89,7 +89,7 @@ namespace Gpseq {
 		 * @throws Error if the future is completed with an exception, the
 		 * exception will be thrown
 		 */
-		[Version (since="0.3.0")]
+		[Version (since="0.3.0-alpha")]
 		public new unowned G get () throws Error {
 			return wait();
 		}
@@ -276,7 +276,7 @@ namespace Gpseq {
 			});
 		}
 
-		[Version (since="0.3.0")]
+		[Version (since="0.3.0-alpha")]
 		public bool equal_to (Result<G> object) {
 			var exp = exception;
 			var objexp = object.exception;
@@ -291,7 +291,7 @@ namespace Gpseq {
 			}
 		}
 
-		[Version (since="0.3.0")]
+		[Version (since="0.3.0-alpha")]
 		public uint hash () {
 			var exp = exception;
 			Gee.HashDataFunc func = Gee.Functions.get_hash_func_for(typeof(G));

@@ -26,7 +26,7 @@ namespace Gpseq {
 	 * @see Sender
 	 * @see Receiver
 	 */
-	[Version (since="0.3.0")]
+	[Version (since="0.3.0-alpha")]
 	public interface Channel<G> : Sender<G>, Receiver<G> {
 		/**
 		 * Creates a bounded channel.

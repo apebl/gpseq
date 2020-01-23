@@ -190,7 +190,7 @@ namespace Gpseq {
 	 * @see SpliteratorTask
 	 * @see TaskEnv.get_common_task_env
 	 */
-	[Version (since="0.3.0")]
+	[Version (since="0.3.0-alpha")]
 	public G[] join<G> (owned TaskFunc<G> left, owned TaskFunc<G> right) throws Error {
 		var executor = TaskEnv.get_common_task_env().executor;
 		var left_task = new FuncTask<G>((owned) left);
@@ -378,7 +378,7 @@ namespace Gpseq {
 	[CCode (cname="g_atomic_int_or", cheader_filename = "glib.h")]
 	private extern uint atomic_uint_or ([CCode (type="volatile guint *")] ref uint atomic, uint val);
 
-	[Version (since="0.3.0")]
+	[Version (since="0.3.0-alpha")]
 	[CCode (cname="GpseqCacheLinePad", has_type_id=false)]
 	public extern struct CacheLinePad {}
 }

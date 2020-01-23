@@ -25,7 +25,7 @@ namespace Gpseq {
 	 * @see Future
 	 * @see Optional
 	 */
-	[Version (since="0.3.0")]
+	[Version (since="0.3.0-alpha")]
 	[GenericAccessors]
 	public interface Result<G> : Gee.Hashable<Result<G>> {
 		public delegate Result<A> TransformFunc<A,G> (Result<G> result);

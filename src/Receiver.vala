@@ -25,7 +25,7 @@ namespace Gpseq {
 	 * @see Channel
 	 * @see Sender
 	 */
-	[Version (since="0.3.0")]
+	[Version (since="0.3.0-alpha")]
 	public interface Receiver<G> : ChannelBase, Gee.Traversable<G> {
 		/**
 		 * Receives a value from the channel. This method blocks the thread

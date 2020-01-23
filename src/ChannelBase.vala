@@ -22,7 +22,7 @@ namespace Gpseq {
 	/**
 	 * A base interface for senders and receivers.
 	 */
-	[Version (since="0.3.0")]
+	[Version (since="0.3.0-alpha")]
 	public interface ChannelBase : Object {
 		/**
 		 * The capacity of the channel.
