@@ -26,6 +26,8 @@ public class UtilsTests : Gpseq.TestSuite {
 	private const int MANY_SORT_LENGTH = 32768;
 	private const ulong SECONDS = 1000000; // microseconds in one second
 
+	private static int64 objects;
+
 	public UtilsTests () {
 		base("gpseq-utils");
 		add_test("parallel_sort<int>:few", test_parallel_sort_ints_few);
@@ -43,6 +45,16 @@ public class UtilsTests : Gpseq.TestSuite {
 		add_test("overflow:int32", test_overflow_int32);
 		add_test("overflow:int64", test_overflow_int64);
 		add_test("wait-group", test_wait_group);
+		add_test("optional", test_optional);
+	}
+
+	public override void set_up () {
+		assert(atomic_int64_get(ref objects) == 0);
+	}
+
+	public override void tear_down () {
+		Thread.usleep(500000); // Wait object finalizations
+		assert(atomic_int64_get(ref objects) == 0);
 	}
 
 	private void test_parallel_sort_ints_few () {
@@ -341,5 +353,71 @@ public class UtilsTests : Gpseq.TestSuite {
 		wg.add(1);
 		bool success = wg.wait_until( get_monotonic_time() + (int64)(2 * SECONDS) );
 		assert(success);
+	}
+
+	private void test_optional () {
+		Optional<Obj> o;
+		Optional<Obj> o2;
+		Optional<int> o3;
+		Obj res;
+
+		/* empty */
+
+		o = new Optional<Obj>.empty();
+		assert(!o.is_present);
+
+		o.if_present((obj) => {
+			assert_not_reached();
+		});
+
+		res = o.or_else( new Obj(726) );
+		assert(res.val == 726);
+
+		o2 = o.filter((obj) => { assert_not_reached(); });
+		assert(!o2.is_present);
+
+		o3 = o.map<int>((obj) => { assert_not_reached(); });
+		assert(!o3.is_present);
+
+		/* present */
+
+		o = new Optional<Obj>.of( new Obj(726) );
+		assert(o.is_present);
+		assert(o.value.val == 726);
+
+		bool chk = false;
+		o.if_present((obj) => {
+			assert(obj.val == 726);
+			chk = true;
+		});
+		assert(chk);
+
+		res = o.or_else( new Obj(123) );
+		assert(res.val == 726);
+
+		o2 = o.filter((obj) => true);
+		assert(o2.is_present);
+		assert(o2.value.val == 726);
+		o2 = o.filter((obj) => false);
+		assert(!o2.is_present);
+
+		o3 = o.map<int>((obj) => new Optional<int>.of(obj.val));
+		assert(o3.is_present);
+		assert(o3.value == 726);
+		o3 = o.map<int>((obj) => new Optional<int>.empty());
+		assert(!o3.is_present);
+	}
+
+	public class Obj : Object {
+		public int val;
+
+		public Obj (int val) {
+			this.val = val;
+			atomic_int64_inc(ref objects);
+		}
+
+		~Obj () {
+			atomic_int64_dec_and_test(ref objects);
+		}
 	}
 }
