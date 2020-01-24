@@ -18,13 +18,22 @@
  * along with Gpseq.  If not, see <http://www.gnu.org/licenses/>.
  */
 
+using Test;
 using Gpseq;
 
 public class ResultTests : Gpseq.TestSuite {
+	private const uint64 TRAP_TIMEOUT = 10000000; // 10s
+	private const TestSubprocessFlags TRAP_FLAGS = TestSubprocessFlags.STDOUT;
+
 	public ResultTests () {
 		base("result");
 		add_test("of", test_of);
 		add_test("err", test_err);
+		add_test("ok", test_ok);
+		add_subprocess("ok/subprocess", subprocess_ok);
+		add_subprocess("ok/subprocess2", subprocess_ok2);
+		add_subprocess("ok/subprocess3", subprocess_ok3);
+		add_subprocess("ok/subprocess4", subprocess_ok4);
 		add_test("future", test_future);
 		add_test("get", test_get);
 		add_test("transform", test_transform);
@@ -45,6 +54,38 @@ public class ResultTests : Gpseq.TestSuite {
 	private void test_err () {
 		var result = Result.err<int>( new OptionalError.NOT_PRESENT("An error") );
 		assert(result.exception != null);
+	}
+
+	private void test_ok () {
+		trap("ok/subprocess", TRAP_TIMEOUT, TRAP_FLAGS);
+		trap_assert_passed();
+		trap("ok/subprocess2", TRAP_TIMEOUT, TRAP_FLAGS);
+		trap_assert_failed();
+		trap("ok/subprocess3", TRAP_TIMEOUT, TRAP_FLAGS);
+		trap_assert_failed();
+		trap("ok/subprocess4", TRAP_TIMEOUT, TRAP_FLAGS);
+		trap_assert_failed();
+	}
+
+	private static void subprocess_ok () {
+		var result = Result.of<int>(726);
+		result.ok();
+		result.ok_with(726);
+	}
+
+	private static void subprocess_ok2 () {
+		var result = Result.of<int>(726);
+		result.ok_with(123);
+	}
+
+	private static void subprocess_ok3 () {
+		var result = Result.err<int>( new OptionalError.NOT_PRESENT("An error") );
+		result.ok();
+	}
+
+	private static void subprocess_ok4 () {
+		var result = Result.err<int>( new OptionalError.NOT_PRESENT("An error") );
+		result.ok_with(726);
 	}
 
 	private void test_future () {

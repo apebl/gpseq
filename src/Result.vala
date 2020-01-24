@@ -108,6 +108,50 @@ namespace Gpseq {
 		}
 
 		/**
+		 * Ensures this result holds a value, not an error.
+		 *
+		 * If this holds an error, fails with {@link GLib.error}. Otherwise,
+		 * returns this.
+		 *
+		 * ''{@link Future} implementation:'' Waits until the future is
+		 * completed if not yet completed.
+		 *
+		 * @return this result if no error
+		 */
+		[Version (since="0.3.0-beta")]
+		public Result<G> ok () {
+			if (is_err) error("Result holds an error");
+			return this;
+		}
+
+		/**
+		 * Ensures this result holds the expected value.
+		 *
+		 * If this holds an error or a not expected value, fails with
+		 * {@link GLib.error}. Otherwise, returns this.
+		 *
+		 * ''{@link Future} implementation:'' Waits until the future is
+		 * completed if not yet completed.
+		 *
+		 * @param expected an expected value
+		 * @param equal an equal function. if not specified,
+		 * {@link Gee.Functions.get_equal_func_for} is used to get a proper
+		 * function
+		 * @return this result if it holds the expected value
+		 */
+		[Version (since="0.3.0-beta")]
+		public Result<G> ok_with (G expected, owned Gee.EqualDataFunc? equal = null) {
+			try {
+				unowned G val = get();
+				if (equal == null) equal = Gee.Functions.get_equal_func_for(typeof(G));
+				if (!equal(val, expected)) error("Result holds a not expected value");
+				return this;
+			} catch (Error err) {
+				error("Result holds an error");
+			}
+		}
+
+		/**
 		 * Returns a {@link Future} version of this result.
 		 *
 		 * ''{@link Result} implementation:'' Creates a future completed with
