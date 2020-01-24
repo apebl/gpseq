@@ -183,7 +183,7 @@ namespace Gpseq {
 		 */
 		public Optional<A> map<A> (Gee.MapFunc<Optional<A>,G> mapper) {
 			if (_is_present) {
-				Optional<A> result = mapper((owned) _value);
+				Optional<A> result = mapper(_value);
 				assert(result != null);
 				return result;
 			} else {
