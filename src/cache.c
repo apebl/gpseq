@@ -1,4 +1,4 @@
-/* cache.h
+/* cache.c
  *
  * Copyright (C) 2019-2020  Космическое П. (kosmospredanie@yandex.ru)
  *
