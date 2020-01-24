@@ -25,13 +25,20 @@ namespace Gpseq {
 	 * A container object which may or may not contain a value.
 	 */
 	public class Optional<G> : Object {
-		private G? _value;
-		private bool _is_present;
+		private static void* _empty;
+
+		static construct {
+			_empty = new Object();
+		}
+
+		private void* _value;
 
 		/**
 		 * Creates an empty optional instance.
 		 */
-		public Optional.empty () {}
+		public Optional.empty () {
+			_value = _empty;
+		}
 
 		/**
 		 * Creates an optional instance with the given value present.
@@ -41,7 +48,13 @@ namespace Gpseq {
 		 */
 		public Optional.of (owned G value) {
 			_value = (owned) value;
-			_is_present = true;
+		}
+
+		~Optional () {
+			if (_value != null && _value != _empty) {
+				G val = (G)(owned)_value;
+				val = null;
+			}
 		}
 
 		/**
@@ -61,7 +74,7 @@ namespace Gpseq {
 		 */
 		public G value {
 			get {
-				assert(_is_present);
+				assert(is_present);
 				return _value;
 			}
 		}
@@ -71,12 +84,12 @@ namespace Gpseq {
 		 */
 		public bool is_present {
 			get {
-				return _is_present;
+				return _value != _empty;
 			}
 		}
 
 		public string to_string () {
-			if (_is_present) {
+			if (is_present) {
 				return "Optional[%p]".printf(_value);
 			} else {
 				return "Optional.empty";
@@ -91,8 +104,8 @@ namespace Gpseq {
 		 * present
 		 */
 		public void if_present (GLib.Func<G> consumer) {
-			if (_is_present) {
-				consumer(_value);
+			if (is_present) {
+				consumer((G)_value);
 			}
 		}
 
@@ -104,7 +117,7 @@ namespace Gpseq {
 		 * @return the value if present, otherwise the given other.
 		 */
 		public G or_else (G other) {
-			return _is_present ? _value : other;
+			return is_present ? (G)_value : other;
 		}
 
 		/**
@@ -116,7 +129,7 @@ namespace Gpseq {
 		 * supply function
 		 */
 		public G or_else_get (SupplyFunc<G> supplier) {
-			return _is_present ? _value : supplier();
+			return is_present ? (G)_value : supplier();
 		}
 
 		/**
@@ -132,8 +145,8 @@ namespace Gpseq {
 		 * is present
 		 */
 		public G or_else_throw (SupplyFunc<Error>? error_supplier = null) throws Error {
-			if (_is_present) {
-				return _value;
+			if (is_present) {
+				return (G)_value;
 			} else {
 				throw error_supplier != null
 					? error_supplier()
@@ -148,8 +161,8 @@ namespace Gpseq {
 		 * @return the value if present
 		 */
 		public G or_else_fail () {
-			if (_is_present) {
-				return _value;
+			if (is_present) {
+				return (G)_value;
 			} else {
 				error("Optional: No value present");
 			}
@@ -163,8 +176,8 @@ namespace Gpseq {
 		 * otherwise an empty optional
 		 */
 		public Optional<G> filter (Gee.Predicate<G> pred) {
-			if (_is_present) {
-				return pred(_value) ? this : new Optional<G>.empty();
+			if (is_present) {
+				return pred((G)_value) ? this : new Optional<G>.empty();
 			} else {
 				return this;
 			}
@@ -182,8 +195,8 @@ namespace Gpseq {
 		 * otherwise an empty optional
 		 */
 		public Optional<A> map<A> (Gee.MapFunc<Optional<A>,G> mapper) {
-			if (_is_present) {
-				Optional<A> result = mapper(_value);
+			if (is_present) {
+				Optional<A> result = mapper((G)_value);
 				assert(result != null);
 				return result;
 			} else {
