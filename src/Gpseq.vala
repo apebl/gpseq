@@ -96,6 +96,30 @@ namespace Gpseq {
 	}
 
 	/**
+	 * Schedules the given function to execute asynchronously.
+	 *
+	 * The {@link Executor} of {@link TaskEnv.get_common_task_env} will execute
+	 * the function. By default, it is a {@link WorkerPool} which uses
+	 * work-stealing algorithm.
+	 *
+	 * This method is the same as {@link task} but this accepts a
+	 * {@link VoidTaskFunc} which has void return type.
+	 *
+	 * @param func a task function to execute
+	 * @return a future of the execution
+	 *
+	 * @see WorkerPool
+	 * @see FuncTask
+	 */
+	[Version (since="0.3.0-beta")]
+	public Future<void*> run (owned VoidTaskFunc func) {
+		return task<void*>(() => {
+			func();
+			return null;
+		});
+	}
+
+	/**
 	 * Runs the given blocking task.
 	 *
 	 * If the current thread is not a {@link WorkerThread}, this method just
