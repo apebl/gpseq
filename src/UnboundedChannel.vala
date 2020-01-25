@@ -172,6 +172,10 @@ namespace Gpseq {
 			 *
 			 * If the queue contains more than {@link int64.MAX} elements,
 			 * returns {@link int64.MAX}.
+			 *
+			 * Note. This is not a constant-time operation. This requires a
+			 * traversal of the elements, and so may return inaccurate results
+			 * if modified during traversal.
 			 */
 			public int64 length {
 				get {

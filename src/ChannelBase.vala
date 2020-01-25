@@ -38,6 +38,10 @@ namespace Gpseq {
 		 *
 		 * If the channel is unbounded and contains more than {@link int64.MAX}
 		 * elements, returns {@link int64.MAX}.
+		 *
+		 * Note. This may or may not be a constant-time operation. If not, this
+		 * requires a traversal of the elements, and so may return inaccurate
+		 * results if modified during traversal.
 		 */
 		public abstract int64 length { get; }
 
@@ -45,6 +49,8 @@ namespace Gpseq {
 		 * Whether or not the channel is full.
 		 *
 		 * Unbuffered channels are always full.
+		 *
+		 * This is a constant-time operation.
 		 */
 		public virtual bool is_full {
 			get {
@@ -57,6 +63,8 @@ namespace Gpseq {
 		 * Whether or not the channel is empty.
 		 *
 		 * Unbuffered channels are always empty.
+		 *
+		 * This is a constant-time operation.
 		 */
 		public virtual bool is_empty {
 			get {
