@@ -20,6 +20,8 @@ gobject_reqs = '2.36'
 gobject_dep = dependency('gobject-2.0', version: '>=' + gobject_reqs)
 gee_reqs = '0.18'
 gee_dep = dependency('gee-0.8', version: '>=' + gee_reqs)
+deps_file = files('gpseq-1.0.deps')
+
 
 dependencies = [
 	m_dep,
@@ -37,7 +39,7 @@ vala_args = [
 
 # Trap on signed integer overflow
 if get_option('buildtype') == 'debug' and cc.get_argument_syntax() == 'gcc'
-	add_global_arguments('-ftrapv', language: 'c')
+	add_project_arguments('-ftrapv', language : 'c')
 endif
 
 subdir('src')

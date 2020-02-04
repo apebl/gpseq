@@ -121,7 +121,7 @@ gpseq_lib = library(libname, sources,
 gpseq_dep = declare_dependency(link_with: gpseq_lib,
 	include_directories: include_directories('.'))
 
-install_data(meson.source_root() / (libname + '.deps'),
+install_data(deps_file,
 	install_dir: get_option('datadir') / 'vala/vapi')
 
 pkg = import('pkgconfig')
