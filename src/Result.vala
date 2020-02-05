@@ -123,8 +123,12 @@ namespace Gpseq {
 		 */
 		[Version (since="0.3.0-beta")]
 		public Result<G> ok () {
-			if (is_err) error("Result holds an error");
-			return this;
+			try {
+				get();
+				return this;
+			} catch (Error err) {
+				error("Result holds an error: %s", err.message);
+			}
 		}
 
 		/**
@@ -150,7 +154,7 @@ namespace Gpseq {
 				if (!equal(val, expected)) error("Result holds a not expected value");
 				return this;
 			} catch (Error err) {
-				error("Result holds an error");
+				error("Result holds an error: %s", err.message);
 			}
 		}
 
