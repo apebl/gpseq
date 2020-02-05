@@ -23,3 +23,8 @@ option('cache_line_size',
 	type: 'integer',
 	value: 0,
 	description: 'The cache line size of the target platform (0 = automatically determined)')
+
+option('comments',
+	type: 'boolean',
+	value: true,
+	description: 'Whether to include comments in generated vapi')

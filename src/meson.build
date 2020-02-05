@@ -127,6 +127,10 @@ if get_option('cache_line_size') > 0
 	c_args += '-DGPSEQ_CACHE_LINE_SIZE=@0@'.format(get_option('cache_line_size'))
 endif
 
+if get_option('comments')
+	vala_args += '--vapi-comments'
+endif
+
 gpseq_lib = library(libname, sources,
 	vala_header: meson.project_name() + '.h',
 	vala_gir: Libname + '.gir',
