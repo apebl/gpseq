@@ -29,7 +29,7 @@ using Gpseq;
 
 void main () {
     Channel<string> chan = Channel.bounded<string>(0);
-    run(() => { chan.send("ping").ok(); });
+    run( () => chan.send("ping").ok() );
     print("%s\n", chan.recv().value);
 }
 
@@ -39,7 +39,7 @@ void main () {
 
 ## Features
 
-- Work-stealing and managed blocking task scheduling
+- Work-stealing task scheduling with managed blocking
 - Functional programming for data processing with parallel execution support (Seq)
 - Unbuffered, buffered, and unbounded MPMC channels
 - Fork-join parallelism
