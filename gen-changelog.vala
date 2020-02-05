@@ -1,20 +1,31 @@
 #!/usr/bin/env vala
 
 /*
- * A utility script to generate a changelog from git log
+ * gen-changelog.vala - A utility script to generate a changelog from git log
+ *
+ * Written in 2019-2020 by Космическое П. (kosmospredanie@yandex.ru)
+ *
+ * To the extent possible under law, the author have dedicated all copyright
+ * and related and neighboring rights to this software to the public domain
+ * worldwide. This software is distributed without any warranty.
+ *
+ * You should have received a copy of the CC0 legalcode along with this
+ * work. If not, see <http://creativecommons.org/publicdomain/zero/1.0/>.
  *
  * example:
- * gen-changelog.vala > CHANGELOG.md
+ *   gen-changelog.vala > CHANGELOG.md
  */
 
 const string REPOSITORY = "https://gitlab.com/kosmospredanie/gpseq";
+// Commit types to be included in changelog
+const string[] TYPES = {
+	"feat", "fix", "refactor", "perf", "deps", "revert"
+};
+
 const string LOG_FORMAT = "<< COMMIT START\n%H\n%h\n%ct\n%s\n%b\nCOMMIT END >>";
 const string TIME_FORMAT = "%Y-%m-%d";
 const string VERSION_PATTERN = "(\\d+).(\\d+).(\\d+)(-[\\w.-]+)?(\\+[\\w.-]+)? \\(([^)]+)\\)";
 const string TAG_CMD="git --no-pager tag -l --format='%(refname:short) (%(creatordate:unix))' --sort=committerdate";
-const string[] TYPES = {
-	"feat", "fix", "refactor", "perf", "deps", "revert"
-};
 
 void main () {
 	Version[] versions = get_versions();
