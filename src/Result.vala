@@ -100,6 +100,9 @@ namespace Gpseq {
 
 		/**
 		 * Whether or not this result holds an error.
+		 *
+		 * ''{@link Future} implementation:'' If the future is not yet
+		 * completed, getting will block until the future is completed.
 		 */
 		public bool is_err {
 			get {
