@@ -20,8 +20,6 @@ gobject_reqs = '2.36'
 gobject_dep = dependency('gobject-2.0', version: '>=' + gobject_reqs)
 gee_reqs = '0.18'
 gee_dep = dependency('gee-0.8', version: '>=' + gee_reqs)
-deps_file = files('gpseq-1.0.deps')
-
 
 dependencies = [
 	m_dep,
@@ -47,6 +45,9 @@ subdir('tests')
 if get_option('benchmark')
 	subdir('benchmark')
 endif
+
+install_data(files(libname + '.deps'),
+	install_dir: get_option('datadir') / 'vala/vapi')
 
 if get_option('docs').length() > 0
 	valadoc = find_program('valadoc')
