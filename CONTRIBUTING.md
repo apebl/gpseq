@@ -1,5 +1,13 @@
 # Contributing
 
+## Branching Workflow
+
+Based on git flow, but allowing fast-forward merge to master/develop branches.
+See the [workflow graph](WORKFLOW.html).
+
+You should use a «MAJOR».«MINOR» branch for target branch when submitting a
+merge request.
+
 ## Commit Message Guidelines
 
 Each commit message should be structured as follows:
