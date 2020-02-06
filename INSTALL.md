@@ -1,6 +1,20 @@
-# Building gpseq
+# Installation
 
-## Build requirements
+## Using package manager
+
+### Arch Linux
+
+You can install [gpseq-git](https://aur.archlinux.org/packages/gpseq-git) from
+AUR.
+
+```sh
+sudo pacman -S yay
+yay -S gpseq-git
+```
+
+## Building
+
+### Build requirements
 
 Required:
 
@@ -20,7 +34,7 @@ Optional:
 - gobject-2.0 >= 2.36
 - gee-0.8 >= 0.18
 
-## Build
+### Build
 
 ```sh
 cd gpseq
@@ -34,7 +48,7 @@ In order to build documentations, add the `-Ddocs` option.
 - Build gtkdoc: `-Ddocs=gtkdoc`
 - Build both: `-Ddocs=valadoc,gtkdoc`
 
-### Test
+#### Test
 
 After meson build:
 
@@ -42,7 +56,7 @@ After meson build:
 meson test -C _build -t 100 --print-errorlogs --verbose
 ```
 
-### Install
+#### Install
 
 Run (sudo) `ninja -C _build install` after meson build.
 
@@ -56,6 +70,6 @@ meson _build --buildtype=release --prefix=/usr
 sudo ninja -C _build install
 ```
 
-### Build options
+#### Build options
 
 See [meson_options.txt](meson_options.txt).
