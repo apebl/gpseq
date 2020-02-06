@@ -52,7 +52,7 @@ void main () {
 ## Documentation
 
 Read [wiki](https://gitlab.com/kosmospredanie/gpseq/wikis),
-[valadoc](https://gitlab.com/kosmospredanie/gpseq/-/jobs/artifacts/master/file/valadoc/index.html?job=build),
+[valadoc](https://valadoc.org/gpseq-1.0/index.htm),
 and [gtkdoc (C API)](https://gitlab.com/kosmospredanie/gpseq/-/jobs/artifacts/master/file/gtkdoc/html/index.html?job=build).
 
 There is a developer's guide in the wiki.
