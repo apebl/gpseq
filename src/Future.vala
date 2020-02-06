@@ -187,10 +187,10 @@ namespace Gpseq {
 		}
 
 		/**
-		 * If this future is completed with an exception, maps the exception to
-		 * another exception by applying the given function to the exception in
-		 * future, otherwise the result future just uses the value of this
-		 * future.
+		 * Maps the exception to another exception by applying the given
+		 * function to the exception in future if this future is completed with
+		 * an exception, otherwise the result future just uses the value of
+		 * this future.
 		 *
 		 * @param func a function applied to exception
 		 * @return [Future<G>] the mapped future
