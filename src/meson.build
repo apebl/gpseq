@@ -45,6 +45,7 @@ sources = files(
 	'IterateIterator.vala',
 	'IteratorSpliterator.vala',
 	'ListSpliterator.vala',
+	'MapError.vala',
 	'MapFunc.vala',
 	'MappedContainer.vala',
 	'MatchTask.vala',

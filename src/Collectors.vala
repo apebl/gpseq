@@ -105,14 +105,18 @@ namespace Gpseq {
 		/**
 		 * Returns a collector that accumulates the elements into a new map.
 		 *
-		 * If there are key duplications, the values are merged using the //merger// function.
+		 * If there are key duplications, the values are merged using the
+		 * //merger// function, or throws a {@link MapError.DUPLICATE_KEY} if
+		 * the function is not specified.
 		 *
 		 * There are no guarantees on the type, mutability, or thread-safety of
 		 * the map.
 		 *
 		 * @param key_mapper a mapping function for keys
 		 * @param val_mapper a mapping function for values
-		 * @param merger a function used to resolve key collisions
+		 * @param merger a function used to resolve key collisions. if not
+		 * specified, //(a, b) => { throw new MapError.DUPLICATE_KEY(...); }//
+		 * is used.
 		 * @param key_hash a hash function for keys. if not specified,
 		 * {@link Gee.Functions.get_hash_func_for} is used to get a proper
 		 * function
@@ -126,10 +130,13 @@ namespace Gpseq {
 		 */
 		public Collector<Map<K,V>,Object,G> to_map<K,V,G> (
 				owned MapFunc<K,G> key_mapper, owned MapFunc<V,G> val_mapper,
-				owned CombineFunc<V> merger,
+				owned CombineFunc<V>? merger = null,
 				owned HashDataFunc<K>? key_hash = null,
 				owned EqualDataFunc<K>? key_equal = null,
 				owned EqualDataFunc<V>? value_equal = null) {
+			if (merger == null) {
+				merger = (a, b) => { throw new MapError.DUPLICATE_KEY("Duplicate key"); };
+			}
 			return new MapCollector<K,V,G>(
 					(owned)key_mapper, (owned)val_mapper, (owned)merger,
 					(owned)key_hash, (owned)key_equal, (owned)value_equal );
@@ -138,7 +145,7 @@ namespace Gpseq {
 		/* TODO
 		public Collector<Map<K,V>,Object,G> to_concurrent_map<K,V,G> (
 				owned MapFunc<K,G> key_mapper, owned MapFunc<V,G> val_mapper,
-				owned CombineFunc<V> merger,
+				owned CombineFunc<V>? merger = null,
 				owned HashDataFunc<K>? key_hash = null,
 				owned EqualDataFunc<K>? key_equal = null,
 				owned EqualDataFunc<V>? value_equal = null)
