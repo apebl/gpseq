@@ -43,7 +43,7 @@ namespace Gpseq {
 		 * If the channel has been closed.
 		 *
 		 * @param data a value
-		 * @return the result which hold null if succeeded, or an error if
+		 * @return the result which holds null if succeeded, or an error if
 		 * failed.
 		 */
 		public abstract Result<void*> send (owned G data);
@@ -66,7 +66,7 @@ namespace Gpseq {
 		 *
 		 * @param data a value
 		 * @param end_time the monotonic time to wait until
-		 * @return the result which hold null if succeeded, or an error if
+		 * @return the result which holds null if succeeded, or an error if
 		 * failed.
 		 */
 		public abstract Result<void*> send_until (owned G data, int64 end_time);
@@ -87,7 +87,7 @@ namespace Gpseq {
 		 * operations waiting for send operations (unbuffered channel).
 		 *
 		 * @param data a value
-		 * @return the result which hold null if succeeded, or an error if
+		 * @return the result which holds null if succeeded, or an error if
 		 * failed.
 		 */
 		public abstract Result<void*> try_send (owned G data);

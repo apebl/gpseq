@@ -43,7 +43,7 @@ namespace Gpseq {
 		 *
 		 * If the channel has been closed and no more data.
 		 *
-		 * @return the result which hold a value if succeeded, or an error if
+		 * @return the result which holds a value if succeeded, or an error if
 		 * failed.
 		 */
 		public abstract Result<G> recv ();
@@ -66,7 +66,7 @@ namespace Gpseq {
 		 * If //end_time// has passed.
 		 *
 		 * @param end_time the monotonic time to wait until
-		 * @return the result which hold a value if succeeded, or an error if
+		 * @return the result which holds a value if succeeded, or an error if
 		 * failed.
 		 */
 		public abstract Result<G> recv_until (int64 end_time);
@@ -87,7 +87,7 @@ namespace Gpseq {
 		 * no send operations waiting for receive operations (unbuffered
 		 * channel).
 		 *
-		 * @return the result which hold a value if succeeded, or an error if
+		 * @return the result which holds a value if succeeded, or an error if
 		 * failed.
 		 */
 		public abstract Result<G> try_recv ();
