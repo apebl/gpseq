@@ -36,6 +36,7 @@ namespace Gpseq {
 			if (proposed_capacity > int64.MAX) error("Capacity exceeds limit");
 			int capacity = find_pot(proposed_capacity);
 			if (capacity < 0) error("Capacity exceeds limit");
+			else if (capacity < 2) capacity = 2;
 			_queue = new Queue<G>(capacity);
 			_closed = new AtomicBoolVal();
 		}

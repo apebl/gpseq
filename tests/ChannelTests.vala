@@ -74,6 +74,13 @@ public abstract class ChannelTests<G> : Gpseq.TestSuite {
 		} else {
 			assert(cap.is_present && (!)cap.value == 0);
 		}
+
+		if (_capacity > 0 && cap.is_present) {
+			for (int i = 1; i < 10; ++i) {
+				chan = create_channel(i);
+				assert(chan.capacity.value >= i);
+			}
+		}
 	}
 
 	private void test_length () {
