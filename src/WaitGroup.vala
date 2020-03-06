@@ -64,6 +64,86 @@ namespace Gpseq {
 		}
 
 		/**
+		 * Increases the counter by one and schedules the given function to
+		 * execute. Next, decreases the counter by one after the function is
+		 * executed.
+		 *
+		 * This is equivalent to:
+		 *
+		 * {{{
+		 * waitgroup.add();
+		 * return Gpseq.task<G>(() => {
+		 *     try {
+		 *         G result = func();
+		 *         return (owned) result;
+		 *     } catch (Error err) {
+		 *         throw err;
+		 *     } finally {
+		 *         waitgroup.done();
+		 *     }
+		 * });
+		 * }}}
+		 *
+		 * @param func a task function to execute
+		 * @return a future of the execution
+		 *
+		 * @see Gpseq.task
+		 */
+		[Version (since="0.4.0-alpha")]
+		public Future<G> task<G> (owned TaskFunc<G> func) {
+			add();
+			return Gpseq.task<G>(() => {
+				try {
+					G result = func();
+					return (owned) result;
+				} catch (Error err) {
+					throw err;
+				} finally {
+					done();
+				}
+			});
+		}
+
+		/**
+		 * Increases the counter by one and schedules the given function to
+		 * execute. Next, decreases the counter by one after the function is
+		 * executed.
+		 *
+		 * This is equivalent to:
+		 *
+		 * {{{
+		 * waitgroup.add();
+		 * return Gpseq.run(() => {
+		 *     try {
+		 *         func();
+		 *     } catch (Error err) {
+		 *         throw err;
+		 *     } finally {
+		 *         waitgroup.done();
+		 *     }
+		 * });
+		 * }}}
+		 *
+		 * @param func a task function to execute
+		 * @return a future of the execution
+		 *
+		 * @see Gpseq.run
+		 */
+		[Version (since="0.4.0-alpha")]
+		public Future<void*> run (owned VoidTaskFunc func) {
+			add();
+			return Gpseq.run(() => {
+				try {
+					func();
+				} catch (Error err) {
+					throw err;
+				} finally {
+					done();
+				}
+			});
+		}
+
+		/**
 		 * Waits until the counter is zero.
 		 */
 		public void wait () {
