@@ -1258,5 +1258,130 @@ namespace Gpseq {
 		public Future< Map<bool,Gee.List<G>> > partition (owned Predicate<G> pred) {
 			return collect( Collectors.partition<G>((owned)pred) );
 		}
+
+		/**
+		 * Accumulates the elements into a new generic array, in encounter
+		 * order.
+		 *
+		 * This is equivalent to:
+		 *
+		 * {{{
+		 * seq.collect( Collectors.to_generic_array<G>() );
+		 * }}}
+		 *
+		 * This is a terminal operation.
+		 *
+		 * @return a future of the result generic array
+		 * @see Collectors.to_generic_array
+		 */
+		[Version (since="0.4.0-alpha")]
+		public Future<GenericArray<G>> to_generic_array () {
+			return collect( Collectors.to_generic_array<G>() );
+		}
+
+		/**
+		 * Accumulates the elements into a new list, in encounter order.
+		 *
+		 * There are no guarantees on the type, mutability, or thread-safety of
+		 * the list.
+		 *
+		 * This is equivalent to:
+		 *
+		 * {{{
+		 * seq.collect( Collectors.to_list<G>() );
+		 * }}}
+		 *
+		 * This is a terminal operation.
+		 *
+		 * @return a future of the result list
+		 * @see Collectors.to_list
+		 */
+		[Version (since="0.4.0-alpha")]
+		public Future<Gee.List<G>> to_list () {
+			return collect( Collectors.to_list<G>() );
+		}
+
+		/**
+		 * Accumulates the elements into a new set.
+		 *
+		 * There are no guarantees on the type, mutability, or thread-safety of
+		 * the set.
+		 *
+		 * This is equivalent to:
+		 *
+		 * {{{
+		 * seq.collect( Collectors.to_set<G>(hash, equal) );
+		 * }}}
+		 *
+		 * This is a terminal operation.
+		 *
+		 * @param hash a hash function. if not specified,
+		 * {@link Gee.Functions.get_hash_func_for} is used to get a proper
+		 * function
+		 * @param equal an equal function. if not specified,
+		 * {@link Gee.Functions.get_equal_func_for} is used to get a proper
+		 * function
+		 * @return a future of the result set
+		 * @see Collectors.to_set
+		 */
+		[Version (since="0.4.0-alpha")]
+		public Future<Set<G>> to_set (
+				owned HashDataFunc<G>? hash = null,
+				owned EqualDataFunc<G>? equal = null) {
+			return collect( Collectors.to_set<G>((owned)hash, (owned)equal) );
+		}
+
+		/**
+		 * Accumulates the elements into a new map.
+		 *
+		 * If there are key duplications, the values are merged using the
+		 * //merger// function, or the future is completed with a
+		 * {@link MapError.DUPLICATE_KEY} if the function is not specified.
+		 *
+		 * There are no guarantees on the type, mutability, or thread-safety of
+		 * the map.
+		 *
+		 * This is equivalent to:
+		 *
+		 * {{{
+		 * seq.collect( Collectors.to_map<K,V,G>(...) );
+		 * }}}
+		 *
+		 * This is a terminal operation.
+		 *
+		 * @param key_mapper a mapping function for keys
+		 * @param val_mapper a mapping function for values
+		 * @param merger a function used to resolve key collisions. if not
+		 * specified, //(a, b) => { throw new MapError.DUPLICATE_KEY(...); }//
+		 * is used.
+		 * @param key_hash a hash function for keys. if not specified,
+		 * {@link Gee.Functions.get_hash_func_for} is used to get a proper
+		 * function
+		 * @param key_equal an equal function for keys. if not specified,
+		 * {@link Gee.Functions.get_equal_func_for} is used to get a proper
+		 * function
+		 * @param value_equal an equal function for values. if not specified,
+		 * {@link Gee.Functions.get_equal_func_for} is used to get a proper
+		 * function
+		 * @return a future of the result map
+		 * @see Collectors.to_map
+		 */
+		[Version (since="0.4.0-alpha")]
+		public Future<Map<K,V>> to_map<K,V> (
+				owned MapFunc<K,G> key_mapper, owned MapFunc<V,G> val_mapper,
+				owned CombineFunc<V>? merger = null,
+				owned HashDataFunc<K>? key_hash = null,
+				owned EqualDataFunc<K>? key_equal = null,
+				owned EqualDataFunc<V>? value_equal = null) {
+			return collect(
+				Collectors.to_map<K,V,G>(
+					(owned)key_mapper, (owned)val_mapper,
+					(owned)merger,
+					(owned)key_hash,
+					(owned)key_equal,
+					(owned)value_equal
+				)
+			);
+		}
 	}
 }
