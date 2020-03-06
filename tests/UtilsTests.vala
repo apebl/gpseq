@@ -46,6 +46,7 @@ public class UtilsTests : Gpseq.TestSuite {
 		add_test("overflow:int64", test_overflow_int64);
 		add_test("wait-group", test_wait_group);
 		add_test("optional", test_optional);
+		add_test("compares", test_compares);
 	}
 
 	public override void set_up () {
@@ -406,6 +407,34 @@ public class UtilsTests : Gpseq.TestSuite {
 		assert(o3.value == 726);
 		o3 = o.map<int>((obj) => new Optional<int>.empty());
 		assert(!o3.is_present);
+	}
+
+	public void test_compares () {
+		int?[] array = {null, 1010, 22, 11, 0, null};
+		int?[] copy;
+
+		copy = array;
+		qsort_with_data<int?>(copy, sizeof(int?), Compares.reverse(compare_nullable_int));
+		assert( copy[0] == 1010 );
+		assert( copy[1] == 22 );
+		assert( copy[2] == 11 );
+		assert( copy[3] == 0 );
+		assert( copy[4] == null );
+		assert( copy[5] == null );
+
+		copy = array;
+		qsort_with_data<int?>(copy, sizeof(int?),
+			Compares.join<int?>(
+				(a, b) => a == null ? -1 : (b == null ? 1 : 0),
+				(a, b) => Compares.reverse<int?>(compare_nullable_int)(a, b)
+			)
+		);
+		assert( copy[0] == null );
+		assert( copy[1] == null );
+		assert( copy[2] == 1010 );
+		assert( copy[3] == 22 );
+		assert( copy[4] == 11 );
+		assert( copy[5] == 00 );
 	}
 
 	public class Obj : Object {
