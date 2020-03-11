@@ -93,6 +93,7 @@ namespace Gpseq {
 
 		private unowned WorkerThread? _parent = null;
 		private bool _blocked;
+		private bool _seeking;
 
 		private Thread<void*>? _thread = null; // also used to lock
 		private unowned WorkerPool _pool;
@@ -335,6 +336,10 @@ namespace Gpseq {
 
 				Task? pop = ctx.work_queue.poll_tail();
 				if (pop != null) {
+					if (_seeking) {
+						_seeking = false;
+						_pool.signal_new_task(false);
+					}
 					pop.compute();
 					barrens = 0;
 				} else {
@@ -344,6 +349,7 @@ namespace Gpseq {
 					if (barrens > MAX_THREAD_IDLE_ITERATIONS) {
 						if (_parent == null) {
 							_pool.block_idle(this);
+							_seeking = true;
 							if (_pool.is_terminating_started) return;
 						}
 						barrens = 0;

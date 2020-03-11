@@ -64,6 +64,8 @@ namespace Gpseq {
 		private Gee.List<WorkerThread> _threads; // master threads
 		private Gee.Set<WorkerThread> _slaves;
 
+		private int _seekers; // AtomicInt
+
 		private string _thread_name_prefix;
 		private int _next_thread_id; // AtomicInt
 		private Mutex _lock = Mutex();
@@ -196,6 +198,12 @@ namespace Gpseq {
 			owned get { return _contexts.read_only_view; }
 		}
 
+		internal int seekers {
+			get {
+				return AtomicInt.get(ref _seekers);
+			}
+		}
+
 		/**
 		 * The submission queue. when a task is submitted from the outside of
 		 * worker threads, the task is queued in this queue.
@@ -231,7 +239,7 @@ namespace Gpseq {
 			} else {
 				add_submission(task);
 			}
-			signal_new_task();
+			signal_new_task(true);
 		}
 
 		/**
@@ -248,10 +256,12 @@ namespace Gpseq {
 		/**
 		 * Wakes one or more threads up.
 		 */
-		private void signal_new_task () {
-			_lock.lock();
-			_cond.signal();
-			_lock.unlock();
+		internal void signal_new_task (bool check_seekers) {
+			if (!check_seekers || 0 == AtomicInt.get(ref _seekers)) {
+				_lock.lock();
+				_cond.signal();
+				_lock.unlock();
+			}
 		}
 
 		/**
@@ -263,6 +273,14 @@ namespace Gpseq {
 			_lock.lock();
 			_cond.wait(_lock);
 			_lock.unlock();
+		}
+
+		internal void begin_seeking () {
+			AtomicInt.add(ref _seekers, 1);
+		}
+
+		internal void end_seeking () {
+			AtomicInt.add(ref _seekers, -1);
 		}
 
 		/**
