@@ -260,14 +260,13 @@ namespace Gpseq {
 		/**
 		 * Runs the given blocking task and returns the result.
 		 *
-		 * This method tries to create (or optain from pool, depending on the
-		 * internal implementation) a new thread.
+		 * This method tries to create a new thread.
 		 *
 		 * -> If succeed, the new thread takes the context of this thread and
 		 * runs the remaining tasks in the context. This thread runs the
 		 * blocking task and is marked as //blocked// until the task ends.
 		 * After it ends, this thread is unblocked and takes the context back,
-		 * and the new thread is terminated (or returned to the pool).
+		 * and the new thread is terminated.
 		 *
 		 * -> If failed, e.g. the maximum number of threads exceeded, this
 		 * method just runs the function without any further work.
