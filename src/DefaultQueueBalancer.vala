@@ -40,9 +40,12 @@ namespace Gpseq {
 
 		public void scan (WorkerContext context) {
 			WorkerPool pool = context.pool;
-			pool.begin_seeking();
-			if (!try_steal(context)) try_drain_submissions(context);
-			pool.end_seeking();
+			// No need to use CAS here; no need to check accurately
+			if (pool.max_seekers > pool.seekers) {
+				pool.begin_seeking();
+				if (!try_steal(context)) try_drain_submissions(context);
+				pool.end_seeking();
+			}
 		}
 
 		/**

@@ -64,6 +64,7 @@ namespace Gpseq {
 		private Gee.List<WorkerThread> _threads; // master threads
 		private Gee.Set<WorkerThread> _slaves;
 
+		private int _max_seekers;
 		private int _seekers; // AtomicInt
 
 		private string _thread_name_prefix;
@@ -111,6 +112,7 @@ namespace Gpseq {
 			_threads = new ArrayList<WorkerThread>();
 			_slaves = new HashSet<WorkerThread>();
 			_submission_queue = new WorkQueue();
+			_max_seekers = int.max(parallels/2, 2);
 
 			var sb = new StringBuilder("GpseqWorkerPool-");
 			sb.append(next_pool_number().to_string()).append("-thread-");
@@ -196,6 +198,12 @@ namespace Gpseq {
 		 */
 		internal Gee.List<WorkerContext> contexts {
 			owned get { return _contexts.read_only_view; }
+		}
+
+		internal int max_seekers {
+			get {
+				return _max_seekers;
+			}
 		}
 
 		internal int seekers {
