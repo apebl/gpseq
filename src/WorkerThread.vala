@@ -282,6 +282,7 @@ namespace Gpseq {
 		 * @see Gpseq.blocking
 		 * @see Gpseq.blocking_get
 		 */
+		// TODO Use pooling for slave threads
 		[Version (since="0.2.0-alpha")]
 		public G blocking<G> (TaskFunc<G> func) throws Error {
 			lock (_context) {
