@@ -1091,6 +1091,31 @@ namespace Gpseq {
 		}
 
 		/**
+		 * Returns a seq which contains the elements of this seq, sorted based
+		 * on the given compare function, but in descending order. The sort is
+		 * stable.
+		 *
+		 * This is equivalent to:
+		 *
+		 * {{{
+		 * seq.order_by( Compares.reverse<G>(compare) );
+		 * }}}
+		 *
+		 * This is a stateful intermediate operation.
+		 *
+		 * @param compare a //non-interfering// and //stateless// compare
+		 * function. if not specified, {@link Gee.Functions.get_compare_func_for}
+		 * is used to get a proper function
+		 * @return the new seq
+		 * @see order_by
+		 * @see Compares.reverse
+		 */
+		[Version (since="0.4.0-alpha")]
+		public Seq<G> reverse_order_by (owned CompareDataFunc<G>? compare = null) {
+			return order_by( Compares.reverse<G>(compare) );
+		}
+
+		/**
 		 * Applies the given function to each element of this seq.
 		 *
 		 * This is a terminal operation.
