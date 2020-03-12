@@ -23,6 +23,7 @@ using Gee;
 namespace Gpseq {
 	internal class WorkerContext : Object {
 		private unowned WorkerPool _pool;
+		private unowned WorkerThread? _thread;
 		private WorkQueue _work_queue;
 		private QueueBalancer _balancer;
 
@@ -35,6 +36,28 @@ namespace Gpseq {
 		public WorkerPool pool {
 			get {
 				return _pool;
+			}
+		}
+
+		public WorkerThread? thread {
+			get {
+				lock (_thread) {
+					return _thread;
+				}
+			}
+			set {
+				lock (_thread) {
+					_thread = value;
+				}
+			}
+		}
+
+		public bool is_blocked {
+			get {
+				lock (_thread) {
+					assert(_thread != null);
+					return _thread.is_blocked;
+				}
 			}
 		}
 

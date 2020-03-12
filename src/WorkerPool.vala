@@ -133,6 +133,7 @@ namespace Gpseq {
 				WorkerContext ctx = new WorkerContext(this);
 				WorkerThread t = new_thread();
 				t.context = ctx;
+				ctx.thread = t;
 				_contexts.add(ctx);
 				_threads.add(t);
 			}

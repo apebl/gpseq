@@ -67,7 +67,9 @@ namespace Gpseq {
 				WorkerContext victim = contexts[idx];
 				WorkQueue vq = victim.work_queue;
 				int size = vq.size;
-				if (size > 1) size = size >> 1;
+				// If blocked, steals all the tasks.
+				// Otherwise, steals half the tasks.
+				if (size > 1 && !victim.is_blocked) size = size >> 1;
 				bool taken = false;
 				while (size > 0) {
 					Task? task = vq.poll_head();

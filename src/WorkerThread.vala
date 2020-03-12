@@ -87,6 +87,7 @@ namespace Gpseq {
 					assert(from._context != null);
 					to._context = from._context;
 					from._context = null;
+					to._context.thread = to;
 				}
 			}
 		}
