@@ -26,6 +26,9 @@ namespace Gpseq {
 	 */
 	public class WorkerThread : Object {
 		private const int MAX_THREAD_IDLE_ITERATIONS = 4;
+		private const int CHECK_INTERVAL_INITIAL = 0;
+		private const int CHECK_INTERVAL_INCR = 1;
+		private const int CHECK_INTERVAL_MAX = 16;
 
 		/**
 		 * A table storing worker threads.
@@ -364,8 +367,14 @@ namespace Gpseq {
 		 * Loop for task join.
 		 */
 		internal void task_join (Task task) throws Error {
+			int interval = CHECK_INTERVAL_INITIAL;
+			int ctr = interval;
 			while (true) {
-				if (task.future.ready) return;
+				if (check_interval(ref ctr, ref interval)) {
+					if (task.future.ready) {
+						break;
+					}
+				}
 
 				WorkerContext? ctx;
 				lock (_context) { ctx = _context; }
@@ -377,13 +386,26 @@ namespace Gpseq {
 				Task? pop = ctx.work_queue.poll_tail();
 				if (pop != null) {
 					pop.invoke();
-					if (pop == task) return;
+					if (pop == task) break;
 				} else {
 					QueueBalancer bal = ctx.balancer;
 					bal.no_tasks(ctx);
 					bal.scan(ctx);
 				}
 			}
+		}
+
+		private bool check_interval (ref int count, ref int interval) {
+			++count;
+			if (count > interval) {
+				count = 0;
+				interval += CHECK_INTERVAL_INCR;
+				if (interval > CHECK_INTERVAL_MAX) {
+					interval = CHECK_INTERVAL_MAX;
+				}
+				return true;
+			}
+			return false;
 		}
 
 		/**
