@@ -88,7 +88,7 @@ public class FutureTests : Gpseq.TestSuite {
 		try {
 			int value;
 			bool result = future.wait_until(
-					get_monotonic_time() + 3*SECONDS, out value);
+					get_monotonic_time() + 4*SECONDS, out value);
 			assert(result == complete);
 			if (complete) {
 				assert(future.ready);

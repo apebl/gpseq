@@ -47,7 +47,7 @@ public class BlockingTests : Gpseq.TestSuite {
 			future = (Future<void*>) future.flat_map<void*>(g => f);
 		}
 		try {
-			assert( future.wait_until(get_monotonic_time() + 2*SECONDS) );
+			assert( future.wait_until(get_monotonic_time() + 8*SECONDS) );
 		} catch (Error err) {
 			assert_not_reached();
 		}

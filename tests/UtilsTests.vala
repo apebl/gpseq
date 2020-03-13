@@ -352,7 +352,7 @@ public class UtilsTests : Gpseq.TestSuite {
 			return null;
 		});
 		wg.add(1);
-		bool success = wg.wait_until( get_monotonic_time() + (int64)(2 * SECONDS) );
+		bool success = wg.wait_until( get_monotonic_time() + (int64)(4 * SECONDS) );
 		assert(success);
 	}
 
