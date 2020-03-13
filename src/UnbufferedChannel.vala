@@ -171,6 +171,7 @@ namespace Gpseq {
 			public System () {
 				_queue = new Gee.LinkedList<Node<G>>();
 				_closed = new AtomicBoolVal();
+				_mutex = Mutex();
 			}
 
 			public void close () {
