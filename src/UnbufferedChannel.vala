@@ -259,7 +259,7 @@ namespace Gpseq {
 			public Cond cond;
 
 			public Node (owned G val) {
-				this.val = val;
+				this.val = (owned) val;
 				mutex = Mutex();
 				cond = Cond();
 			}
