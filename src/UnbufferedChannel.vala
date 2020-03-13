@@ -89,7 +89,20 @@ namespace Gpseq {
 		}
 
 		public Result<void*> try_send (owned G data) {
-			Code code = _system.transfer(true, (owned)data, true, false, 0, null);
+			Node<G>? node;
+			Code code = _system.reserve(true, (owned)data, false, false, 0, null, out node);
+			switch (code) {
+			case Code.SUCCESS:
+				return Result.of<void*>(null);
+			case Code.CLOSED:
+				return Result.err<void*>(new ChannelError.CLOSED("Channel closed"));
+			case Code.CONTINUE:
+				break;
+			default:
+				assert_not_reached();
+			}
+
+			code = _system.cancel((!)node, null);
 			switch (code) {
 			case Code.SUCCESS:
 				return Result.of<void*>(null);
@@ -132,10 +145,23 @@ namespace Gpseq {
 
 		public Result<G> try_recv () {
 			G? res;
-			Code code = _system.transfer(false, null, true, false, 0, out res);
+			Node<G>? node;
+			Code code = _system.reserve(false, null, false, false, 0, out res, out node);
 			switch (code) {
 			case Code.SUCCESS:
-				return Result.of<G>((owned) res);
+				return Result.of<G>(null);
+			case Code.CLOSED:
+				return Result.err<G>(new ChannelError.CLOSED("Channel closed"));
+			case Code.CONTINUE:
+				break;
+			default:
+				assert_not_reached();
+			}
+
+			code = _system.cancel((!)node, out res);
+			switch (code) {
+			case Code.SUCCESS:
+				return Result.of<G>((owned)res);
 			case Code.FAILED:
 				return Result.err<G>(new ChannelError.TRY_FAILED("No sends"));
 			case Code.CLOSED:
@@ -159,7 +185,8 @@ namespace Gpseq {
 		private enum Code {
 			SUCCESS,
 			FAILED,
-			CLOSED
+			CLOSED,
+			CONTINUE
 		}
 
 		private class System<G> : Object {
@@ -188,42 +215,100 @@ namespace Gpseq {
 				_mutex.unlock();
 			}
 
-			public Code transfer (bool is_data, owned G? val,
+			public Code reserve (bool is_data, owned G? val,
 					bool is_try, bool timed, int64 end_time,
-					out G? result) {
+					out G? result, out Node<G>? node) {
 				if (_closed._val == AtomicBoolVal.TRUE) { // fast-path
 					result = null;
+					node = null;
 					return Code.CLOSED;
 				}
 				_mutex.lock();
 				if (_closed.val) {
 					result = null;
+					node = null;
 					return Code.CLOSED;
 				}
 
 				// There are different mode waiters
 				if (!_queue.is_empty && _is_data != is_data) {
-					Node<G> node = _queue.poll();
+					Node<G> obj = _queue.poll();
 					_mutex.unlock();
-					node.mutex.lock();
-					result = (owned) node.val;
-					node.val = (owned) val;
-					node.completed = true;
-					node.cond.broadcast();
-					node.mutex.unlock();
+					obj.mutex.lock();
+					result = (owned) obj.val;
+					obj.val = (owned) val;
+					obj.completed = true;
+					obj.cond.broadcast();
+					obj.mutex.unlock();
+					node = null;
 					return Code.SUCCESS;
 				}
 
-				if (is_try) {
-					_mutex.unlock();
-					result = null;
-					return Code.FAILED;
-				}
-
-				Node<G> node = new Node<G>((owned) val);
+				node = new Node<G>((owned) val);
 				_queue.offer(node);
 				_is_data = is_data;
 				_mutex.unlock();
+				result = null;
+				return Code.CONTINUE;
+			}
+
+			public Code check (Node<G> node, bool timed, int64 end_time, out G? result) {
+				node.mutex.lock();
+				while (true) {
+					if (node.completed) {
+						result = (owned) node.val;
+						node.mutex.unlock();
+						return Code.SUCCESS;
+					} else if (_closed.val) {
+						node.mutex.unlock();
+						result = null;
+						return Code.CLOSED;
+					} else if (timed && get_monotonic_time() > end_time) {
+						_mutex.lock();
+						bool removed = _queue.remove(node);
+						_mutex.unlock();
+						if (!removed) continue;
+						node.mutex.unlock();
+						result = null;
+						return Code.FAILED;
+					} else {
+						node.mutex.unlock();
+						result = null;
+						return Code.CONTINUE;
+					}
+				}
+			}
+
+			public Code cancel (Node<G> node, out G? result) {
+				_mutex.lock();
+				bool removed = _queue.remove(node);
+				_mutex.unlock();
+				if (!removed) {
+					node.mutex.lock();
+					if (node.completed) {
+						result = (owned) node.val;
+						node.mutex.unlock();
+						return Code.SUCCESS;
+					} else if (_closed.val) {
+						node.mutex.unlock();
+						result = null;
+						return Code.CLOSED;
+					} else {
+						assert_not_reached();
+					}
+				}
+				return Code.FAILED;
+			}
+
+			public Code transfer (bool is_data, owned G? val,
+					bool is_try, bool timed, int64 end_time,
+					out G? result) {
+				Node<G>? node;
+				Code res = reserve(is_data, (owned)val, is_try, timed, end_time,
+						out result, out node);
+				if (res != Code.CONTINUE) {
+					return (!)res;
+				}
 
 				node.mutex.lock();
 				while (true) {
